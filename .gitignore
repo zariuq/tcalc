@@ -1,0 +1,11 @@
+/test_tcalc
+/mm0_tcalc
+/mmb_tcalc
+/hol_tcalc
+/mg_tcalc
+/dk_tcalc
+/tcalc_compile
+/diff_micromath
+/micromath_tcalc_gen.h
+/*.o
+/compiled/build/
