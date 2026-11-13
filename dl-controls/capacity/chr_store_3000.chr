@@ -1,0 +1,5 @@
+:- use_module(library(chr)).
+:- chr_constraint n/1, item/1.
+stop @ n(0) <=> true.
+gen @ n(X) <=> X > 0 | item(X), Y is X - 1, n(Y).
+?- n(3000).

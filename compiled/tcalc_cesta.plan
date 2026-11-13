@@ -1,0 +1,119 @@
+(CheckedPermissions "cesta-permissions/2" (module ordinary_flat) (word-bits 64)
+  (function pack (params (span u32 read) (span u32 read) (span u32 read) (span u32 write) (span u32 write)) (returns bool -1) (effects) (allocator)
+    (checks
+      (param 0 0 (span u32 read))
+      (param 1 0 (span u32 read))
+      (param 2 0 (span u32 read))
+      (param 3 0 (span u32 write))
+      (param 4 0 (span u32 write))
+      (inspect 1 0 (span u32 read))
+      (branch
+        (then
+      (end 4 0 (span u32 write))
+      (end 3 0 (span u32 write))
+      (end 2 0 (span u32 read))
+      (end 1 0 (span u32 read))
+      (end 0 0 (span u32 read))
+      (return)
+        )
+        (else
+        )
+      )
+      (inspect 2 0 (span u32 read))
+      (branch
+        (then
+      (end 4 0 (span u32 write))
+      (end 3 0 (span u32 write))
+      (end 2 0 (span u32 read))
+      (end 1 0 (span u32 read))
+      (end 0 0 (span u32 read))
+      (return)
+        )
+        (else
+        )
+      )
+      (inspect 1 0 (span u32 read))
+      (inspect 2 0 (span u32 read))
+      (inspect 3 0 (span u32 read))
+      (branch
+        (then
+      (end 4 0 (span u32 write))
+      (end 3 0 (span u32 write))
+      (end 2 0 (span u32 read))
+      (end 1 0 (span u32 read))
+      (end 0 0 (span u32 read))
+      (return)
+        )
+        (else
+        )
+      )
+      (inspect 1 0 (span u32 read))
+      (inspect 4 0 (span u32 read))
+      (branch
+        (then
+      (end 4 0 (span u32 write))
+      (end 3 0 (span u32 write))
+      (end 2 0 (span u32 read))
+      (end 1 0 (span u32 read))
+      (end 0 0 (span u32 read))
+      (return)
+        )
+        (else
+        )
+      )
+      (inspect 1 0 (span u32 read))
+      (loop
+      (read 1 0 (span u32 read))
+      (inspect 0 0 (span u32 read))
+      (branch
+        (then
+      (end 4 0 (span u32 write))
+      (end 3 0 (span u32 write))
+      (end 2 0 (span u32 read))
+      (end 1 0 (span u32 read))
+      (end 0 0 (span u32 read))
+      (return)
+        )
+        (else
+        )
+      )
+      (inspect 0 0 (span u32 read))
+      (branch
+        (then
+      (end 4 0 (span u32 write))
+      (end 3 0 (span u32 write))
+      (end 2 0 (span u32 read))
+      (end 1 0 (span u32 read))
+      (end 0 0 (span u32 read))
+      (return)
+        )
+        (else
+        )
+      )
+      )
+      (inspect 1 0 (span u32 read))
+      (loop
+      (read 1 0 (span u32 read))
+      (write 4 0 (span u32 write))
+      (loop
+      (read 0 0 (span u32 read))
+      (write 3 0 (span u32 write))
+      )
+      )
+      (inspect 1 0 (span u32 read))
+      (inspect 1 0 (span u32 read))
+      (write 4 0 (span u32 write))
+      (inspect 2 0 (span u32 read))
+      (loop
+      (inspect 1 0 (span u32 read))
+      (read 2 0 (span u32 read))
+      (write 3 0 (span u32 write))
+      )
+      (end 4 0 (span u32 write))
+      (end 3 0 (span u32 write))
+      (end 2 0 (span u32 read))
+      (end 1 0 (span u32 read))
+      (end 0 0 (span u32 read))
+      (return)
+    ))
+)

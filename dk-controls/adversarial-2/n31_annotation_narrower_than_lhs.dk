@@ -1,0 +1,7 @@
+(; The context states x : El ca, but the left-hand side gives x the type El T. ;)
+U : Type.
+def El : U -> Type.
+ca : U.
+a0 : El ca.
+def f : (T : U) -> El T -> El T.
+[T : U, x : El ca] f T x --> a0.

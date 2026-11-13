@@ -1,0 +1,9 @@
+(; A wildcard that nothing constrains: the variable's type mentions it and the rule preserves types. ;)
+U : Type.
+def El : U -> Type.
+ca : U.
+a : El ca.
+def f : (T : U) -> El T -> El T.
+[x] f _ x --> x.
+P : El ca -> Type.
+thm t : P (f ca a) -> P a := p : P (f ca a) => p.

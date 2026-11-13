@@ -1,0 +1,3 @@
+(* xor64: native binary callback image, 34 bytes (ENDBR64, then the 30-byte body).
+   Bytes of the artifact xor64.bin, sha256 78db2ff38f0480ac82acd15769322742ea83f5c7eb5b2cf02fc0030a35242329. *)
+cb_image "xor64" "f30f1efa488b8700000000488b97080000004831d048898600000000b801000000c3";;

@@ -1,0 +1,14 @@
+(; expect dk=0 complete=1 ;)
+(; The negative assertion of a match Dedukti does not make (F twice under a binder, open
+   instance): dk check accepts it, and so does --dk-matching; by default the redex rewrites
+   to ok and the assertion fails. ;)
+
+A : Type.
+ok : A.
+c : A -> A -> A.
+d : A -> A.
+def g1 : (A -> A) -> A.
+
+[F] g1 (x => c F F) --> ok.
+
+#ASSERTNOT (q : A => g1 (u => c (d q) (d q))) == (q : A => ok).

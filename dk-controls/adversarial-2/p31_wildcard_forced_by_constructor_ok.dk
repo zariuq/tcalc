@@ -1,0 +1,13 @@
+(; A wildcard whose value the type of a constructor pattern determines. ;)
+Nat : Type.
+z : Nat.
+s : Nat -> Nat.
+A : Type.
+Vec : Nat -> Type.
+vnil : Vec z.
+vcons : (n : Nat) -> A -> Vec n -> Vec (s n).
+def tail : (n : Nat) -> Vec (s n) -> Vec n.
+[n, a, v] tail _ (vcons n a v) --> v.
+x : A.
+P : Vec z -> Type.
+thm t : P (tail z (vcons z x vnil)) -> P vnil := p : P (tail z (vcons z x vnil)) => p.

@@ -1,0 +1,19 @@
+== SHA256SUMS of the artifacts
+scratch/tisa-cutpoints-20261111/binary-callbacks/add64.bin: OK
+scratch/tisa-cutpoints-20261111/binary-callbacks/and64.bin: OK
+scratch/tisa-cutpoints-20261111/binary-callbacks/or64.bin: OK
+scratch/tisa-cutpoints-20261111/binary-callbacks/sub64.bin: OK
+scratch/tisa-cutpoints-20261111/binary-callbacks/xor64.bin: OK
+scratch/tisa-cutpoints-20261111/binary-callbacks/add64.hex: OK
+scratch/tisa-cutpoints-20261111/binary-callbacks/and64.hex: OK
+scratch/tisa-cutpoints-20261111/binary-callbacks/or64.hex: OK
+scratch/tisa-cutpoints-20261111/binary-callbacks/sub64.hex: OK
+scratch/tisa-cutpoints-20261111/binary-callbacks/xor64.hex: OK
+scratch/tisa-cutpoints-20261111/binary-callbacks/capture.json: OK
+scratch/tisa-cutpoints-20261111/binary-callbacks/CONTRACT.txt: OK
+== the bytes proved, per image (sha256 of the 34 bytes)
+add64: 8bd7d062bf7f730f611796bd212315ba680feb8984f5ec6081b76211c53f24a9  record same as .bin: f30f1efa488b8700000000488b97080000004801d048898600000000b801000000c3
+sub64: e2cfe0775fa459842ea3140031fb64f17d40eaf806cf5e615907f2dd96dca279  record same as .bin: f30f1efa488b8700000000488b97080000004829d048898600000000b801000000c3
+and64: 2a22ecb14ea43bc7e9810ca532682a4837ae7b5d09613d6bb9a7b388c25da71e  record same as .bin: f30f1efa488b8700000000488b97080000004821d048898600000000b801000000c3
+or64: eff126e2b53dc45dcb4ecbfb8b7f2b10a320fc1e09e096392db3f2b20bcf0a93  record same as .bin: f30f1efa488b8700000000488b97080000004809d048898600000000b801000000c3
+xor64: 78db2ff38f0480ac82acd15769322742ea83f5c7eb5b2cf02fc0030a35242329  record same as .bin: f30f1efa488b8700000000488b97080000004831d048898600000000b801000000c3

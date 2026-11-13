@@ -1,0 +1,25 @@
+(; expect dk=1 complete=0 ;)
+(; Dedukti (0b67dab) does not match a pattern variable that occurs at least twice under the
+   pattern's binders when its instance mentions a variable of the redex's own context.
+
+   Here F occurs twice under three binders, and in the assertion both occurrences stand for
+   `d q`, where q is bound outside the redex.  The left-hand side instantiated with F := d q
+   is the redex, so the declared rule rewrites it to ok: by the matching relation of
+   lambda-Pi modulo rewriting, d q matches F (its free variable q is not one of the pattern's
+   binders) and the two occurrences match equal terms.
+
+   dk_tcalc (complete matching, the default) fires the rule and accepts the assertion.
+   dk check refuses it, and so does dk_tcalc --dk-matching.  Dedukti does fire the rule when
+   the instance is closed, when F occurs once, and when at most one occurrence is under a
+   binder (repeated_var_matches_once_under.dk). ;)
+
+A : Type.
+a : A.
+ok : A.
+c : A -> A -> A.
+d : A -> A.
+def g3 : (A -> A -> A -> A) -> A.
+
+[F] g3 (x => y => z => c F F) --> ok.
+
+#ASSERT (q : A => g3 (u => v => w => c (d q) (d q))) == (q : A => ok).

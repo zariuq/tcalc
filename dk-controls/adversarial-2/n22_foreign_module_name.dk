@@ -1,0 +1,4 @@
+(; A name qualified with another module is not the local name. ;)
+A : Type.
+a : A.
+def b : A := nosuchmodule.a.

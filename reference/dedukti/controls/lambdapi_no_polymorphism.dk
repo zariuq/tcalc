@@ -1,0 +1,3 @@
+(; expect 1 ;)
+(; Negative control: in lambda-Pi a product's domain is a type, never Type itself. ;)
+def id : A : Type -> A -> A := A : Type => x : A => x.

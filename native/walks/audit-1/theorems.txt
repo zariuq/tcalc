@@ -1,0 +1,4 @@
+# THEOREM BW_RUN: |- forall st k st'.
+# THEOREM BIND_WALK_SOUND: |- forall st st'.
+# THEOREM BIND_WALK_CANONICAL: |- forall st k st'.
+# THEOREM BW_CTX_SATISFIABLE: |- exists nms tys TY. bw_ctx nms tys 0 0 TY

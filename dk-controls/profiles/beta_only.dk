@@ -1,0 +1,5 @@
+A : Type.
+f : A -> A.
+P : (A -> A) -> Type.
+p : P f.
+thm q : P ((x : (A -> A) => x) f) := p.

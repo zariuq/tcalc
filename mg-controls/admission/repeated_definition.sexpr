@@ -1,0 +1,2 @@
+(DEF "F" "same" 0 (PROP) (ALL (PROP) (DB 0)) 1)
+(DEF "F_again" "same" 0 (PROP) (ALL (PROP) (DB 0)) 2)

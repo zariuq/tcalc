@@ -1,0 +1,3 @@
+(; An unannotated lambda has no inferable type. ;)
+A : Type.
+def id := x => x.

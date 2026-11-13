@@ -1,0 +1,938 @@
+# s2n-bignum x86 decoder coverage by XED iform: a textual reading of upstream 76604c2 x86/proofs/decode.ml (see s2n_decode_reading.py). The authoritative check is s2n's decode run in HOL Light on these encodings, a later pass.
+# Columns: s2n is decoded (some form decodes without caveat), caveat (decodes only with
+# the caveat given), or not-decoded. decoded_forms and caveat_forms list SHAPE|PREFIXES
+# (oN operand size, vVlLwW for VEX/EVEX; legacy prefix set). rejected_forms counts the
+# other forms seen; reason is the decode.ml clause for the plainest of them. attested:
+# some decoded form has an encoding in upstream's cosimulation lists or harnesses.
+# iform	iclass	extension	isa_set	category	s2n	decoded_forms	caveat_forms	caveat	rejected_forms	reason	attested	s2n_constructors	hol_tcalc	dk_tcalc	images	families	sources
+ADCX_GPR32d_GPR32d	ADCX	ADOX_ADCX	ADOX_ADCX	ADOX_ADCX	decoded	o32|66	-	-	2	0F 38 F6 without exactly 66 or F3 (decode.ml:407)	yes	ADCX32	0	0	0	-	sweep,upstream
+ADCX_GPR32d_MEMd	ADCX	ADOX_ADCX	ADOX_ADCX	ADOX_ADCX	decoded	o32|66	-	-	2	0F 38 F6 without exactly 66 or F3 (decode.ml:407)	yes	ADCX32	0	0	0	-	sweep,upstream
+ADCX_GPR64q_GPR64q	ADCX	ADOX_ADCX	ADOX_ADCX	ADOX_ADCX	decoded	o64|66	-	-	2	0F 38 F6 without exactly 66 or F3 (decode.ml:407)	yes	ADCX64	0	0	0	bmi	family,sweep,upstream
+ADCX_GPR64q_MEMq	ADCX	ADOX_ADCX	ADOX_ADCX	ADOX_ADCX	decoded	o64|66	-	-	2	0F 38 F6 without exactly 66 or F3 (decode.ml:407)	yes	ADCX64	0	0	0	-	sweep,upstream
+ADC_AL_IMMb	ADC	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU acc,imm (decode.ml:326)	yes	ADC8	0	0	0	-	sweep,upstream
+ADC_GPR8_GPR8_10	ADC	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	ADC8	0	0	0	-	sweep,upstream
+ADC_GPR8_GPR8_12	ADC	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	ADC8	0	0	0	-	sweep,upstream
+ADC_GPR8_IMMb_80r2	ADC	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	ADC8	0	0	0	-	sweep,upstream
+ADC_GPR8_MEMb	ADC	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	ADC8	0	0	0	-	sweep,upstream
+ADC_GPRv_GPRv_11	ADC	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	ADC16,ADC32,ADC64	0	0	0	-	sweep,upstream
+ADC_GPRv_GPRv_13	ADC	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	ADC16,ADC32,ADC64	0	0	0	-	sweep,upstream
+ADC_GPRv_IMMb	ADC	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm8 (decode.ml:650)	yes	ADC16,ADC32,ADC64	0	2	0	-	sweep,target,upstream
+ADC_GPRv_IMMz	ADC	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	ADC16,ADC32,ADC64	0	0	0	-	sweep,upstream
+ADC_GPRv_MEMv	ADC	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	ADC16,ADC32,ADC64	0	0	0	-	sweep,upstream
+ADC_MEMb_GPR8	ADC	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	40	no clause for opcode D5 (decode.ml:1335)	yes	ADC8	0	0	0	-	sweep,upstream
+ADC_MEMb_IMMb_80r2	ADC	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	ADC8	0	0	0	-	sweep,upstream
+ADC_MEMv_GPRv	ADC	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	ADC16,ADC32,ADC64	0	0	0	-	sweep,upstream
+ADC_MEMv_IMMb	ADC	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm8 (decode.ml:650)	yes	ADC16,ADC32,ADC64	0	0	0	-	sweep,upstream
+ADC_MEMv_IMMz	ADC	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	ADC16,ADC32,ADC64	0	0	0	-	sweep,upstream
+ADC_OrAX_IMMz	ADC	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU acc,imm (decode.ml:326)	yes	ADC16,ADC32,ADC64	0	0	0	-	sweep,upstream
+ADD_AL_IMMb	ADD	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU acc,imm (decode.ml:326)	yes	ADD8	0	0	0	-	sweep,upstream
+ADD_GPR8_GPR8_00	ADD	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	ADD8	0	0	0	-	sweep,upstream
+ADD_GPR8_GPR8_02	ADD	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	ADD8	0	0	0	-	sweep,upstream
+ADD_GPR8_IMMb_80r0	ADD	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	ADD8	0	0	0	-	sweep,upstream
+ADD_GPR8_MEMb	ADD	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	ADD8	0	0	0	-	sweep,upstream
+ADD_GPRv_GPRv_01	ADD	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	ADD16,ADD32,ADD64	291	385	68	-	sweep,target,upstream
+ADD_GPRv_GPRv_03	ADD	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	ADD16,ADD32,ADD64	0	0	0	-	sweep,upstream
+ADD_GPRv_IMMb	ADD	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm8 (decode.ml:650)	yes	ADD16,ADD32,ADD64	266	234	8	-	sweep,target,upstream
+ADD_GPRv_IMMz	ADD	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	ADD16,ADD32,ADD64	35	31	97	-	sweep,target,upstream
+ADD_GPRv_MEMv	ADD	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	ADD16,ADD32,ADD64	174	113	35	-	sweep,target,upstream
+ADD_MEMb_GPR8	ADD	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	ADD8	0	0	0	-	sweep,upstream
+ADD_MEMb_IMMb_80r0	ADD	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	ADD8	0	0	0	-	sweep,upstream
+ADD_MEMv_GPRv	ADD	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	ADD16,ADD32,ADD64	1	1	0	-	sweep,target,upstream
+ADD_MEMv_IMMb	ADD	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm8 (decode.ml:650)	yes	ADD16,ADD32,ADD64	1	1	0	-	sweep,target,upstream
+ADD_MEMv_IMMz	ADD	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	ADD16,ADD32,ADD64	0	0	0	-	sweep,upstream
+ADD_OrAX_IMMz	ADD	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU acc,imm (decode.ml:326)	yes	ADD16,ADD32,ADD64	0	0	0	-	sweep,upstream
+ADOX_GPR32d_GPR32d	ADOX	ADOX_ADCX	ADOX_ADCX	ADOX_ADCX	decoded	o32|F3	-	-	3	0F 38 F6 without exactly 66 or F3 (decode.ml:407)	yes	ADOX32	0	0	0	-	sweep,upstream
+ADOX_GPR32d_MEMd	ADOX	ADOX_ADCX	ADOX_ADCX	ADOX_ADCX	decoded	o32|F3	-	-	3	0F 38 F6 without exactly 66 or F3 (decode.ml:407)	yes	ADOX32	0	0	0	-	sweep,upstream
+ADOX_GPR64q_GPR64q	ADOX	ADOX_ADCX	ADOX_ADCX	ADOX_ADCX	decoded	o64|F3	-	-	3	0F 38 F6 without exactly 66 or F3 (decode.ml:407)	yes	ADOX64	0	0	0	bmi	family,sweep,upstream
+ADOX_GPR64q_MEMq	ADOX	ADOX_ADCX	ADOX_ADCX	ADOX_ADCX	decoded	o64|F3	-	-	3	0F 38 F6 without exactly 66 or F3 (decode.ml:407)	yes	ADOX64	0	0	0	-	sweep,upstream
+AESDECLAST_XMMdq_MEMdq	AESDECLAST	AES	AES	AES	decoded	o32|66 o64|66	-	-	4	0F 38 DF needs exactly the 66 prefix (decode.ml:376)	yes	AESDECLAST	0	0	0	-	sweep,upstream
+AESDECLAST_XMMdq_XMMdq	AESDECLAST	AES	AES	AES	decoded	o32|66 o64|66	-	-	4	0F 38 DF needs exactly the 66 prefix (decode.ml:376)	yes	AESDECLAST	0	0	0	-	sweep,upstream
+AESDEC_XMMdq_MEMdq	AESDEC	AES	AES	AES	decoded	o32|66 o64|66	-	-	4	0F 38 DE needs exactly the 66 prefix (decode.ml:376)	yes	AESDEC	0	0	0	-	sweep,upstream
+AESDEC_XMMdq_XMMdq	AESDEC	AES	AES	AES	decoded	o32|66 o64|66	-	-	4	0F 38 DE needs exactly the 66 prefix (decode.ml:376)	yes	AESDEC	0	0	0	hashing	family,sweep,upstream
+AESENCLAST_XMMdq_MEMdq	AESENCLAST	AES	AES	AES	decoded	o32|66 o64|66	-	-	4	0F 38 DD needs exactly the 66 prefix (decode.ml:376)	yes	AESENCLAST	0	0	0	-	sweep,upstream
+AESENCLAST_XMMdq_XMMdq	AESENCLAST	AES	AES	AES	decoded	o32|66 o64|66	-	-	4	0F 38 DD needs exactly the 66 prefix (decode.ml:376)	yes	AESENCLAST	0	0	0	hashing	family,sweep,upstream
+AESENC_XMMdq_MEMdq	AESENC	AES	AES	AES	decoded	o32|66 o64|66	-	-	4	0F 38 DC needs exactly the 66 prefix (decode.ml:376)	yes	AESENC	0	0	0	-	sweep,upstream
+AESENC_XMMdq_XMMdq	AESENC	AES	AES	AES	decoded	o32|66 o64|66	-	-	4	0F 38 DC needs exactly the 66 prefix (decode.ml:376)	yes	AESENC	0	0	0	hashing	family,sweep,upstream
+AESKEYGENASSIST_XMMdq_MEMdq_IMMb	AESKEYGENASSIST	AES	AES	AES	decoded	o32|66 o64|66	-	-	4	0F 3A DF needs exactly the 66 prefix (decode.ml:417)	yes	AESKEYGENASSIST	0	0	0	-	sweep,upstream
+AESKEYGENASSIST_XMMdq_XMMdq_IMMb	AESKEYGENASSIST	AES	AES	AES	decoded	o32|66 o64|66	-	-	4	0F 3A DF needs exactly the 66 prefix (decode.ml:417)	yes	AESKEYGENASSIST	0	0	0	hashing	family,sweep,upstream
+ANDN_GPR32d_GPR32d_GPR32d	ANDN	BMI1	BMI1	BMI1	not-decoded	-	-	-	1	no clause for VEX.0F38.L0.F2 (decode.ml:862)	no	-	1	1	0	-	sweep,target
+ANDN_GPR32d_GPR32d_MEMd	ANDN	BMI1	BMI1	BMI1	not-decoded	-	-	-	1	no clause for VEX.0F38.L0.F2 (decode.ml:862)	no	-	0	0	0	bmi	family,sweep
+ANDN_GPR64q_GPR64q_GPR64q	ANDN	BMI1	BMI1	BMI1	not-decoded	-	-	-	1	no clause for VEX.0F38.L0.F2 (decode.ml:862)	no	-	4	18	0	bmi	family,target
+ANDN_GPR64q_GPR64q_MEMq	ANDN	BMI1	BMI1	BMI1	not-decoded	-	-	-	1	no clause for VEX.0F38.L0.F2 (decode.ml:862)	no	-	3	3	0	-	target
+AND_AL_IMMb	AND	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	40	no clause for opcode D5 (decode.ml:1335)	yes	AND8	0	0	0	-	sweep,upstream
+AND_GPR8_GPR8_20	AND	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	AND8	6	5	0	-	sweep,target,upstream
+AND_GPR8_GPR8_22	AND	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	AND8	0	0	0	-	sweep,upstream
+AND_GPR8_IMMb_80r4	AND	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	AND8	1	1	0	-	sweep,target,upstream
+AND_GPR8_MEMb	AND	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	AND8	2	1	0	-	sweep,target,upstream
+AND_GPRv_GPRv_21	AND	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	AND16,AND32,AND64	145	58	19	-	sweep,target,upstream
+AND_GPRv_GPRv_23	AND	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	AND16,AND32,AND64	0	0	0	-	sweep,upstream
+AND_GPRv_IMMb	AND	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm8 (decode.ml:650)	yes	AND16,AND32,AND64	58	31	0	-	sweep,target,upstream
+AND_GPRv_IMMz	AND	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	AND16,AND32,AND64	12	15	0	-	sweep,target,upstream
+AND_GPRv_MEMv	AND	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	AND16,AND32,AND64	31	14	0	-	sweep,target,upstream
+AND_MEMb_GPR8	AND	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	AND8	1	0	0	-	sweep,target,upstream
+AND_MEMb_IMMb_80r4	AND	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	AND8	0	0	0	-	sweep,upstream
+AND_MEMv_GPRv	AND	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	AND16,AND32,AND64	0	0	0	-	sweep,upstream
+AND_MEMv_IMMb	AND	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm8 (decode.ml:650)	yes	AND16,AND32,AND64	0	0	0	-	sweep,upstream
+AND_MEMv_IMMz	AND	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	AND16,AND32,AND64	0	0	0	-	sweep,upstream
+AND_OrAX_IMMz	AND	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU acc,imm (decode.ml:326)	yes	AND16,AND32,AND64	7	10	0	-	sweep,target,upstream
+BEXTR_GPR64q_GPR64q_GPR64q	BEXTR	BMI1	BMI1	BMI1	not-decoded	-	-	-	1	no clause for VEX.0F38.L0.F7 (decode.ml:862)	no	-	0	0	0	bmi	family
+BLSI_GPR64q_GPR64q	BLSI	BMI1	BMI1	BMI1	not-decoded	-	-	-	1	no clause for VEX.0F38.L0.F3 (decode.ml:862)	no	-	0	0	0	bmi	family
+BLSMSK_GPR64q_GPR64q	BLSMSK	BMI1	BMI1	BMI1	not-decoded	-	-	-	1	no clause for VEX.0F38.L0.F3 (decode.ml:862)	no	-	0	0	0	bmi	family
+BLSR_GPR32d_GPR32d	BLSR	BMI1	BMI1	BMI1	not-decoded	-	-	-	1	no clause for VEX.0F38.L0.F3 (decode.ml:862)	no	-	0	0	0	bmi	family,sweep
+BLSR_GPR64q_GPR64q	BLSR	BMI1	BMI1	BMI1	not-decoded	-	-	-	1	no clause for VEX.0F38.L0.F3 (decode.ml:862)	no	-	2	2	0	bmi	family,target
+BSF_GPRv_GPRv	BSF	BASE	I386	BITBYTE	decoded	o32|- o64|-	-	-	26	0F BC with a prefix other than one F3 (decode.ml:566)	yes	BSF32,BSF64	0	0	0	bitscan	family,sweep,upstream
+BSF_GPRv_MEMv	BSF	BASE	I386	BITBYTE	decoded	o32|- o64|-	-	-	26	0F BC with a prefix other than one F3 (decode.ml:566)	yes	BSF32,BSF64	0	0	0	bitscan	family,sweep,upstream
+BSR_GPRv_GPRv	BSR	BASE	I386	BITBYTE	decoded	o32|- o64|-	-	-	26	0F BD with a prefix other than one F3 (decode.ml:566)	yes	BSR32,BSR64	0	0	0	bitscan	family,sweep,upstream
+BSR_GPRv_MEMv	BSR	BASE	I386	BITBYTE	decoded	o32|- o64|-	-	-	26	0F BD with a prefix other than one F3 (decode.ml:566)	yes	BSR32,BSR64	0	0	0	-	sweep,upstream
+BSWAP_GPRv	BSWAP	BASE	I486REAL	DATAXFER	decoded	o32|- o64|-	-	-	34	prefix on BSWAP (decode.ml:580)	yes	BSWAP32,BSWAP64	0	0	0	integer	family,sweep,upstream
+BTC_GPRv_GPRv	BTC	BASE	I386	BITBYTE	decoded	o32|- o64|-	-	-	34	prefix on BT* r/m,r (decode.ml:528)	yes	BTC32,BTC64	0	0	0	bitscan	family,sweep,upstream
+BTC_GPRv_IMMb	BTC	BASE	I386	BITBYTE	decoded	o32|- o64|-	-	-	34	prefix on BT* r/m,imm8 (decode.ml:552)	yes	BTC32_imm,BTC64_imm	0	1	0	-	sweep,target,upstream
+BTC_MEMv_IMMb	BTC	BASE	I386	BITBYTE	decoded	o32|- o64|-	-	-	34	prefix on BT* r/m,imm8 (decode.ml:552)	yes	BTC32_imm,BTC64_imm	0	0	0	-	sweep,upstream
+BTR_GPRv_GPRv	BTR	BASE	I386	BITBYTE	decoded	o32|- o64|-	-	-	34	prefix on BT* r/m,r (decode.ml:528)	yes	BTR32,BTR64	0	0	0	bitscan	family,sweep,upstream
+BTR_GPRv_IMMb	BTR	BASE	I386	BITBYTE	decoded	o32|- o64|-	-	-	34	prefix on BT* r/m,imm8 (decode.ml:552)	yes	BTR32_imm,BTR64_imm	0	0	0	-	sweep,upstream
+BTR_MEMv_IMMb	BTR	BASE	I386	BITBYTE	decoded	o32|- o64|-	-	-	34	prefix on BT* r/m,imm8 (decode.ml:552)	yes	BTR32_imm,BTR64_imm	0	0	0	-	sweep,upstream
+BTS_GPRv_GPRv	BTS	BASE	I386	BITBYTE	decoded	o32|- o64|-	-	-	34	prefix on BT* r/m,r (decode.ml:528)	yes	BTS32,BTS64	0	0	0	bitscan	family,sweep,upstream
+BTS_GPRv_IMMb	BTS	BASE	I386	BITBYTE	decoded	o32|- o64|-	-	-	34	prefix on BT* r/m,imm8 (decode.ml:552)	yes	BTS32_imm,BTS64_imm	3	4	0	-	sweep,target,upstream
+BTS_MEMv_IMMb	BTS	BASE	I386	BITBYTE	decoded	o32|- o64|-	-	-	34	prefix on BT* r/m,imm8 (decode.ml:552)	yes	BTS32_imm,BTS64_imm	0	0	0	-	sweep,upstream
+BT_GPRv_GPRv	BT	BASE	I386	BITBYTE	decoded	o32|- o64|-	-	-	34	prefix on BT* r/m,r (decode.ml:528)	yes	BT32,BT64	33	12	0	bitscan	family,sweep,target,upstream
+BT_GPRv_IMMb	BT	BASE	I386	BITBYTE	decoded	o32|- o64|-	-	-	34	prefix on BT* r/m,imm8 (decode.ml:552)	yes	BT32_imm,BT64_imm	0	0	0	bitscan	family,sweep,upstream
+BT_MEMv_GPRv	BT	BASE	I386	BITBYTE	not-decoded	-	-	-	36	BT* with a memory destination and register bit offset (decode.ml:531)	no	-	0	0	0	bitscan	family,sweep
+BT_MEMv_IMMb	BT	BASE	I386	BITBYTE	decoded	o32|- o64|-	-	-	34	prefix on BT* r/m,imm8 (decode.ml:552)	yes	BT32_imm,BT64_imm	0	0	0	-	sweep,upstream
+BZHI_GPR64q_GPR64q_GPR64q	BZHI	BMI2	BMI2	BMI2	not-decoded	-	-	-	3	VEX.0F38.L0.F5: 0F38 F5 is decoded only as PEXT (F3) (decode.ml:853)	no	-	0	0	0	bmi	family,sweep
+CALL_NEAR_GPRv	CALL_NEAR	BASE	I86	CALL	not-decoded	-	-	-	18	indirect CALL (FF /2) (decode.ml:313)	no	-	1	1	0	control	family,sweep,target
+CALL_NEAR_MEMv	CALL_NEAR	BASE	I86	CALL	not-decoded	-	-	-	18	indirect CALL (FF /2) (decode.ml:313)	no	-	1	1	0	control	family,sweep,target
+CALL_NEAR_RELBRd	CALL_NEAR	BASE	I86	CALL	decoded	o64|-	-	-	17	prefix on CALL rel32 (decode.ml:1315)	yes	CALL	1342	1082	0	-	harness,sweep,target
+CDQ	CDQ	BASE	I386	CONVERT	not-decoded	-	-	-	3	no clause for opcode 99 (decode.ml:1335)	no	-	0	0	0	integer	family,sweep
+CDQE	CDQE	LONGMODE	LONGMODE	CONVERT	not-decoded	-	-	-	4	no clause for opcode 98 (decode.ml:1335)	no	-	11	34	0	integer	family,sweep,target
+CLC	CLC	BASE	I86	FLAGOP	decoded	o32|- o64|-	-	-	34	prefix on flag instruction (decode.ml:1321)	yes	CLC	0	0	0	integer	family,sweep,upstream
+CLD	CLD	BASE	I86	FLAGOP	decoded	o32|- o64|-	-	-	34	prefix on flag instruction (decode.ml:1321)	yes	CLD	0	0	0	integer	family,sweep,upstream
+CMC	CMC	BASE	I86	FLAGOP	decoded	o32|- o64|-	-	-	34	prefix on flag instruction (decode.ml:1321)	yes	CMC	0	0	0	integer	family,sweep,upstream
+CMOVBE_GPRv_GPRv	CMOVBE	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVBE32,CMOVBE64	4	1	0	-	sweep,target,upstream
+CMOVBE_GPRv_MEMv	CMOVBE	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVBE32,CMOVBE64	0	0	0	-	sweep,upstream
+CMOVB_GPRv_GPRv	CMOVB	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVB32,CMOVB64	38	91	0	-	sweep,target,upstream
+CMOVB_GPRv_MEMv	CMOVB	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVB32,CMOVB64	0	0	0	-	sweep,upstream
+CMOVLE_GPRv_GPRv	CMOVLE	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVLE32,CMOVLE64	1	0	0	-	sweep,target,upstream
+CMOVLE_GPRv_MEMv	CMOVLE	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVLE32,CMOVLE64	0	0	0	-	sweep,upstream
+CMOVL_GPRv_GPRv	CMOVL	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVL32,CMOVL64	0	0	0	-	sweep,upstream
+CMOVL_GPRv_MEMv	CMOVL	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVL32,CMOVL64	0	0	0	-	sweep,upstream
+CMOVNBE_GPRv_GPRv	CMOVNBE	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVNBE32,CMOVNBE64	3	3	0	-	sweep,target,upstream
+CMOVNBE_GPRv_MEMv	CMOVNBE	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVNBE32,CMOVNBE64	0	0	0	-	sweep,upstream
+CMOVNB_GPRv_GPRv	CMOVNB	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVNB32,CMOVNB64	66	67	0	-	sweep,target,upstream
+CMOVNB_GPRv_MEMv	CMOVNB	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVNB32,CMOVNB64	0	2	0	-	sweep,target,upstream
+CMOVNLE_GPRv_GPRv	CMOVNLE	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVNLE32,CMOVNLE64	0	0	0	-	sweep,upstream
+CMOVNLE_GPRv_MEMv	CMOVNLE	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVNLE32,CMOVNLE64	0	0	0	-	sweep,upstream
+CMOVNL_GPRv_GPRv	CMOVNL	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVNL32,CMOVNL64	0	0	0	-	sweep,upstream
+CMOVNL_GPRv_MEMv	CMOVNL	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVNL32,CMOVNL64	0	0	0	-	sweep,upstream
+CMOVNO_GPRv_GPRv	CMOVNO	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVNO32,CMOVNO64	0	0	0	-	sweep,upstream
+CMOVNO_GPRv_MEMv	CMOVNO	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVNO32,CMOVNO64	0	0	0	-	sweep,upstream
+CMOVNP_GPRv_GPRv	CMOVNP	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVNP32,CMOVNP64	0	0	0	-	sweep,upstream
+CMOVNP_GPRv_MEMv	CMOVNP	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVNP32,CMOVNP64	0	0	0	-	sweep,upstream
+CMOVNS_GPRv_GPRv	CMOVNS	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVNS32,CMOVNS64	0	0	0	-	sweep,upstream
+CMOVNS_GPRv_MEMv	CMOVNS	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVNS32,CMOVNS64	0	0	0	-	sweep,upstream
+CMOVNZ_GPRv_GPRv	CMOVNZ	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVNZ32,CMOVNZ64	21	22	0	-	sweep,target,upstream
+CMOVNZ_GPRv_MEMv	CMOVNZ	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVNZ32,CMOVNZ64	3	10	0	integer	family,sweep,target,upstream
+CMOVO_GPRv_GPRv	CMOVO	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVO32,CMOVO64	0	0	0	-	sweep,upstream
+CMOVO_GPRv_MEMv	CMOVO	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVO32,CMOVO64	0	0	0	-	sweep,upstream
+CMOVP_GPRv_GPRv	CMOVP	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVP32,CMOVP64	0	0	0	-	sweep,upstream
+CMOVP_GPRv_MEMv	CMOVP	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVP32,CMOVP64	0	0	0	-	sweep,upstream
+CMOVS_GPRv_GPRv	CMOVS	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVS32,CMOVS64	0	0	0	-	sweep,upstream
+CMOVS_GPRv_MEMv	CMOVS	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVS32,CMOVS64	0	0	0	-	sweep,upstream
+CMOVZ_GPRv_GPRv	CMOVZ	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVZ32,CMOVZ64	14	55	0	control	family,sweep,target,upstream
+CMOVZ_GPRv_MEMv	CMOVZ	BASE	CMOV	CMOV	decoded	o32|- o64|-	-	-	34	prefix on CMOVcc (decode.ml:437)	yes	CMOVZ32,CMOVZ64	4	3	0	control	family,sweep,target,upstream
+CMPSB	CMPSB	BASE	I86	STRINGOP	not-decoded	-	-	-	4	no clause for opcode A6 (decode.ml:1335)	no	-	0	0	0	equality	family,sweep
+CMPXCHG_LOCK_MEMv_GPRv	CMPXCHG_LOCK	BASE	I486REAL	SEMAPHORE	not-decoded	-	-	-	1	LOCK prefix (decode.ml:90)	no	-	0	0	0	control	family
+CMPXCHG_MEMv_GPRv	CMPXCHG	BASE	I486REAL	SEMAPHORE	not-decoded	-	-	-	8	no clause for 0F B1 (decode.ml:625)	no	-	0	0	0	control	family,sweep
+CMP_AL_IMMb	CMP	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU acc,imm (decode.ml:326)	yes	CMP8	43	23	0	-	sweep,target,upstream
+CMP_GPR8_GPR8_38	CMP	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	CMP8	8	6	0	-	sweep,target,upstream
+CMP_GPR8_GPR8_3A	CMP	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	CMP8	0	0	0	-	sweep,upstream
+CMP_GPR8_IMMb_80r7	CMP	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	CMP8	167	110	0	-	sweep,target,upstream
+CMP_GPR8_MEMb	CMP	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	CMP8	8	3	0	-	sweep,target,upstream
+CMP_GPRv_GPRv_39	CMP	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	CMP16,CMP32,CMP64	807	896	199	-	sweep,target,upstream
+CMP_GPRv_GPRv_3B	CMP	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	CMP16,CMP32,CMP64	0	0	0	-	sweep,upstream
+CMP_GPRv_IMMb	CMP	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm8 (decode.ml:650)	yes	CMP16,CMP32,CMP64	121	240	0	-	sweep,target,upstream
+CMP_GPRv_IMMz	CMP	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	CMP16,CMP32,CMP64	78	83	22	-	sweep,target,upstream
+CMP_GPRv_MEMv	CMP	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	CMP16,CMP32,CMP64	452	224	46	-	sweep,target,upstream
+CMP_MEMb_GPR8	CMP	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	CMP8	11	9	0	-	sweep,target,upstream
+CMP_MEMb_IMMb_80r7	CMP	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	CMP8	310	417	0	-	sweep,target,upstream
+CMP_MEMv_GPRv	CMP	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	CMP16,CMP32,CMP64	225	201	0	-	sweep,target,upstream
+CMP_MEMv_IMMb	CMP	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm8 (decode.ml:650)	yes	CMP16,CMP32,CMP64	115	153	0	integer	family,sweep,target,upstream
+CMP_MEMv_IMMz	CMP	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	CMP16,CMP32,CMP64	11	19	0	-	sweep,target,upstream
+CMP_OrAX_IMMz	CMP	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU acc,imm (decode.ml:326)	yes	CMP16,CMP32,CMP64	19	14	0	-	sweep,target,upstream
+CPUID	CPUID	BASE	I486REAL	MISC	not-decoded	-	-	-	8	no clause for 0F A2 (decode.ml:625)	no	-	0	0	0	control	family,sweep
+CQO	CQO	LONGMODE	LONGMODE	CONVERT	not-decoded	-	-	-	4	no clause for opcode 99 (decode.ml:1335)	no	-	0	0	0	integer	family,sweep
+CRC32_GPRyy_GPRv	CRC32	SSE4	SSE42	SSE	not-decoded	-	-	-	2	no clause for 0F 38 F1 (decode.ml:408)	no	-	0	0	0	hashing	family,sweep
+CRC32_GPRyy_MEMb	CRC32	SSE4	SSE42	SSE	not-decoded	-	-	-	2	no clause for 0F 38 F0 (decode.ml:408)	no	-	0	0	0	hashing	family,sweep
+CRC32_GPRyy_MEMv	CRC32	SSE4	SSE42	SSE	not-decoded	-	-	-	2	no clause for 0F 38 F1 (decode.ml:408)	no	-	0	0	0	hashing	family,sweep
+CWDE	CWDE	BASE	I386	CONVERT	not-decoded	-	-	-	3	no clause for opcode 98 (decode.ml:1335)	no	-	0	0	0	integer	family,sweep
+DEC_GPR8	DEC	BASE	I86	BINARY	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	DEC8	5	0	0	-	sweep,target,upstream
+DEC_GPRv_FFr1	DEC	BASE	I86	BINARY	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	DEC32,DEC64	22	23	0	-	sweep,target,upstream
+DEC_MEMb	DEC	BASE	I86	BINARY	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	DEC8	0	0	0	-	sweep,upstream
+DEC_MEMv	DEC	BASE	I86	BINARY	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	DEC32,DEC64	6	3	0	-	sweep,target,upstream
+DIV_GPRv	DIV	BASE	I86	BINARY	not-decoded	-	-	-	36	DIV (decode.ml:316)	no	-	0	0	0	integer	family,sweep
+ENDBR64	ENDBR64	CET	CET	CET	decoded	o32|F3 o64|F3	-	-	0	-	yes	ENDBR64	58	32	0	control	family,target,upstream
+HLT	HLT	BASE	I86	SYSTEM	not-decoded	-	-	-	8	no clause for opcode F4 (decode.ml:1335)	no	-	1	1	0	control	family,sweep,target
+IDIV_GPRv	IDIV	BASE	I86	BINARY	not-decoded	-	-	-	36	IDIV (decode.ml:316)	no	-	0	0	0	integer	family,sweep
+IMUL_GPR8	IMUL	BASE	I86	BINARY	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	IMUL2_8	0	0	0	-	sweep,upstream
+IMUL_GPRv	IMUL	BASE	I86	BINARY	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	IMUL2_32,IMUL2_64	0	0	0	-	sweep,upstream
+IMUL_GPRv_GPRv	IMUL	BASE	I86	BINARY	decoded	o32|- o64|-	-	-	34	prefix on IMUL r,r/m (decode.ml:542)	yes	IMUL32,IMUL64	32	19	9	hashing	family,sweep,target,upstream
+IMUL_GPRv_GPRv_IMMb	IMUL	BASE	I186	BINARY	decoded	o32|- o64|-	-	-	34	prefix on IMUL r,r/m,imm (decode.ml:637)	yes	IMUL3_32,IMUL3_64	98	20	0	-	sweep,target,upstream
+IMUL_GPRv_GPRv_IMMz	IMUL	BASE	I186	BINARY	decoded	o32|- o64|-	-	-	34	prefix on IMUL r,r/m,imm (decode.ml:637)	yes	IMUL3_32,IMUL3_64	16	7	0	hashing	family,sweep,target,upstream
+IMUL_GPRv_MEMv	IMUL	BASE	I86	BINARY	decoded	o32|- o64|-	-	-	34	prefix on IMUL r,r/m (decode.ml:542)	yes	IMUL32,IMUL64	3	2	0	-	sweep,target,upstream
+IMUL_GPRv_MEMv_IMMb	IMUL	BASE	I186	BINARY	decoded	o32|- o64|-	-	-	34	prefix on IMUL r,r/m,imm (decode.ml:637)	yes	IMUL3_32,IMUL3_64	1	0	0	-	sweep,target,upstream
+IMUL_GPRv_MEMv_IMMz	IMUL	BASE	I186	BINARY	decoded	o32|- o64|-	-	-	34	prefix on IMUL r,r/m,imm (decode.ml:637)	yes	IMUL3_32,IMUL3_64	0	0	0	-	sweep,upstream
+IMUL_MEMb	IMUL	BASE	I86	BINARY	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	IMUL2_8	0	0	0	-	sweep,upstream
+IMUL_MEMv	IMUL	BASE	I86	BINARY	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	IMUL2_32,IMUL2_64	0	0	0	-	sweep,upstream
+INC_GPR8	INC	BASE	I86	BINARY	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	INC8	0	0	0	-	sweep,upstream
+INC_GPRv_FFr0	INC	BASE	I86	BINARY	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	INC32,INC64	427	242	0	-	sweep,target,upstream
+INC_LOCK_MEMv	INC_LOCK	BASE	I86	BINARY	not-decoded	-	-	-	2	LOCK prefix (decode.ml:90)	no	-	0	0	0	control	family,sweep
+INC_MEMb	INC	BASE	I86	BINARY	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	INC8	0	0	0	-	sweep,upstream
+INC_MEMv	INC	BASE	I86	BINARY	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	INC32,INC64	22	29	0	-	sweep,target,upstream
+INT3	INT3	BASE	I86	INTERRUPT	not-decoded	-	-	-	8	no clause for opcode CC (decode.ml:1335)	no	-	0	0	0	control	family,sweep
+JBE_RELBRb	JBE	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel8 (decode.ml:642)	yes	JBE	59	12	0	-	harness,sweep,target
+JBE_RELBRd	JBE	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel32 (decode.ml:521)	yes	JBE	32	19	0	-	harness,sweep,target
+JB_RELBRb	JB	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel8 (decode.ml:642)	yes	JB	101	120	0	-	harness,sweep,target
+JB_RELBRd	JB	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel32 (decode.ml:521)	yes	JB	59	96	265	-	harness,sweep,target
+JLE_RELBRb	JLE	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel8 (decode.ml:642)	yes	JLE	34	40	0	-	harness,sweep,target
+JLE_RELBRd	JLE	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel32 (decode.ml:521)	yes	JLE	37	69	0	-	harness,sweep,target
+JL_RELBRb	JL	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel8 (decode.ml:642)	yes	JL	2	2	0	-	harness,sweep,target
+JL_RELBRd	JL	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel32 (decode.ml:521)	yes	JL	0	1	0	-	harness,sweep,target
+JMP_GPRv	JMP	BASE	I86	UNCOND_BR	not-decoded	-	-	-	18	indirect JMP (FF /4) (decode.ml:313)	no	-	3	3	0	control	family,sweep,target
+JMP_MEMv	JMP	BASE	I86	UNCOND_BR	not-decoded	-	-	-	18	indirect JMP (FF /4) (decode.ml:313)	no	-	38	37	0	control	family,sweep,target
+JMP_RELBRb	JMP	BASE	I86	UNCOND_BR	decoded	o64|-	-	-	17	prefix on JMP rel (decode.ml:1318)	yes	JMP	280	221	0	-	harness,sweep,target
+JMP_RELBRd	JMP	BASE	I86	UNCOND_BR	decoded	o64|-	-	-	17	prefix on JMP rel (decode.ml:1318)	yes	JMP	710	723	94	-	harness,sweep,target
+JNBE_RELBRb	JNBE	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel8 (decode.ml:642)	yes	JNBE	27	14	0	-	harness,sweep,target
+JNBE_RELBRd	JNBE	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel32 (decode.ml:521)	yes	JNBE	55	50	187	-	harness,sweep,target
+JNB_RELBRb	JNB	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel8 (decode.ml:642)	yes	JNB	106	153	0	-	harness,sweep,target
+JNB_RELBRd	JNB	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel32 (decode.ml:521)	yes	JNB	136	88	8	-	harness,sweep,target
+JNLE_RELBRb	JNLE	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel8 (decode.ml:642)	yes	JNLE	41	42	0	-	harness,sweep,target
+JNLE_RELBRd	JNLE	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel32 (decode.ml:521)	yes	JNLE	18	47	0	-	harness,sweep,target
+JNL_RELBRb	JNL	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel8 (decode.ml:642)	yes	JNL	0	2	0	-	harness,sweep,target
+JNL_RELBRd	JNL	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel32 (decode.ml:521)	yes	JNL	5	12	0	-	harness,sweep,target
+JNO_RELBRb	JNO	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel8 (decode.ml:642)	yes	JNO	0	0	0	-	harness,sweep
+JNO_RELBRd	JNO	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel32 (decode.ml:521)	yes	JNO	0	0	0	-	harness,sweep
+JNP_RELBRb	JNP	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel8 (decode.ml:642)	yes	JNP	0	0	0	-	harness,sweep
+JNP_RELBRd	JNP	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel32 (decode.ml:521)	yes	JNP	0	0	0	-	harness,sweep
+JNS_RELBRb	JNS	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel8 (decode.ml:642)	yes	JNS	4	0	0	-	harness,sweep,target
+JNS_RELBRd	JNS	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel32 (decode.ml:521)	yes	JNS	38	0	0	-	harness,sweep,target
+JNZ_RELBRb	JNZ	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel8 (decode.ml:642)	yes	JNZ	564	439	0	-	harness,sweep,target
+JNZ_RELBRd	JNZ	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel32 (decode.ml:521)	yes	JNZ	601	589	23	-	harness,sweep,target
+JO_RELBRb	JO	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel8 (decode.ml:642)	yes	JO	0	0	0	-	harness,sweep
+JO_RELBRd	JO	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel32 (decode.ml:521)	yes	JO	0	0	0	-	harness,sweep
+JP_RELBRb	JP	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel8 (decode.ml:642)	yes	JP	0	0	0	-	harness,sweep
+JP_RELBRd	JP	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel32 (decode.ml:521)	yes	JP	0	0	0	-	harness,sweep
+JS_RELBRb	JS	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel8 (decode.ml:642)	yes	JS	5	5	0	-	harness,sweep,target
+JS_RELBRd	JS	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel32 (decode.ml:521)	yes	JS	10	10	0	-	harness,sweep,target
+JZ_RELBRb	JZ	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel8 (decode.ml:642)	yes	JZ	576	561	0	-	harness,sweep,target
+JZ_RELBRd	JZ	BASE	I86	COND_BR	decoded	o64|-	-	-	17	prefix on Jcc rel32 (decode.ml:521)	yes	JZ	916	1003	66	-	harness,sweep,target
+KANDQ_MASKmskw_MASKmskw_MASKmskw_AVX512	KANDQ	AVX512VEX	AVX512BW_KOPQ	KMASK	not-decoded	-	-	-	1	no clause for VEX.0F.L1.41 (decode.ml:1176)	no	-	0	0	0	equality	family
+KMOVD_GPR32u32_MASKmskw_AVX512	KMOVD	AVX512VEX	AVX512BW_KOPD	KMASK	not-decoded	-	-	-	1	no clause for VEX.0F.L0.93 (decode.ml:1176)	no	-	0	0	0	equality	family,sweep
+KMOVQ_GPR64u64_MASKmskw_AVX512	KMOVQ	AVX512VEX	AVX512BW_KOPQ	KMASK	not-decoded	-	-	-	1	no clause for VEX.0F.L0.93 (decode.ml:1176)	no	-	0	0	0	equality	family
+KMOVW_MASKmskw_GPR32u32_AVX512	KMOVW	AVX512VEX	AVX512F_KOPW	KMASK	not-decoded	-	-	-	1	no clause for VEX.0F.L0.92 (decode.ml:1176)	no	-	0	0	0	equality	family,sweep
+KORTESTD_MASKmskw_MASKmskw_AVX512	KORTESTD	AVX512VEX	AVX512BW_KOPD	KMASK	not-decoded	-	-	-	1	no clause for VEX.0F.L0.98 (decode.ml:1176)	no	-	0	0	0	equality	family
+KORTESTQ_MASKmskw_MASKmskw_AVX512	KORTESTQ	AVX512VEX	AVX512BW_KOPQ	KMASK	not-decoded	-	-	-	1	no clause for VEX.0F.L0.98 (decode.ml:1176)	no	-	0	0	0	equality	family
+KORTESTW_MASKmskw_MASKmskw_AVX512	KORTESTW	AVX512VEX	AVX512F_KOPW	KMASK	not-decoded	-	-	-	1	no clause for VEX.0F.L0.98 (decode.ml:1176)	no	-	0	1	0	equality	family,sweep,target
+KTESTQ_MASKmskw_MASKmskw_AVX512	KTESTQ	AVX512VEX	AVX512BW_KOPQ	KMASK	not-decoded	-	-	-	1	no clause for VEX.0F.L0.99 (decode.ml:1176)	no	-	0	0	0	equality	family
+LAHF	LAHF	BASE	LAHF	FLAGOP	not-decoded	-	-	-	8	no clause for opcode 9F (decode.ml:1335)	no	-	0	0	0	integer	family,sweep
+LEAVE	LEAVE	BASE	I186	MISC	not-decoded	-	-	-	5	no clause for opcode C9 (decode.ml:1335)	no	-	0	0	0	integer	family,sweep
+LEA_GPRv_AGEN	LEA	BASE	I86	MISC	decoded	o32|- o64|-	-	-	34	prefix on LEA (decode.ml:668)	yes	LEA32,LEA64	1438	1585	0	integer	family,sweep,target,upstream
+LFENCE	LFENCE	SSE2	SSE2	MISC	not-decoded	-	-	-	2	no clause for 0F AE (decode.ml:625)	no	-	0	0	0	control	family,sweep
+LZCNT_GPRv_GPRv	LZCNT	LZCNT	LZCNT	LZCNT	caveat	-	o32|F3 o64|F3	decoded whatever CPUID says: without ABM/LZCNT the bytes run as BSR (decode.ml:572)	6	0F BD with a prefix other than one F3 (decode.ml:566)	no	LZCNT32,LZCNT64	0	0	0	bitscan	family,sweep,upstream
+LZCNT_GPRv_MEMv	LZCNT	LZCNT	LZCNT	LZCNT	caveat	-	o32|F3 o64|F3	decoded whatever CPUID says: without ABM/LZCNT the bytes run as BSR (decode.ml:572)	6	0F BD with a prefix other than one F3 (decode.ml:566)	no	LZCNT32,LZCNT64	0	0	0	-	sweep,upstream
+MFENCE	MFENCE	SSE2	SSE2	MISC	not-decoded	-	-	-	2	no clause for 0F AE (decode.ml:625)	no	-	0	0	0	control	family,sweep
+MOVAPS_MEMps_XMMps	MOVAPS	SSE	SSE	DATAXFER	decoded	o32|- o64|-	-	-	16	prefix on 0F 28/29 (only MOVAPS) (decode.ml:362)	yes	MOVAPS	0	0	0	-	sweep,upstream
+MOVAPS_XMMps_MEMps	MOVAPS	SSE	SSE	DATAXFER	decoded	o32|- o64|-	-	-	16	prefix on 0F 28/29 (only MOVAPS) (decode.ml:362)	yes	MOVAPS	0	0	0	copy	family,sweep,upstream
+MOVAPS_XMMps_XMMps_0F28	MOVAPS	SSE	SSE	DATAXFER	decoded	o32|- o64|-	-	-	16	prefix on 0F 28/29 (only MOVAPS) (decode.ml:362)	yes	MOVAPS	0	0	0	-	sweep,upstream
+MOVAPS_XMMps_XMMps_0F29	MOVAPS	SSE	SSE	DATAXFER	decoded	o32|- o64|-	-	-	16	prefix on 0F 28/29 (only MOVAPS) (decode.ml:362)	yes	MOVAPS	0	0	0	-	sweep,upstream
+MOVBE_GPRv_MEMv	MOVBE	MOVBE	MOVBE	DATAXFER	not-decoded	-	-	-	4	no clause for 0F 38 F0 (decode.ml:408)	no	-	0	0	0	integer	family,sweep
+MOVDQA_MEMdq_XMMdq	MOVDQA	SSE2	SSE2	DATAXFER	decoded	o32|66 o64|66	-	-	4	0F 6F/7F without exactly 66 or F3 (decode.ml:471)	yes	MOVDQA	0	0	0	-	sweep,upstream
+MOVDQA_XMMdq_MEMdq	MOVDQA	SSE2	SSE2	DATAXFER	decoded	o32|66 o64|66	-	-	4	0F 6F/7F without exactly 66 or F3 (decode.ml:471)	yes	MOVDQA	0	0	0	copy	family,sweep,upstream
+MOVDQA_XMMdq_XMMdq_0F6F	MOVDQA	SSE2	SSE2	DATAXFER	decoded	o32|66 o64|66	-	-	4	0F 6F/7F without exactly 66 or F3 (decode.ml:471)	yes	MOVDQA	0	0	0	-	sweep,upstream
+MOVDQA_XMMdq_XMMdq_0F7F	MOVDQA	SSE2	SSE2	DATAXFER	decoded	o32|66 o64|66	-	-	4	0F 6F/7F without exactly 66 or F3 (decode.ml:471)	yes	MOVDQA	0	0	0	-	sweep,upstream
+MOVDQU_MEMdq_XMMdq	MOVDQU	SSE2	SSE2	DATAXFER	decoded	o32|F3 o64|F3	-	-	6	0F 6F/7F without exactly 66 or F3 (decode.ml:471)	yes	MOVDQU	0	0	0	copy	family,sweep,upstream
+MOVDQU_XMMdq_MEMdq	MOVDQU	SSE2	SSE2	DATAXFER	decoded	o32|F3 o64|F3	-	-	6	0F 6F/7F without exactly 66 or F3 (decode.ml:471)	yes	MOVDQU	0	0	0	copy	family,sweep,upstream
+MOVDQU_XMMdq_XMMdq_0F6F	MOVDQU	SSE2	SSE2	DATAXFER	decoded	o32|F3 o64|F3	-	-	6	0F 6F/7F without exactly 66 or F3 (decode.ml:471)	yes	MOVDQU	0	0	0	-	sweep,upstream
+MOVDQU_XMMdq_XMMdq_0F7F	MOVDQU	SSE2	SSE2	DATAXFER	decoded	o32|F3 o64|F3	-	-	6	0F 6F/7F without exactly 66 or F3 (decode.ml:471)	yes	MOVDQU	0	0	0	-	sweep,upstream
+MOVD_GPR32_XMMd	MOVD	SSE2	SSE2	DATAXFER	decoded	o32|66	-	-	2	0F 7E without exactly 66 or F3 (decode.ml:520)	yes	MOVD_from_xmm	0	0	0	-	sweep,upstream
+MOVD_MEMd_XMMd	MOVD	SSE2	SSE2	DATAXFER	decoded	o32|66	-	-	2	0F 7E without exactly 66 or F3 (decode.ml:520)	yes	MOVD_from_xmm	0	0	0	-	sweep,upstream
+MOVD_XMMdq_GPR32	MOVD	SSE2	SSE2	DATAXFER	decoded	o32|66	-	-	2	REP or segment prefix on 0F 6E (decode.ml:453)	yes	MOVD_to_xmm	0	0	0	-	sweep,upstream
+MOVD_XMMdq_MEMd	MOVD	SSE2	SSE2	DATAXFER	decoded	o32|66	-	-	2	REP or segment prefix on 0F 6E (decode.ml:453)	yes	MOVD_to_xmm	0	0	0	-	sweep,upstream
+MOVNTI_MEMq_GPR64	MOVNTI	SSE2	SSE2	DATAXFER	not-decoded	-	-	-	1	no clause for 0F C3 (decode.ml:625)	no	-	0	0	0	copy	family,sweep
+MOVQ_GPR64_XMMq	MOVQ	SSE2	SSE2	DATAXFER	decoded	o64|66	-	-	2	0F 7E without exactly 66 or F3 (decode.ml:520)	yes	MOVQ_from_xmm	0	0	0	-	sweep,upstream
+MOVQ_MEMq_XMMq_0F7E	MOVQ	SSE2	SSE2	DATAXFER	decoded	o64|66	-	-	2	0F 7E without exactly 66 or F3 (decode.ml:520)	yes	MOVQ_from_xmm	0	0	0	-	sweep,upstream
+MOVQ_MEMq_XMMq_0FD6	MOVQ	SSE2	SSE2	DATAXFER	decoded	o32|66 o64|66	-	-	4	MOVQ xmm/m64,xmm needs exactly the 66 prefix (decode.ml:598)	yes	MOVQ_store	0	0	0	-	sweep,upstream
+MOVQ_XMMdq_GPR64	MOVQ	SSE2	SSE2	DATAXFER	decoded	o64|66	-	-	2	REP or segment prefix on 0F 6E (decode.ml:453)	yes	MOVQ_to_xmm	0	0	0	-	sweep,upstream
+MOVQ_XMMdq_MEMq_0F6E	MOVQ	SSE2	SSE2	DATAXFER	decoded	o64|66	-	-	2	REP or segment prefix on 0F 6E (decode.ml:453)	yes	MOVQ_to_xmm	0	0	0	-	sweep,upstream
+MOVQ_XMMdq_MEMq_0F7E	MOVQ	SSE2	SSE2	DATAXFER	decoded	o32|F3 o64|F3	-	-	6	0F 7E without exactly 66 or F3 (decode.ml:520)	yes	MOVQ_xmm_load	0	0	0	-	sweep,upstream
+MOVQ_XMMdq_XMMq_0F7E	MOVQ	SSE2	SSE2	DATAXFER	decoded	o32|F3 o64|F3	-	-	6	0F 7E without exactly 66 or F3 (decode.ml:520)	yes	MOVQ_xmm_load	0	0	0	-	sweep,upstream
+MOVQ_XMMdq_XMMq_0FD6	MOVQ	SSE2	SSE2	DATAXFER	decoded	o32|66 o64|66	-	-	4	MOVQ xmm/m64,xmm needs exactly the 66 prefix (decode.ml:598)	yes	MOVQ_store	0	0	0	-	sweep,upstream
+MOVSB	MOVSB	BASE	I86	STRINGOP	decoded	o32|- o64|-	-	-	22	66 or segment prefix on MOVSB (decode.ml:685)	yes	MOVSB	0	0	0	copy	family,harness,reading,sweep
+MOVSQ	MOVSQ	LONGMODE	LONGMODE	STRINGOP	not-decoded	-	-	-	2	no clause for opcode A5 (decode.ml:1335)	no	-	0	0	0	copy	family,sweep
+MOVSXD_GPR64_MEMd	MOVSXD	LONGMODE	LONGMODE	DATAXFER	decoded	o64|-	-	-	17	prefix on MOVSXD (decode.ml:630)	yes	MOVSX64_32	26	39	0	-	sweep,target,upstream
+MOVSXD_GPRv_GPRz	MOVSXD	LONGMODE	LONGMODE	DATAXFER	decoded	o32|- o64|-	-	-	34	prefix on MOVSXD (decode.ml:630)	yes	MOVSX32_32,MOVSX64_32	42	56	0	integer	family,sweep,target,upstream
+MOVSXD_GPRz_MEMz	MOVSXD	LONGMODE	LONGMODE	DATAXFER	decoded	o32|-	-	-	17	prefix on MOVSXD (decode.ml:630)	yes	MOVSX32_32	0	0	0	-	sweep,upstream
+MOVSX_GPR32_MEMw	MOVSX	BASE	I386	DATAXFER	decoded	o32|-	-	-	12	prefix on MOVZX/MOVSX (decode.ml:574)	yes	MOVSX32_16	0	0	0	-	sweep,upstream
+MOVSX_GPR64_MEMw	MOVSX	BASE	I386	DATAXFER	decoded	o64|-	-	-	17	prefix on MOVZX/MOVSX (decode.ml:574)	yes	MOVSX64_16	0	0	0	-	sweep,upstream
+MOVSX_GPRv_GPR16	MOVSX	BASE	I386	DATAXFER	decoded	o32|- o64|-	-	-	34	prefix on MOVZX/MOVSX (decode.ml:574)	yes	MOVSX32_16,MOVSX64_16	0	0	0	-	sweep,upstream
+MOVSX_GPRv_GPR8	MOVSX	BASE	I386	DATAXFER	decoded	o32|- o64|-	-	-	34	prefix on MOVZX/MOVSX (decode.ml:574)	yes	MOVSX32_8,MOVSX64_8	2	2	0	-	sweep,target,upstream
+MOVSX_GPRv_MEMb	MOVSX	BASE	I386	DATAXFER	decoded	o32|- o64|-	-	-	34	prefix on MOVZX/MOVSX (decode.ml:574)	yes	MOVSX32_8,MOVSX64_8	4	6	0	integer	family,sweep,target,upstream
+MOVUPS_MEMps_XMMps	MOVUPS	SSE	SSE	DATAXFER	decoded	o32|- o64|-	-	-	18	no clause for opcode D5 (decode.ml:1335)	yes	MOVUPS	0	0	0	copy	family,sweep,upstream
+MOVUPS_XMMps_MEMps	MOVUPS	SSE	SSE	DATAXFER	decoded	o32|- o64|-	-	-	16	prefix on 0F 10/11 (only MOVUPS) (decode.ml:332)	yes	MOVUPS	0	0	0	copy	family,sweep,upstream
+MOVUPS_XMMps_XMMps_0F10	MOVUPS	SSE	SSE	DATAXFER	decoded	o32|- o64|-	-	-	16	prefix on 0F 10/11 (only MOVUPS) (decode.ml:332)	yes	MOVUPS	0	0	0	-	sweep,upstream
+MOVUPS_XMMps_XMMps_0F11	MOVUPS	SSE	SSE	DATAXFER	decoded	o32|- o64|-	-	-	16	prefix on 0F 10/11 (only MOVUPS) (decode.ml:332)	yes	MOVUPS	0	0	0	-	sweep,upstream
+MOVZX_GPR32_MEMw	MOVZX	BASE	I386	DATAXFER	decoded	o32|-	-	-	12	prefix on MOVZX/MOVSX (decode.ml:574)	yes	MOVZX32_16	51	101	0	integer	family,sweep,target,upstream
+MOVZX_GPR64_MEMw	MOVZX	BASE	I386	DATAXFER	decoded	o64|-	-	-	17	prefix on MOVZX/MOVSX (decode.ml:574)	yes	MOVZX64_16	0	0	0	-	sweep,upstream
+MOVZX_GPRv_GPR16	MOVZX	BASE	I386	DATAXFER	decoded	o32|- o64|-	-	-	34	prefix on MOVZX/MOVSX (decode.ml:574)	yes	MOVZX32_16,MOVZX64_16	18	31	0	-	sweep,target,upstream
+MOVZX_GPRv_GPR8	MOVZX	BASE	I386	DATAXFER	decoded	o32|- o64|-	-	-	34	prefix on MOVZX/MOVSX (decode.ml:574)	yes	MOVZX32_8,MOVZX64_8	69	69	72	integer	family,sweep,target,upstream
+MOVZX_GPRv_MEMb	MOVZX	BASE	I386	DATAXFER	decoded	o32|- o64|-	-	-	34	prefix on MOVZX/MOVSX (decode.ml:574)	yes	MOVZX32_8,MOVZX64_8	579	485	5	-	sweep,target,upstream
+MOV_GPR8_GPR8_88	MOV	BASE	I86	DATAXFER	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on MOV (decode.ml:663)	yes	MOV8	0	0	0	-	sweep,upstream
+MOV_GPR8_GPR8_8A	MOV	BASE	I86	DATAXFER	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on MOV (decode.ml:663)	yes	MOV8	0	0	0	-	sweep,upstream
+MOV_GPR8_IMMb_B0	MOV	BASE	I86	DATAXFER	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on MOV r,imm (decode.ml:690)	yes	MOV8_imm	0	0	0	-	sweep,upstream
+MOV_GPR8_IMMb_C6r0	MOV	BASE	I86	DATAXFER	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on MOV r/m,imm (decode.ml:1302)	yes	MOV8_imm	0	0	0	-	sweep,upstream
+MOV_GPR8_MEMb	MOV	BASE	I86	DATAXFER	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on MOV (decode.ml:663)	yes	MOV8	0	0	0	-	sweep,upstream
+MOV_GPRv_GPRv_89	MOV	BASE	I86	DATAXFER	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on MOV (decode.ml:663)	yes	MOV16,MOV32,MOV64	2424	2500	344	-	sweep,target,upstream
+MOV_GPRv_GPRv_8B	MOV	BASE	I86	DATAXFER	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on MOV (decode.ml:663)	yes	MOV16,MOV32,MOV64	0	0	0	-	sweep,upstream
+MOV_GPRv_IMMv	MOV	BASE	I86	DATAXFER	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on MOV r,imm (decode.ml:690)	yes	MOV16_imm,MOV32_imm,MOV64_imm	737	447	136	-	sweep,target,upstream
+MOV_GPRv_IMMz	MOV	BASE	I86	DATAXFER	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on MOV r/m,imm (decode.ml:1302)	yes	MOV16_imm,MOV32_imm,MOV64_imm	7	7	0	-	sweep,target,upstream
+MOV_GPRv_MEMv	MOV	BASE	I86	DATAXFER	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on MOV (decode.ml:663)	yes	MOV16,MOV32,MOV64	4576	4131	267	integer	family,sweep,target,upstream
+MOV_MEMb_GPR8	MOV	BASE	I86	DATAXFER	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on MOV (decode.ml:663)	yes	MOV8	247	190	1	-	sweep,target,upstream
+MOV_MEMb_IMMb	MOV	BASE	I86	DATAXFER	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on MOV r/m,imm (decode.ml:1302)	yes	MOV8_imm	175	242	0	-	sweep,target,upstream
+MOV_MEMv_GPRv	MOV	BASE	I86	DATAXFER	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on MOV (decode.ml:663)	yes	MOV16,MOV32,MOV64	3006	2868	117	integer	family,sweep,target,upstream
+MOV_MEMv_IMMz	MOV	BASE	I86	DATAXFER	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on MOV r/m,imm (decode.ml:1302)	yes	MOV16_imm,MOV32_imm,MOV64_imm	263	321	47	-	sweep,target,upstream
+MULX_GPR32d_GPR32d_GPR32d	MULX	BMI2	BMI2	BMI2	decoded	v1l0w0|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	MULX32	0	0	0	bmi	family,sweep,upstream
+MULX_GPR32d_GPR32d_MEMd	MULX	BMI2	BMI2	BMI2	decoded	v1l0w0|-	-	-	0	-	yes	MULX32	0	0	0	-	sweep,upstream
+MULX_GPR64q_GPR64q_GPR64q	MULX	BMI2	BMI2	BMI2	decoded	v1l0w1|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	MULX64	0	0	0	bmi	family,sweep,upstream
+MULX_GPR64q_GPR64q_MEMq	MULX	BMI2	BMI2	BMI2	decoded	v1l0w1|-	-	-	0	-	yes	MULX64	0	0	0	-	sweep,upstream
+MUL_GPR8	MUL	BASE	I86	BINARY	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	MUL2_8	0	0	0	-	sweep,upstream
+MUL_GPRv	MUL	BASE	I86	BINARY	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	MUL2_32,MUL2_64	0	0	0	hashing	family,sweep,upstream
+MUL_MEMb	MUL	BASE	I86	BINARY	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	MUL2_8	0	0	0	-	sweep,upstream
+MUL_MEMv	MUL	BASE	I86	BINARY	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	MUL2_32,MUL2_64	0	0	0	-	sweep,upstream
+NEG_GPR8	NEG	BASE	I86	BINARY	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	NEG8	0	0	0	-	sweep,upstream
+NEG_GPRv	NEG	BASE	I86	BINARY	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	NEG32,NEG64	2	1	0	integer	family,sweep,target,upstream
+NEG_MEMb	NEG	BASE	I86	BINARY	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	NEG8	0	0	0	-	sweep,upstream
+NEG_MEMv	NEG	BASE	I86	BINARY	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	NEG32,NEG64	0	0	0	-	sweep,upstream
+NOP_90	NOP	BASE	I86	NOP	decoded	o16|66 o32|- o64|- o64|66	-	-	24	REP or segment prefix on 90+r (decode.ml:674)	yes	NOP	211	187	0	integer	family,sweep,target,upstream
+NOP_GPRv_0F1F	NOP	BASE	FAT_NOP	WIDENOP	decoded	o16|26.66 o16|2E.66 o16|36.66 o16|3E.66 o16|66 o32|- o32|26 o32|2E o32|36 o32|3E o64|- o64|26 o64|26.66 o64|2E o64|2E.66 o64|36 o64|36.66 o64|3E o64|3E.66 o64|66	-	-	20	F2/F3 prefix on NOP r/m (decode.ml:361)	yes	NOP_N16,NOP_N32,NOP_N64	0	0	0	-	sweep,upstream
+NOP_MEMv_0F1F	NOP	BASE	FAT_NOP	WIDENOP	decoded	o16|26.66 o16|2E.66 o16|36.66 o16|3E.66 o16|66 o32|- o32|26 o32|2E o32|36 o32|3E o64|- o64|26 o64|26.66 o64|2E o64|2E.66 o64|36 o64|36.66 o64|3E o64|3E.66 o64|66	-	-	20	F2/F3 prefix on NOP r/m (decode.ml:361)	yes	NOP_N16,NOP_N32,NOP_N64	969	867	0	integer	family,sweep,target,upstream
+NOT_GPR8	NOT	BASE	I86	LOGICAL	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	NOT8	0	0	0	-	sweep,upstream
+NOT_GPRv	NOT	BASE	I86	LOGICAL	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	NOT32,NOT64	0	0	0	integer	family,sweep,upstream
+NOT_MEMb	NOT	BASE	I86	LOGICAL	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	NOT8	0	0	0	-	sweep,upstream
+NOT_MEMv	NOT	BASE	I86	LOGICAL	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	NOT32,NOT64	0	0	0	-	sweep,upstream
+OR_AL_IMMb	OR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU acc,imm (decode.ml:326)	yes	OR8	0	0	0	-	sweep,upstream
+OR_GPR8_GPR8_08	OR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	OR8	12	16	0	-	sweep,target,upstream
+OR_GPR8_GPR8_0A	OR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	OR8	0	0	0	-	sweep,upstream
+OR_GPR8_IMMb_80r1	OR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	OR8	0	0	0	-	sweep,upstream
+OR_GPR8_MEMb	OR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	OR8	8	14	0	-	sweep,target,upstream
+OR_GPRv_GPRv_09	OR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	OR16,OR32,OR64	132	72	0	-	sweep,target,upstream
+OR_GPRv_GPRv_0B	OR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	OR16,OR32,OR64	0	0	0	-	sweep,upstream
+OR_GPRv_IMMb	OR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm8 (decode.ml:650)	yes	OR16,OR32,OR64	13	20	0	-	sweep,target,upstream
+OR_GPRv_IMMz	OR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	OR16,OR32,OR64	3	3	0	-	sweep,target,upstream
+OR_GPRv_MEMv	OR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	OR16,OR32,OR64	15	6	0	-	sweep,target,upstream
+OR_MEMb_GPR8	OR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	OR8	1	30	0	-	sweep,target,upstream
+OR_MEMb_IMMb_80r1	OR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	OR8	4	5	0	-	sweep,target,upstream
+OR_MEMv_GPRv	OR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	OR16,OR32,OR64	14	16	0	-	sweep,target,upstream
+OR_MEMv_IMMb	OR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm8 (decode.ml:650)	yes	OR16,OR32,OR64	0	6	0	-	sweep,target,upstream
+OR_MEMv_IMMz	OR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	OR16,OR32,OR64	0	0	0	-	sweep,upstream
+OR_OrAX_IMMz	OR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU acc,imm (decode.ml:326)	yes	OR16,OR32,OR64	3	3	0	-	sweep,target,upstream
+PADDD_XMMdq_MEMdq	PADDD	SSE2	SSE2	SSE	decoded	o32|66 o64|66	-	-	4	0F FE needs exactly the 66 prefix (decode.ml:589)	yes	PADDD	0	0	0	-	sweep,upstream
+PADDD_XMMdq_XMMdq	PADDD	SSE2	SSE2	SSE	decoded	o32|66 o64|66	-	-	4	0F FE needs exactly the 66 prefix (decode.ml:589)	yes	PADDD	0	0	0	-	sweep,upstream
+PADDQ_XMMdq_MEMdq	PADDQ	SSE2	SSE2	SSE	decoded	o32|66 o64|66	-	-	4	0F D4 needs exactly the 66 prefix (decode.ml:589)	yes	PADDQ	0	0	0	-	sweep,upstream
+PADDQ_XMMdq_XMMdq	PADDQ	SSE2	SSE2	SSE	decoded	o32|66 o64|66	-	-	4	0F D4 needs exactly the 66 prefix (decode.ml:589)	yes	PADDQ	0	0	0	-	sweep,upstream
+PAND_XMMdq_MEMdq	PAND	SSE2	SSE2	LOGICAL	decoded	o32|66 o64|66	-	-	4	0F DB needs exactly the 66 prefix (decode.ml:589)	yes	PAND	0	0	0	-	sweep,upstream
+PAND_XMMdq_XMMdq	PAND	SSE2	SSE2	LOGICAL	decoded	o32|66 o64|66	-	-	4	0F DB needs exactly the 66 prefix (decode.ml:589)	yes	PAND	0	0	0	-	sweep,upstream
+PAUSE	PAUSE	PAUSE	PAUSE	MISC	not-decoded	-	-	-	8	REP or segment prefix on 90+r (decode.ml:674)	no	-	0	0	0	control	family,sweep
+PBLENDW_XMMdq_MEMdq_IMMb	PBLENDW	SSE4	SSE4	SSE	decoded	o32|66 o64|66	-	-	4	0F 3A 0E needs exactly the 66 prefix (decode.ml:417)	yes	PBLENDW	0	0	0	-	sweep,upstream
+PBLENDW_XMMdq_XMMdq_IMMb	PBLENDW	SSE4	SSE4	SSE	decoded	o32|66 o64|66	-	-	4	0F 3A 0E needs exactly the 66 prefix (decode.ml:417)	yes	PBLENDW	0	0	0	-	sweep,upstream
+PCLMULQDQ_XMMdq_XMMdq_IMMb	PCLMULQDQ	PCLMULQDQ	PCLMULQDQ	PCLMULQDQ	not-decoded	-	-	-	2	no clause for 0F 3A 44 (decode.ml:436)	no	-	0	0	0	hashing	family,sweep
+PCMPEQB_XMMdq_XMMdq	PCMPEQB	SSE2	SSE2	SSE	not-decoded	-	-	-	2	no clause for 0F 74 (decode.ml:625)	no	-	0	0	0	equality	family,sweep
+PCMPEQQ_XMMdq_XMMdq	PCMPEQQ	SSE4	SSE4	SSE	not-decoded	-	-	-	2	no clause for 0F 38 29 (decode.ml:408)	no	-	0	0	0	equality	family,sweep
+PCMPESTRI_XMMdq_MEMdq_IMMb	PCMPESTRI	SSE4	SSE42	SSE	not-decoded	-	-	-	1	no clause for 0F 3A 61 (decode.ml:436)	no	-	0	0	0	equality	family,sweep
+PCMPGTD_XMMdq_MEMdq	PCMPGTD	SSE2	SSE2	SSE	decoded	o32|66 o64|66	-	-	4	PCMPGTW/D needs exactly the 66 prefix (decode.ml:446)	yes	PCMPGTD	0	0	0	-	sweep,upstream
+PCMPGTD_XMMdq_XMMdq	PCMPGTD	SSE2	SSE2	SSE	decoded	o32|66 o64|66	-	-	4	PCMPGTW/D needs exactly the 66 prefix (decode.ml:446)	yes	PCMPGTD	0	0	0	-	sweep,upstream
+PCMPGTW_XMMdq_MEMdq	PCMPGTW	SSE2	SSE2	SSE	decoded	o32|66 o64|66	-	-	4	PCMPGTW/D needs exactly the 66 prefix (decode.ml:446)	yes	PCMPGTW	0	0	0	-	sweep,upstream
+PCMPGTW_XMMdq_XMMdq	PCMPGTW	SSE2	SSE2	SSE	decoded	o32|66 o64|66	-	-	4	PCMPGTW/D needs exactly the 66 prefix (decode.ml:446)	yes	PCMPGTW	0	0	0	-	sweep,upstream
+PCMPISTRI_XMMdq_XMMdq_IMMb	PCMPISTRI	SSE4	SSE42	SSE	not-decoded	-	-	-	1	no clause for 0F 3A 63 (decode.ml:436)	no	-	0	0	0	equality	family,sweep
+PDEP_GPR64q_GPR64q_GPR64q	PDEP	BMI2	BMI2	BMI2	not-decoded	-	-	-	3	VEX.0F38.L0.F5: 0F38 F5 is decoded only as PEXT (F3) (decode.ml:853)	no	-	0	0	0	bmi	family,sweep
+PEXT_GPR32d_GPR32d_GPR32d	PEXT	BMI2	BMI2	BMI2	decoded	v1l0w0|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	PEXT32	0	0	0	bmi	family,sweep,upstream
+PEXT_GPR32d_GPR32d_MEMd	PEXT	BMI2	BMI2	BMI2	decoded	v1l0w0|-	-	-	0	-	yes	PEXT32	0	0	0	-	sweep,upstream
+PEXT_GPR64q_GPR64q_GPR64q	PEXT	BMI2	BMI2	BMI2	decoded	v1l0w1|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	PEXT64	0	0	0	bmi	family,sweep,upstream
+PEXT_GPR64q_GPR64q_MEMq	PEXT	BMI2	BMI2	BMI2	decoded	v1l0w1|-	-	-	0	-	yes	PEXT64	0	0	0	-	sweep,upstream
+PINSRD_XMMdq_GPR32d_IMMb	PINSRD	SSE4	SSE4	SSE	decoded	o32|66	-	-	2	REP or segment prefix on PINSRD/Q (decode.ml:418)	yes	PINSRD	0	0	0	-	sweep,upstream
+PINSRD_XMMdq_MEMd_IMMb	PINSRD	SSE4	SSE4	SSE	decoded	o32|66	-	-	2	REP or segment prefix on PINSRD/Q (decode.ml:418)	yes	PINSRD	0	0	0	-	sweep,upstream
+PINSRQ_XMMdq_GPR64q_IMMb	PINSRQ	SSE4	SSE4	SSE	decoded	o64|66	-	-	2	REP or segment prefix on PINSRD/Q (decode.ml:418)	yes	PINSRQ	0	0	0	-	sweep,upstream
+PINSRQ_XMMdq_MEMq_IMMb	PINSRQ	SSE4	SSE4	SSE	decoded	o64|66	-	-	2	REP or segment prefix on PINSRD/Q (decode.ml:418)	yes	PINSRQ	0	0	0	-	sweep,upstream
+PMOVMSKB_GPR32_XMMdq	PMOVMSKB	SSE2	SSE2	SSE	decoded	o32|66 o64|66	-	-	4	PMOVMSKB needs exactly the 66 prefix (decode.ml:606)	yes	PMOVMSKB	0	0	0	equality	family,sweep,upstream
+PMULUDQ_XMMdq_XMMdq	PMULUDQ	SSE2	SSE2	SSE	not-decoded	-	-	-	2	no clause for 0F F4 (decode.ml:625)	no	-	0	0	0	hashing	family,sweep
+POPCNT_GPRv_GPRv	POPCNT	SSE4	POPCNT	SSE	decoded	o32|F3 o64|F3	-	-	6	0F B8 without exactly F3 (decode.ml:551)	yes	POPCNT32,POPCNT64	0	0	0	bitscan	family,sweep,upstream
+POPCNT_GPRv_MEMv	POPCNT	SSE4	POPCNT	SSE	decoded	o32|F3 o64|F3	-	-	6	0F B8 without exactly F3 (decode.ml:551)	yes	POPCNT32,POPCNT64	0	0	0	-	sweep,upstream
+POPFQ	POPFQ	LONGMODE	LONGMODE	POP	not-decoded	-	-	-	4	no clause for opcode 9D (decode.ml:1335)	no	-	0	0	0	integer	family,sweep
+POP_GPRv_58	POP	BASE	I86	POP	decoded	o64|-	-	-	22	prefix on POP r64 (decode.ml:628)	yes	POP64	682	680	25	-	harness,sweep,target
+POP_MEMv	POP	BASE	I86	POP	not-decoded	-	-	-	5	no clause for opcode 8F (decode.ml:1335)	no	-	0	0	0	integer	family,sweep
+PREFETCHNTA_MEMmprefetch	PREFETCHNTA	SSE	SSE_PREFETCH	PREFETCH	not-decoded	-	-	-	8	no clause for 0F 18 (decode.ml:625)	no	-	0	0	0	copy	family,sweep
+PREFETCHT0_MEMmprefetch	PREFETCHT0	SSE	SSE_PREFETCH	PREFETCH	not-decoded	-	-	-	8	no clause for 0F 18 (decode.ml:625)	no	-	0	0	0	copy	family,sweep
+PSHUFB_XMMdq_MEMdq	PSHUFB	SSSE3	SSSE3	SSE	decoded	o32|66 o64|66	-	-	4	0F 38 00 needs exactly the 66 prefix (decode.ml:376)	yes	PSHUFB	0	0	0	-	sweep,upstream
+PSHUFB_XMMdq_XMMdq	PSHUFB	SSSE3	SSSE3	SSE	decoded	o32|66 o64|66	-	-	4	0F 38 00 needs exactly the 66 prefix (decode.ml:376)	yes	PSHUFB	0	0	0	hashing	family,sweep,upstream
+PSHUFD_XMMdq_MEMdq_IMMb	PSHUFD	SSE2	SSE2	SSE	decoded	o32|66 o64|66	-	-	4	PSHUFD needs exactly the 66 prefix (decode.ml:478)	yes	PSHUFD	0	0	0	-	sweep,upstream
+PSHUFD_XMMdq_XMMdq_IMMb	PSHUFD	SSE2	SSE2	SSE	decoded	o32|66 o64|66	-	-	4	PSHUFD needs exactly the 66 prefix (decode.ml:478)	yes	PSHUFD	0	0	0	hashing	family,sweep,upstream
+PSRAD_XMMdq_IMMb	PSRAD	SSE2	SSE2	SSE	decoded	o32|66 o64|66	-	-	4	0F 72 without exactly 66 (decode.ml:490)	yes	PSRAD	0	0	0	-	sweep,upstream
+PSRLW_XMMdq_IMMb	PSRLW	SSE2	SSE2	SSE	decoded	o32|66 o64|66	-	-	4	0F 71 without exactly 66 (decode.ml:490)	yes	PSRLW	0	0	0	-	sweep,upstream
+PTEST_XMMdq_XMMdq	PTEST	SSE4	SSE4	LOGICAL	not-decoded	-	-	-	2	no clause for 0F 38 17 (decode.ml:408)	no	-	0	0	0	equality	family,sweep
+PUSHFQ	PUSHFQ	LONGMODE	LONGMODE	PUSH	not-decoded	-	-	-	4	no clause for opcode 9C (decode.ml:1335)	no	-	0	0	0	integer	family,sweep
+PUSH_GPRv_50	PUSH	BASE	I86	PUSH	decoded	o64|-	-	-	22	prefix on PUSH r64 (decode.ml:626)	yes	PUSH64	507	432	25	-	harness,sweep,target
+PUSH_IMMb	PUSH	BASE	I186	PUSH	decoded	o64|-	-	-	22	prefix on PUSH imm (decode.ml:634)	yes	PUSHimm	6	22	0	integer	family,harness,sweep,target
+PUSH_IMMz	PUSH	BASE	I186	PUSH	decoded	o64|-	-	-	22	prefix on PUSH imm (decode.ml:634)	yes	PUSHimm	36	35	0	integer	family,harness,sweep,target
+PUSH_MEMv	PUSH	BASE	I86	PUSH	not-decoded	-	-	-	23	PUSH r/m (FF /6) (decode.ml:313)	no	-	9	9	0	integer	family,sweep,target
+PXOR_XMMdq_MEMdq	PXOR	SSE2	SSE2	LOGICAL	decoded	o32|66 o64|66	-	-	4	0F EF needs exactly the 66 prefix (decode.ml:589)	yes	PXOR	0	0	0	-	sweep,upstream
+PXOR_XMMdq_XMMdq	PXOR	SSE2	SSE2	LOGICAL	decoded	o32|66 o64|66	-	-	4	0F EF needs exactly the 66 prefix (decode.ml:589)	yes	PXOR	0	0	0	zero	family,sweep,upstream
+RCL_GPR8_CL	RCL	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	RCL8_CL	0	0	0	-	sweep,upstream
+RCL_GPR8_IMMb	RCL	BASE	I186	ROTATE	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	RCL8	0	0	0	-	sweep,upstream
+RCL_GPR8_ONE	RCL	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	RCL8_1	0	0	0	-	sweep,upstream
+RCL_GPRv_CL	RCL	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	RCL32_CL,RCL64_CL	0	0	0	-	sweep,upstream
+RCL_GPRv_IMMb	RCL	BASE	I186	ROTATE	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	RCL16,RCL32,RCL64	0	0	0	-	sweep,upstream
+RCL_GPRv_ONE	RCL	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	RCL32_1,RCL64_1	0	0	0	integer	family,sweep,upstream
+RCL_MEMb_CL	RCL	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	RCL8_CL	0	0	0	-	sweep,upstream
+RCL_MEMb_IMMb	RCL	BASE	I186	ROTATE	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	RCL8	0	0	0	-	sweep,upstream
+RCL_MEMb_ONE	RCL	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	RCL8_1	0	0	0	-	sweep,upstream
+RCL_MEMv_CL	RCL	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	RCL32_CL,RCL64_CL	0	0	0	-	sweep,upstream
+RCL_MEMv_IMMb	RCL	BASE	I186	ROTATE	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	RCL16,RCL32,RCL64	0	0	0	-	sweep,upstream
+RCL_MEMv_ONE	RCL	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	RCL32_1,RCL64_1	0	0	0	-	sweep,upstream
+RCR_GPR8_CL	RCR	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	RCR8_CL	0	0	0	-	sweep,upstream
+RCR_GPR8_IMMb	RCR	BASE	I186	ROTATE	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	RCR8	0	0	0	-	sweep,upstream
+RCR_GPR8_ONE	RCR	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	RCR8_1	0	0	0	-	sweep,upstream
+RCR_GPRv_CL	RCR	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	RCR32_CL,RCR64_CL	0	0	0	-	sweep,upstream
+RCR_GPRv_IMMb	RCR	BASE	I186	ROTATE	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	RCR16,RCR32,RCR64	0	0	0	-	sweep,upstream
+RCR_GPRv_ONE	RCR	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	RCR32_1,RCR64_1	0	0	0	-	sweep,upstream
+RCR_MEMb_CL	RCR	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	RCR8_CL	0	0	0	-	sweep,upstream
+RCR_MEMb_IMMb	RCR	BASE	I186	ROTATE	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	RCR8	0	0	0	-	sweep,upstream
+RCR_MEMb_ONE	RCR	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	RCR8_1	0	0	0	-	sweep,upstream
+RCR_MEMv_CL	RCR	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	RCR32_CL,RCR64_CL	0	0	0	-	sweep,upstream
+RCR_MEMv_IMMb	RCR	BASE	I186	ROTATE	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	RCR16,RCR32,RCR64	0	0	0	-	sweep,upstream
+RCR_MEMv_ONE	RCR	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	RCR32_1,RCR64_1	0	0	0	-	sweep,upstream
+RDTSC	RDTSC	BASE	PENTIUMREAL	SYSTEM	not-decoded	-	-	-	8	no clause for 0F 31 (decode.ml:625)	no	-	0	0	0	control	family,sweep
+RDTSCP	RDTSCP	RDTSCP	RDTSCP	SYSTEM	not-decoded	-	-	-	8	no clause for 0F 01 (decode.ml:625)	no	-	0	0	0	control	family,sweep
+REPE_CMPSB	REPE_CMPSB	BASE	I86	STRINGOP	not-decoded	-	-	-	2	no clause for opcode A6 (decode.ml:1335)	no	-	0	0	0	equality	family,sweep
+REPE_CMPSQ	REPE_CMPSQ	LONGMODE	LONGMODE	STRINGOP	not-decoded	-	-	-	1	no clause for opcode A7 (decode.ml:1335)	no	-	0	0	0	equality	family,sweep
+REPE_SCASQ	REPE_SCASQ	LONGMODE	LONGMODE	STRINGOP	not-decoded	-	-	-	1	no clause for opcode AF (decode.ml:1335)	no	-	0	0	0	equality	family,sweep
+REPNE_CMPSB	REPNE_CMPSB	BASE	I86	STRINGOP	not-decoded	-	-	-	2	no clause for opcode A6 (decode.ml:1335)	no	-	0	0	0	equality	family,sweep
+REPNE_SCASB	REPNE_SCASB	BASE	I86	STRINGOP	not-decoded	-	-	-	2	no clause for opcode AE (decode.ml:1335)	no	-	0	0	0	equality	family,sweep
+REP_MOVSB	REP_MOVSB	BASE	I86	STRINGOP	decoded	o32|F3 o64|F3	o32|F2 o64|F2	F2 A4 is decoded as REP MOVSB; the manuals define REPNE only for CMPS and SCAS (upstream cosimulates it, simulator.ml:2050) (decode.ml:684)	8	66 or segment prefix on MOVSB (decode.ml:685)	yes	REPNE_MOVSB,REP_MOVSB	0	0	0	copy	family,harness,sweep
+REP_MOVSD	REP_MOVSD	BASE	I386	STRINGOP	not-decoded	-	-	-	2	no clause for opcode A5 (decode.ml:1335)	no	-	0	0	0	copy	family,sweep
+REP_MOVSQ	REP_MOVSQ	LONGMODE	LONGMODE	STRINGOP	not-decoded	-	-	-	2	no clause for opcode A5 (decode.ml:1335)	no	-	0	0	0	copy	family,sweep
+REP_MOVSW	REP_MOVSW	BASE	I86	STRINGOP	not-decoded	-	-	-	1	no clause for opcode A5 (decode.ml:1335)	no	-	0	0	0	copy	family
+REP_STOSB	REP_STOSB	BASE	I86	STRINGOP	not-decoded	-	-	-	4	no clause for opcode AA (decode.ml:1335)	no	-	0	0	0	zero	family,sweep
+REP_STOSD	REP_STOSD	BASE	I386	STRINGOP	not-decoded	-	-	-	2	no clause for opcode AB (decode.ml:1335)	no	-	3	2	0	zero	family,sweep,target
+REP_STOSQ	REP_STOSQ	LONGMODE	LONGMODE	STRINGOP	not-decoded	-	-	-	2	no clause for opcode AB (decode.ml:1335)	no	-	0	0	0	zero	family,sweep
+REP_STOSW	REP_STOSW	BASE	I86	STRINGOP	not-decoded	-	-	-	1	no clause for opcode AB (decode.ml:1335)	no	-	0	0	0	zero	family
+RET_NEAR	RET_NEAR	BASE	I86	RET	decoded	o64|-	-	-	17	prefix on RET (decode.ml:701)	yes	RET	170	139	5	control	family,harness,sweep,target
+RET_NEAR_IMMw	RET_NEAR	BASE	I86	RET	not-decoded	-	-	-	4	no clause for opcode C2 (decode.ml:1335)	no	-	0	0	0	control	family,sweep
+ROL_GPR8_CL	ROL	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	ROL8_CL	0	0	0	-	sweep,upstream
+ROL_GPR8_IMMb	ROL	BASE	I186	ROTATE	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	ROL8	0	0	0	-	sweep,upstream
+ROL_GPR8_ONE	ROL	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	ROL8_1	0	0	0	-	sweep,upstream
+ROL_GPRv_CL	ROL	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	ROL32_CL,ROL64_CL	0	1	0	-	sweep,target,upstream
+ROL_GPRv_IMMb	ROL	BASE	I186	ROTATE	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	ROL16,ROL32,ROL64	0	0	0	hashing	family,sweep,upstream
+ROL_GPRv_ONE	ROL	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	ROL32_1,ROL64_1	0	0	0	-	sweep,upstream
+ROL_MEMb_CL	ROL	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	ROL8_CL	0	0	0	-	sweep,upstream
+ROL_MEMb_IMMb	ROL	BASE	I186	ROTATE	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	ROL8	0	0	0	-	sweep,upstream
+ROL_MEMb_ONE	ROL	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	ROL8_1	0	0	0	-	sweep,upstream
+ROL_MEMv_CL	ROL	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	ROL32_CL,ROL64_CL	0	0	0	-	sweep,upstream
+ROL_MEMv_IMMb	ROL	BASE	I186	ROTATE	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	ROL16,ROL32,ROL64	0	0	0	-	sweep,upstream
+ROL_MEMv_ONE	ROL	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	ROL32_1,ROL64_1	0	0	0	-	sweep,upstream
+RORX_GPR32d_GPR32d_IMMb	RORX	BMI2	BMI2	BMI2	not-decoded	-	-	-	1	no clause for VEX.0F3A.L0.F0 (decode.ml:1300)	no	-	0	0	0	bmi	family,sweep
+RORX_GPR64q_GPR64q_IMMb	RORX	BMI2	BMI2	BMI2	not-decoded	-	-	-	1	no clause for VEX.0F3A.L0.F0 (decode.ml:1300)	no	-	0	0	0	bmi	family
+ROR_GPR8_CL	ROR	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	ROR8_CL	0	0	0	-	sweep,upstream
+ROR_GPR8_IMMb	ROR	BASE	I186	ROTATE	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	ROR8	0	0	0	-	sweep,upstream
+ROR_GPR8_ONE	ROR	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	ROR8_1	0	0	0	-	sweep,upstream
+ROR_GPRv_CL	ROR	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	ROR32_CL,ROR64_CL	0	0	0	hashing	family,sweep,upstream
+ROR_GPRv_IMMb	ROR	BASE	I186	ROTATE	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	ROR16,ROR32,ROR64	0	0	0	-	sweep,upstream
+ROR_GPRv_ONE	ROR	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	ROR32_1,ROR64_1	0	0	0	-	sweep,upstream
+ROR_MEMb_CL	ROR	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	ROR8_CL	0	0	0	-	sweep,upstream
+ROR_MEMb_IMMb	ROR	BASE	I186	ROTATE	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	ROR8	0	0	0	-	sweep,upstream
+ROR_MEMb_ONE	ROR	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	ROR8_1	0	0	0	-	sweep,upstream
+ROR_MEMv_CL	ROR	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	ROR32_CL,ROR64_CL	0	0	0	-	sweep,upstream
+ROR_MEMv_IMMb	ROR	BASE	I186	ROTATE	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	ROR16,ROR32,ROR64	0	0	0	-	sweep,upstream
+ROR_MEMv_ONE	ROR	BASE	I86	ROTATE	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	ROR32_1,ROR64_1	0	0	0	-	sweep,upstream
+SAHF	SAHF	BASE	LAHF	FLAGOP	not-decoded	-	-	-	8	no clause for opcode 9E (decode.ml:1335)	no	-	0	0	0	integer	family,sweep
+SARX_GPR64q_GPR64q_GPR64q	SARX	BMI2	BMI2	BMI2	not-decoded	-	-	-	1	no clause for VEX.0F38.L0.F7 (decode.ml:862)	no	-	0	0	0	bmi	family
+SAR_GPR8_CL	SAR	BASE	I86	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	SAR8_CL	0	0	0	-	sweep,upstream
+SAR_GPR8_IMMb	SAR	BASE	I186	SHIFT	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	SAR8	0	0	0	-	sweep,upstream
+SAR_GPR8_ONE	SAR	BASE	I86	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	SAR8_1	0	0	0	-	sweep,upstream
+SAR_GPRv_CL	SAR	BASE	I86	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	SAR32_CL,SAR64_CL	0	0	0	-	sweep,upstream
+SAR_GPRv_IMMb	SAR	BASE	I186	SHIFT	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	SAR16,SAR32,SAR64	2	3	0	integer	family,sweep,target,upstream
+SAR_GPRv_ONE	SAR	BASE	I86	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	SAR32_1,SAR64_1	1	1	0	-	sweep,target,upstream
+SAR_MEMb_CL	SAR	BASE	I86	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	SAR8_CL	0	0	0	-	sweep,upstream
+SAR_MEMb_IMMb	SAR	BASE	I186	SHIFT	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	SAR8	0	0	0	-	sweep,upstream
+SAR_MEMb_ONE	SAR	BASE	I86	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	SAR8_1	0	0	0	-	sweep,upstream
+SAR_MEMv_CL	SAR	BASE	I86	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	SAR32_CL,SAR64_CL	0	0	0	-	sweep,upstream
+SAR_MEMv_IMMb	SAR	BASE	I186	SHIFT	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	SAR16,SAR32,SAR64	0	0	0	-	sweep,upstream
+SAR_MEMv_ONE	SAR	BASE	I86	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	SAR32_1,SAR64_1	0	0	0	-	sweep,upstream
+SBB_AL_IMMb	SBB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU acc,imm (decode.ml:326)	yes	SBB8	0	0	0	-	sweep,upstream
+SBB_GPR8_GPR8_18	SBB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	SBB8	0	0	0	-	sweep,upstream
+SBB_GPR8_GPR8_1A	SBB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	SBB8	0	0	0	-	sweep,upstream
+SBB_GPR8_IMMb_80r3	SBB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	SBB8	0	0	0	-	sweep,upstream
+SBB_GPR8_MEMb	SBB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	SBB8	0	0	0	-	sweep,upstream
+SBB_GPRv_GPRv_19	SBB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	SBB16,SBB32,SBB64	2	2	0	-	sweep,target,upstream
+SBB_GPRv_GPRv_1B	SBB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	SBB16,SBB32,SBB64	0	0	0	-	sweep,upstream
+SBB_GPRv_IMMb	SBB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm8 (decode.ml:650)	yes	SBB16,SBB32,SBB64	0	0	0	-	sweep,upstream
+SBB_GPRv_IMMz	SBB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	SBB16,SBB32,SBB64	0	0	0	-	sweep,upstream
+SBB_GPRv_MEMv	SBB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	SBB16,SBB32,SBB64	0	0	0	-	sweep,upstream
+SBB_MEMb_GPR8	SBB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	SBB8	0	0	0	-	sweep,upstream
+SBB_MEMb_IMMb_80r3	SBB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	SBB8	0	0	0	-	sweep,upstream
+SBB_MEMv_GPRv	SBB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	SBB16,SBB32,SBB64	0	0	0	-	sweep,upstream
+SBB_MEMv_IMMb	SBB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm8 (decode.ml:650)	yes	SBB16,SBB32,SBB64	0	0	0	-	sweep,upstream
+SBB_MEMv_IMMz	SBB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	SBB16,SBB32,SBB64	0	0	0	-	sweep,upstream
+SBB_OrAX_IMMz	SBB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU acc,imm (decode.ml:326)	yes	SBB16,SBB32,SBB64	0	0	0	-	sweep,upstream
+SCASB	SCASB	BASE	I86	STRINGOP	not-decoded	-	-	-	4	no clause for opcode AE (decode.ml:1335)	no	-	0	0	0	equality	family,sweep
+SETBE_GPR8	SETBE	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETBE	6	5	2	-	sweep,target,upstream
+SETBE_MEMb	SETBE	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETBE	0	0	0	-	sweep,upstream
+SETB_GPR8	SETB	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETB	10	10	32	-	sweep,target,upstream
+SETB_MEMb	SETB	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETB	0	0	0	-	sweep,upstream
+SETLE_GPR8	SETLE	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETLE	0	0	0	-	sweep,upstream
+SETLE_MEMb	SETLE	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETLE	0	0	0	-	sweep,upstream
+SETL_GPR8	SETL	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETL	0	0	0	-	sweep,upstream
+SETL_MEMb	SETL	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETL	0	0	0	-	sweep,upstream
+SETNBE_GPR8	SETNBE	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETNBE	12	18	0	-	sweep,target,upstream
+SETNBE_MEMb	SETNBE	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETNBE	4	4	0	-	sweep,target,upstream
+SETNB_GPR8	SETNB	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETNB	4	5	0	-	sweep,target,upstream
+SETNB_MEMb	SETNB	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETNB	0	0	0	-	sweep,upstream
+SETNLE_GPR8	SETNLE	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETNLE	0	0	0	-	sweep,upstream
+SETNLE_MEMb	SETNLE	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETNLE	0	0	0	-	sweep,upstream
+SETNL_GPR8	SETNL	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETNL	0	0	0	-	sweep,upstream
+SETNL_MEMb	SETNL	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETNL	0	0	0	-	sweep,upstream
+SETNO_GPR8	SETNO	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETNO	0	0	0	-	sweep,upstream
+SETNO_MEMb	SETNO	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETNO	0	0	0	-	sweep,upstream
+SETNP_GPR8	SETNP	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETNP	0	0	0	-	sweep,upstream
+SETNP_MEMb	SETNP	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETNP	0	0	0	-	sweep,upstream
+SETNS_GPR8	SETNS	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETNS	0	0	0	-	sweep,upstream
+SETNS_MEMb	SETNS	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETNS	0	0	0	-	sweep,upstream
+SETNZ_GPR8	SETNZ	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETNZ	21	40	1	-	sweep,target,upstream
+SETNZ_MEMb	SETNZ	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETNZ	4	5	0	-	sweep,target,upstream
+SETO_GPR8	SETO	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETO	0	0	0	-	sweep,upstream
+SETO_MEMb	SETO	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETO	0	0	0	-	sweep,upstream
+SETP_GPR8	SETP	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETP	0	0	0	-	sweep,upstream
+SETP_MEMb	SETP	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETP	0	0	0	-	sweep,upstream
+SETS_GPR8	SETS	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETS	0	0	0	-	sweep,upstream
+SETS_MEMb	SETS	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETS	0	0	0	-	sweep,upstream
+SETZ_GPR8	SETZ	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETZ	76	86	37	control	family,sweep,target,upstream
+SETZ_MEMb	SETZ	BASE	I386	SETCC	decoded	o32|- o64|-	-	-	34	prefix on SETcc (decode.ml:524)	yes	SETZ	5	5	0	-	sweep,target,upstream
+SFENCE	SFENCE	SSE	SSE	MISC	not-decoded	-	-	-	2	no clause for 0F AE (decode.ml:625)	no	-	0	0	0	control	family,sweep
+SHA1RNDS4_XMMi32_XMMi32_IMM8_SHA	SHA1RNDS4	SHA	SHA	SHA	not-decoded	-	-	-	2	no clause for 0F 3A CC (decode.ml:436)	no	-	0	0	0	hashing	family,sweep
+SHA256MSG1_XMMi32_XMMi32_SHA	SHA256MSG1	SHA	SHA	SHA	not-decoded	-	-	-	2	no clause for 0F 38 CC (decode.ml:408)	no	-	0	0	0	hashing	family,sweep
+SHA256RNDS2_XMMi32_XMMi32_SHA	SHA256RNDS2	SHA	SHA	SHA	not-decoded	-	-	-	2	no clause for 0F 38 CB (decode.ml:408)	no	-	0	0	0	hashing	family,sweep
+SHLD_GPRv_GPRv_CL	SHLD	BASE	I386	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on SHLD/SHRD CL (decode.ml:538)	yes	SHLD32_CL,SHLD64_CL	0	0	0	-	sweep,upstream
+SHLD_GPRv_GPRv_IMMb	SHLD	BASE	I386	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on SHLD/SHRD imm8 (decode.ml:533)	yes	SHLD32,SHLD64	0	0	0	integer	family,sweep,upstream
+SHLD_MEMv_GPRv_CL	SHLD	BASE	I386	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on SHLD/SHRD CL (decode.ml:538)	yes	SHLD32_CL,SHLD64_CL	0	0	0	-	sweep,upstream
+SHLD_MEMv_GPRv_IMMb	SHLD	BASE	I386	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on SHLD/SHRD imm8 (decode.ml:533)	yes	SHLD32,SHLD64	0	0	0	-	sweep,upstream
+SHLX_GPR32d_MEMd_GPR32d	SHLX	BMI2	BMI2	BMI2	not-decoded	-	-	-	1	no clause for VEX.0F38.L0.F7 (decode.ml:862)	no	-	2	2	0	bmi	family,sweep,target
+SHLX_GPR64q_GPR64q_GPR64q	SHLX	BMI2	BMI2	BMI2	not-decoded	-	-	-	1	no clause for VEX.0F38.L0.F7 (decode.ml:862)	no	-	24	16	0	bmi	family,target
+SHL_GPR8_CL_D2r4	SHL	BASE	I86	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	SHL8_CL	0	0	0	-	sweep,upstream
+SHL_GPR8_IMMb_C0r4	SHL	BASE	I186	SHIFT	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	SHL8	0	0	0	-	sweep,upstream
+SHL_GPR8_ONE_D0r4	SHL	BASE	I86	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	SHL8_1	0	0	0	-	sweep,upstream
+SHL_GPRv_CL_D3r4	SHL	BASE	I86	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	SHL32_CL,SHL64_CL	0	0	0	-	sweep,upstream
+SHL_GPRv_IMMb_C1r4	SHL	BASE	I186	SHIFT	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	SHL16,SHL32,SHL64	560	616	54	-	sweep,target,upstream
+SHL_GPRv_ONE_D1r4	SHL	BASE	I86	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	SHL32_1,SHL64_1	0	0	0	-	sweep,upstream
+SHL_MEMb_CL_D2r4	SHL	BASE	I86	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	SHL8_CL	0	0	0	-	sweep,upstream
+SHL_MEMb_IMMb_C0r4	SHL	BASE	I186	SHIFT	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	SHL8	0	0	0	-	sweep,upstream
+SHL_MEMb_ONE_D0r4	SHL	BASE	I86	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	SHL8_1	0	0	0	-	sweep,upstream
+SHL_MEMv_CL_D3r4	SHL	BASE	I86	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	SHL32_CL,SHL64_CL	0	0	0	-	sweep,upstream
+SHL_MEMv_IMMb_C1r4	SHL	BASE	I186	SHIFT	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	SHL16,SHL32,SHL64	0	0	0	-	sweep,upstream
+SHL_MEMv_ONE_D1r4	SHL	BASE	I86	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	SHL32_1,SHL64_1	0	0	0	-	sweep,upstream
+SHRD_GPRv_GPRv_CL	SHRD	BASE	I386	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on SHLD/SHRD CL (decode.ml:538)	yes	SHRD32_CL,SHRD64_CL	0	0	0	integer	family,sweep,upstream
+SHRD_GPRv_GPRv_IMMb	SHRD	BASE	I386	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on SHLD/SHRD imm8 (decode.ml:533)	yes	SHRD32,SHRD64	0	0	0	-	sweep,upstream
+SHRD_MEMv_GPRv_CL	SHRD	BASE	I386	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on SHLD/SHRD CL (decode.ml:538)	yes	SHRD32_CL,SHRD64_CL	0	0	0	-	sweep,upstream
+SHRD_MEMv_GPRv_IMMb	SHRD	BASE	I386	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on SHLD/SHRD imm8 (decode.ml:533)	yes	SHRD32,SHRD64	0	0	0	-	sweep,upstream
+SHRX_GPR32d_GPR32d_GPR32d	SHRX	BMI2	BMI2	BMI2	not-decoded	-	-	-	1	no clause for VEX.0F38.L0.F7 (decode.ml:862)	no	-	0	0	0	bmi	family,sweep
+SHRX_GPR64q_GPR64q_GPR64q	SHRX	BMI2	BMI2	BMI2	not-decoded	-	-	-	1	no clause for VEX.0F38.L0.F7 (decode.ml:862)	no	-	0	0	0	bmi	family
+SHR_GPR8_CL	SHR	BASE	I86	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	SHR8_CL	0	0	0	-	sweep,upstream
+SHR_GPR8_IMMb	SHR	BASE	I186	SHIFT	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	SHR8	1	1	0	-	sweep,target,upstream
+SHR_GPR8_ONE	SHR	BASE	I86	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	SHR8_1	4	0	0	-	sweep,target,upstream
+SHR_GPRv_CL	SHR	BASE	I86	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	SHR32_CL,SHR64_CL	0	0	0	-	sweep,upstream
+SHR_GPRv_IMMb	SHR	BASE	I186	SHIFT	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	SHR16,SHR32,SHR64	43	40	40	-	sweep,target,upstream
+SHR_GPRv_ONE	SHR	BASE	I86	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	SHR32_1,SHR64_1	3	5	0	-	sweep,target,upstream
+SHR_MEMb_CL	SHR	BASE	I86	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	SHR8_CL	0	0	0	-	sweep,upstream
+SHR_MEMb_IMMb	SHR	BASE	I186	SHIFT	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	SHR8	0	0	0	-	sweep,upstream
+SHR_MEMb_ONE	SHR	BASE	I86	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	SHR8_1	0	0	0	-	sweep,upstream
+SHR_MEMv_CL	SHR	BASE	I86	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	SHR32_CL,SHR64_CL	0	0	0	-	sweep,upstream
+SHR_MEMv_IMMb	SHR	BASE	I186	SHIFT	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on shift r/m,imm8 (decode.ml:695)	yes	SHR16,SHR32,SHR64	0	0	0	-	sweep,upstream
+SHR_MEMv_ONE	SHR	BASE	I86	SHIFT	decoded	o32|- o64|-	-	-	34	prefix on shift r/m,1 or CL (decode.ml:1309)	yes	SHR32_1,SHR64_1	0	0	0	-	sweep,upstream
+STC	STC	BASE	I86	FLAGOP	decoded	o32|- o64|-	-	-	34	prefix on flag instruction (decode.ml:1321)	yes	STCF	0	0	0	integer	family,sweep,upstream
+STD	STD	BASE	I86	FLAGOP	decoded	o32|- o64|-	-	-	34	prefix on flag instruction (decode.ml:1321)	yes	STD	0	0	0	integer	family,sweep,upstream
+STOSB	STOSB	BASE	I86	STRINGOP	not-decoded	-	-	-	4	no clause for opcode AA (decode.ml:1335)	no	-	0	0	0	zero	family,sweep
+STOSQ	STOSQ	LONGMODE	LONGMODE	STRINGOP	not-decoded	-	-	-	2	no clause for opcode AB (decode.ml:1335)	no	-	0	0	0	zero	family,sweep
+SUB_AL_IMMb	SUB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU acc,imm (decode.ml:326)	yes	SUB8	0	0	0	-	sweep,upstream
+SUB_GPR8_GPR8_28	SUB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	SUB8	0	0	0	-	sweep,upstream
+SUB_GPR8_GPR8_2A	SUB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	SUB8	0	0	0	-	sweep,upstream
+SUB_GPR8_IMMb_80r5	SUB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	SUB8	0	0	0	-	sweep,upstream
+SUB_GPR8_MEMb	SUB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	SUB8	0	0	0	-	sweep,upstream
+SUB_GPRv_GPRv_29	SUB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	SUB16,SUB32,SUB64	32	182	19	-	sweep,target,upstream
+SUB_GPRv_GPRv_2B	SUB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	SUB16,SUB32,SUB64	0	0	0	-	sweep,upstream
+SUB_GPRv_IMMb	SUB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm8 (decode.ml:650)	yes	SUB16,SUB32,SUB64	122	107	133	-	sweep,target,upstream
+SUB_GPRv_IMMz	SUB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	SUB16,SUB32,SUB64	33	35	0	-	sweep,target,upstream
+SUB_GPRv_MEMv	SUB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	SUB16,SUB32,SUB64	67	54	168	integer	family,sweep,target,upstream
+SUB_MEMb_GPR8	SUB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	SUB8	0	0	0	-	sweep,upstream
+SUB_MEMb_IMMb_80r5	SUB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	SUB8	0	0	0	-	sweep,upstream
+SUB_MEMv_GPRv	SUB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	SUB16,SUB32,SUB64	0	0	0	-	sweep,upstream
+SUB_MEMv_IMMb	SUB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm8 (decode.ml:650)	yes	SUB16,SUB32,SUB64	0	0	0	-	sweep,upstream
+SUB_MEMv_IMMz	SUB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	SUB16,SUB32,SUB64	0	0	0	-	sweep,upstream
+SUB_OrAX_IMMz	SUB	BASE	I86	BINARY	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU acc,imm (decode.ml:326)	yes	SUB16,SUB32,SUB64	0	0	0	-	sweep,upstream
+SYSCALL	SYSCALL	LONGMODE	LONGMODE	SYSCALL	not-decoded	-	-	-	4	no clause for 0F 05 (decode.ml:625)	no	-	0	0	0	control	family,sweep
+TEST_AL_IMMb	TEST	BASE	I86	LOGICAL	decoded	o32|- o64|-	-	-	34	prefix on TEST acc,imm (decode.ml:686)	yes	TEST8	12	4	0	-	sweep,target,upstream
+TEST_GPR8_GPR8	TEST	BASE	I86	LOGICAL	decoded	o32|- o64|-	-	-	34	prefix on TEST r/m,r (decode.ml:655)	yes	TEST8	229	217	0	-	sweep,target,upstream
+TEST_GPR8_IMMb_F6r0	TEST	BASE	I86	LOGICAL	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	TEST8	15	23	0	-	sweep,target,upstream
+TEST_GPRv_GPRv	TEST	BASE	I86	LOGICAL	decoded	o32|- o64|-	-	-	34	prefix on TEST r/m,r (decode.ml:655)	yes	TEST32,TEST64	818	905	66	integer	family,sweep,target,upstream
+TEST_GPRv_IMMz_F7r0	TEST	BASE	I86	LOGICAL	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	TEST32,TEST64	0	0	0	-	sweep,upstream
+TEST_MEMb_GPR8	TEST	BASE	I86	LOGICAL	decoded	o32|- o64|-	-	-	34	prefix on TEST r/m,r (decode.ml:655)	yes	TEST8	0	0	0	-	sweep,upstream
+TEST_MEMb_IMMb_F6r0	TEST	BASE	I86	LOGICAL	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	TEST8	43	64	0	-	sweep,target,upstream
+TEST_MEMv_GPRv	TEST	BASE	I86	LOGICAL	decoded	o32|- o64|-	-	-	34	prefix on TEST r/m,r (decode.ml:655)	yes	TEST32,TEST64	0	0	0	-	sweep,upstream
+TEST_MEMv_IMMz_F7r0	TEST	BASE	I86	LOGICAL	decoded	o32|- o64|-	-	-	34	prefix on F6/F7/FE/FF group (decode.ml:1331)	yes	TEST32,TEST64	1	1	0	-	sweep,target,upstream
+TEST_OrAX_IMMz	TEST	BASE	I86	LOGICAL	decoded	o32|- o64|-	-	-	34	prefix on TEST acc,imm (decode.ml:686)	yes	TEST32,TEST64	0	7	0	-	sweep,target,upstream
+TZCNT_GPRv_GPRv	TZCNT	BMI1	BMI1	BMI1	caveat	-	o32|F3 o64|F3	decoded whatever CPUID says: without BMI1 the bytes run as BSF (decode.ml:565)	6	0F BC with a prefix other than one F3 (decode.ml:566)	no	TZCNT32,TZCNT64	4	3	0	bitscan	family,sweep,target,upstream
+TZCNT_GPRv_MEMv	TZCNT	BMI1	BMI1	BMI1	caveat	-	o32|F3 o64|F3	decoded whatever CPUID says: without BMI1 the bytes run as BSF (decode.ml:565)	6	0F BC with a prefix other than one F3 (decode.ml:566)	no	TZCNT32,TZCNT64	0	0	0	bitscan	family,sweep,upstream
+UD2	UD2	BASE	PPRO	MISC	not-decoded	-	-	-	8	no clause for 0F 0B (decode.ml:625)	no	-	0	0	0	control	family,sweep
+VAESENC_XMMdq_XMMdq_XMMdq	VAESENC	AVXAES	AVXAES	AES	not-decoded	-	-	-	1	no clause for VEX.0F38.L0.DC (decode.ml:862)	no	-	0	0	0	hashing	family,sweep
+VAESENC_YMMu128_YMMu128_YMMu128	VAESENC	VAES	VAES	VAES	not-decoded	-	-	-	1	no clause for VEX.0F38.L1.DC (decode.ml:862)	no	-	0	0	0	hashing	family,sweep
+VANDPS_YMMqq_YMMqq_YMMqq	VANDPS	AVX	AVX	LOGICAL_FP	not-decoded	-	-	-	1	no clause for VEX.0F.L1.54 (decode.ml:1176)	no	-	0	0	0	equality	family,sweep
+VCVTSI2SD_XMMdq_XMMdq_GPR64q	VCVTSI2SD	AVX	AVX	CONVERT	not-decoded	-	-	-	1	no clause for VEX.0F.L0.2A (decode.ml:1176)	no	-	0	2	0	-	target
+VCVTSI2SD_XMMdq_XMMdq_MEMq	VCVTSI2SD	AVX	AVX	CONVERT	not-decoded	-	-	-	1	no clause for VEX.0F.L0.2A (decode.ml:1176)	no	-	2	4	0	-	target
+VEXTRACTI128_MEMdq_YMMqq_IMMb	VEXTRACTI128	AVX2	AVX2	AVX2	decoded	v1l1w0|-	-	-	0	-	yes	VEXTRACTI128	0	0	0	copy	family,sweep,upstream
+VEXTRACTI128_XMMdq_YMMqq_IMMb	VEXTRACTI128	AVX2	AVX2	AVX2	decoded	v1l1w0|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VEXTRACTI128	0	0	0	-	sweep,upstream
+VFMADD132SD_XMMdq_XMMq_MEMq	VFMADD132SD	FMA	FMA	VFMA	not-decoded	-	-	-	1	no clause for VEX.0F38.L0.99 (decode.ml:862)	no	-	1	3	0	-	target
+VINSERTI128_YMMqq_YMMqq_MEMdq_IMMb	VINSERTI128	AVX2	AVX2	AVX2	decoded	v1l1w0|-	-	-	0	-	yes	VINSERTI128	0	0	0	copy	family,sweep,upstream
+VINSERTI128_YMMqq_YMMqq_XMMdq_IMMb	VINSERTI128	AVX2	AVX2	AVX2	decoded	v1l1w0|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VINSERTI128	0	0	0	-	sweep,upstream
+VINSERTI64X2_YMMu64_MASKmskw_YMMu64_MEMu64_IMM8_AVX512	VINSERTI64X2	AVX512EVEX	AVX512DQ_256	AVX512	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	2	0	-	target
+VINSERTI64X4_ZMMu64_MASKmskw_ZMMu64_YMMu64_IMM8_AVX512	VINSERTI64X4	AVX512EVEX	AVX512F_512	AVX512	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	1	0	-	target
+VLDDQU_YMMqq_MEMqq	VLDDQU	AVX	AVX	AVX	not-decoded	-	-	-	1	no clause for VEX.0F.L1.F0 (decode.ml:1176)	no	-	0	0	0	copy	family,sweep
+VMOVAPS_YMMqq_MEMqq	VMOVAPS	AVX	AVX	DATAXFER	not-decoded	-	-	-	1	no clause for VEX.0F.L1.28 (decode.ml:1176)	no	-	0	0	0	copy	family,sweep
+VMOVDQA64_ZMMu64_MASKmskw_MEMu64_AVX512	VMOVDQA64	AVX512EVEX	AVX512F_512	DATAXFER	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	0	0	copy	family
+VMOVDQA_MEMdq_XMMdq	VMOVDQA	AVX	AVX	DATAXFER	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VMOVDQA	33	21	0	-	sweep,target,upstream
+VMOVDQA_MEMqq_YMMqq	VMOVDQA	AVX	AVX	DATAXFER	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VMOVDQA	0	2	0	copy	family,sweep,target,upstream
+VMOVDQA_XMMdq_MEMdq	VMOVDQA	AVX	AVX	DATAXFER	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VMOVDQA	5	5	0	-	sweep,target,upstream
+VMOVDQA_XMMdq_XMMdq_6F	VMOVDQA	AVX	AVX	DATAXFER	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VMOVDQA	5	3	0	-	sweep,target,upstream
+VMOVDQA_XMMdq_XMMdq_7F	VMOVDQA	AVX	AVX	DATAXFER	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VMOVDQA	0	0	0	-	sweep,upstream
+VMOVDQA_YMMqq_MEMqq	VMOVDQA	AVX	AVX	DATAXFER	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VMOVDQA	0	0	0	copy	family,sweep,upstream
+VMOVDQA_YMMqq_YMMqq_6F	VMOVDQA	AVX	AVX	DATAXFER	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VMOVDQA	0	0	0	-	sweep,upstream
+VMOVDQA_YMMqq_YMMqq_7F	VMOVDQA	AVX	AVX	DATAXFER	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VMOVDQA	0	0	0	-	sweep,upstream
+VMOVDQU32_ZMMu32_MASKmskw_MEMu32_AVX512	VMOVDQU32	AVX512EVEX	AVX512F_512	DATAXFER	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	0	0	copy	family
+VMOVDQU64_MEMu64_MASKmskw_ZMMu64_AVX512	VMOVDQU64	AVX512EVEX	AVX512F_512	DATAXFER	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	9	0	copy	family,target
+VMOVDQU64_ZMMu64_MASKmskw_MEMu64_AVX512	VMOVDQU64	AVX512EVEX	AVX512F_512	DATAXFER	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	9	0	copy	family,target
+VMOVDQU8_MEMu8_MASKmskw_XMMu8_AVX512	VMOVDQU8	AVX512EVEX	AVX512BW_128	DATAXFER	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	6	48	0	-	target
+VMOVDQU8_MEMu8_MASKmskw_YMMu8_AVX512	VMOVDQU8	AVX512EVEX	AVX512BW_256	DATAXFER	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	16	23	0	-	target
+VMOVDQU8_MEMu8_MASKmskw_ZMMu8_AVX512	VMOVDQU8	AVX512EVEX	AVX512BW_512	DATAXFER	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	32	141	0	copy	family,target
+VMOVDQU8_YMMu8_MASKmskw_MEMu8_AVX512	VMOVDQU8	AVX512EVEX	AVX512BW_256	DATAXFER	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	0	0	copy	family
+VMOVDQU8_ZMMu8_MASKmskw_MEMu8_AVX512	VMOVDQU8	AVX512EVEX	AVX512BW_512	DATAXFER	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	0	0	copy	family
+VMOVDQU_MEMdq_XMMdq	VMOVDQU	AVX	AVX	DATAXFER	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VMOVDQU	3	4	0	copy	family,sweep,target,upstream
+VMOVDQU_MEMqq_YMMqq	VMOVDQU	AVX	AVX	DATAXFER	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VMOVDQU	1	67	0	copy	family,sweep,target,upstream
+VMOVDQU_XMMdq_MEMdq	VMOVDQU	AVX	AVX	DATAXFER	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VMOVDQU	0	2	0	copy	family,sweep,target,upstream
+VMOVDQU_XMMdq_XMMdq_6F	VMOVDQU	AVX	AVX	DATAXFER	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VMOVDQU	0	0	0	-	sweep,upstream
+VMOVDQU_XMMdq_XMMdq_7F	VMOVDQU	AVX	AVX	DATAXFER	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VMOVDQU	0	0	0	-	sweep,upstream
+VMOVDQU_YMMqq_MEMqq	VMOVDQU	AVX	AVX	DATAXFER	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VMOVDQU	1	67	0	copy	family,sweep,target,upstream
+VMOVDQU_YMMqq_YMMqq_6F	VMOVDQU	AVX	AVX	DATAXFER	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VMOVDQU	0	0	0	copy	family,sweep,upstream
+VMOVDQU_YMMqq_YMMqq_7F	VMOVDQU	AVX	AVX	DATAXFER	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VMOVDQU	0	0	0	-	sweep,upstream
+VMOVD_GPR32d_XMMd	VMOVD	AVX	AVX	DATAXFER	decoded	v1l0w0|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VMOVD_from_xmm	23	27	0	-	sweep,target,upstream
+VMOVD_MEMd_XMMd	VMOVD	AVX	AVX	DATAXFER	decoded	v1l0w0|-	-	-	0	-	yes	VMOVD_from_xmm	18	10	0	-	sweep,target,upstream
+VMOVD_XMMdq_GPR32d	VMOVD	AVX	AVX	DATAXFER	decoded	v1l0w0|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VMOVD_to_xmm	5	5	0	-	sweep,target,upstream
+VMOVD_XMMdq_MEMd	VMOVD	AVX	AVX	DATAXFER	decoded	v1l0w0|-	-	-	0	-	yes	VMOVD_to_xmm	29	11	0	copy	family,sweep,target,upstream
+VMOVHPD_MEMq_XMMdq	VMOVHPD	AVX	AVX	DATAXFER	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VMOVHPD	0	0	0	-	sweep,upstream
+VMOVMSKPS_GPR32d_YMMqq	VMOVMSKPS	AVX	AVX	DATAXFER	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VMOVMSKPS	0	0	0	equality	family,sweep,upstream
+VMOVNTDQA_YMMqq_MEMqq	VMOVNTDQA	AVX2	AVX2	DATAXFER	not-decoded	-	-	-	1	no clause for VEX.0F38.L1.2A (decode.ml:862)	no	-	0	0	0	copy	family,sweep
+VMOVNTDQ_MEMqq_YMMqq	VMOVNTDQ	AVX	AVX	DATAXFER	not-decoded	-	-	-	1	no clause for VEX.0F.L1.E7 (decode.ml:1176)	no	-	0	0	0	copy	family,sweep
+VMOVQ_GPR64q_XMMq	VMOVQ	AVX	AVX	DATAXFER	decoded	v1l0w1|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VMOVQ_from_xmm	72	91	0	-	sweep,target,upstream
+VMOVQ_MEMq_XMMq_7E	VMOVQ	AVX	AVX	DATAXFER	decoded	v1l0w1|-	-	-	0	-	yes	VMOVQ_from_xmm	0	0	0	-	sweep,upstream
+VMOVQ_MEMq_XMMq_D6	VMOVQ	AVX	AVX	DATAXFER	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VMOVQ_store	6	5	0	copy	family,sweep,target,upstream
+VMOVQ_XMMdq_GPR64q	VMOVQ	AVX	AVX	DATAXFER	decoded	v1l0w1|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VMOVQ_to_xmm	29	43	0	-	sweep,target,upstream
+VMOVQ_XMMdq_MEMq_6E	VMOVQ	AVX	AVX	DATAXFER	decoded	v1l0w1|-	-	-	0	-	yes	VMOVQ_to_xmm	0	0	0	-	sweep,upstream
+VMOVQ_XMMdq_MEMq_7E	VMOVQ	AVX	AVX	DATAXFER	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VMOVQ_xmm_load	22	21	0	copy	family,sweep,target,upstream
+VMOVQ_XMMdq_XMMq_7E	VMOVQ	AVX	AVX	DATAXFER	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VMOVQ_xmm_load	0	0	0	-	sweep,upstream
+VMOVQ_XMMdq_XMMq_D6	VMOVQ	AVX	AVX	DATAXFER	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VMOVQ_store	0	0	0	-	sweep,upstream
+VMOVSD_MEMq_XMMq	VMOVSD	AVX	AVX	DATAXFER	not-decoded	-	-	-	2	no clause for VEX.0F.L0.11 (decode.ml:1176)	no	-	1	2	0	-	sweep,target
+VMOVSHDUP_XMMdq_MEMdq	VMOVSHDUP	AVX	AVX	DATAXFER	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VMOVSHDUP	0	0	0	-	sweep,upstream
+VMOVSHDUP_XMMdq_XMMdq	VMOVSHDUP	AVX	AVX	DATAXFER	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VMOVSHDUP	0	0	0	-	sweep,upstream
+VMOVSHDUP_YMMqq_MEMqq	VMOVSHDUP	AVX	AVX	DATAXFER	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VMOVSHDUP	0	0	0	-	sweep,upstream
+VMOVSHDUP_YMMqq_YMMqq	VMOVSHDUP	AVX	AVX	DATAXFER	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VMOVSHDUP	0	0	0	-	sweep,upstream
+VMOVSLDUP_XMMdq_MEMdq	VMOVSLDUP	AVX	AVX	DATAXFER	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VMOVSLDUP	0	0	0	-	sweep,upstream
+VMOVSLDUP_XMMdq_XMMdq	VMOVSLDUP	AVX	AVX	DATAXFER	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VMOVSLDUP	0	0	0	-	sweep,upstream
+VMOVSLDUP_YMMqq_MEMqq	VMOVSLDUP	AVX	AVX	DATAXFER	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VMOVSLDUP	0	0	0	-	sweep,upstream
+VMOVSLDUP_YMMqq_YMMqq	VMOVSLDUP	AVX	AVX	DATAXFER	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VMOVSLDUP	0	0	0	-	sweep,upstream
+VMOVUPS_MEMqq_YMMqq	VMOVUPS	AVX	AVX	DATAXFER	not-decoded	-	-	-	1	no clause for VEX.0F.L1.11 (decode.ml:1176)	no	-	0	0	0	copy	family,sweep
+VMOVUPS_YMMqq_MEMqq	VMOVUPS	AVX	AVX	DATAXFER	not-decoded	-	-	-	1	no clause for VEX.0F.L1.10 (decode.ml:1176)	no	-	0	0	0	copy	family,sweep
+VMULSD_XMMdq_XMMdq_MEMq	VMULSD	AVX	AVX	AVX	not-decoded	-	-	-	2	no clause for VEX.0F.L0.59 (decode.ml:1176)	no	-	1	3	0	-	sweep,target
+VORPS_YMMqq_YMMqq_YMMqq	VORPS	AVX	AVX	LOGICAL_FP	not-decoded	-	-	-	1	no clause for VEX.0F.L1.56 (decode.ml:1176)	no	-	0	0	0	equality	family,sweep
+VPABSD_XMMdq_MEMdq	VPABSD	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPABSD	0	0	0	-	sweep,upstream
+VPABSD_XMMdq_XMMdq	VPABSD	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPABSD	0	0	0	-	sweep,upstream
+VPABSD_YMMqq_MEMqq	VPABSD	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPABSD	0	0	0	-	sweep,upstream
+VPABSD_YMMqq_YMMqq	VPABSD	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPABSD	0	0	0	-	sweep,upstream
+VPACKUSWB_XMMdq_XMMdq_MEMdq	VPACKUSWB	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPACKUSWB	0	0	0	-	sweep,upstream
+VPACKUSWB_XMMdq_XMMdq_XMMdq	VPACKUSWB	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPACKUSWB	0	0	0	-	sweep,upstream
+VPACKUSWB_YMMqq_YMMqq_MEMqq	VPACKUSWB	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPACKUSWB	0	0	0	-	sweep,upstream
+VPACKUSWB_YMMqq_YMMqq_YMMqq	VPACKUSWB	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPACKUSWB	0	0	0	-	sweep,upstream
+VPADDB_XMMdq_XMMdq_MEMdq	VPADDB	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPADDB	0	0	0	-	sweep,upstream
+VPADDB_XMMdq_XMMdq_XMMdq	VPADDB	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPADDB	0	0	0	-	sweep,upstream
+VPADDB_YMMqq_YMMqq_MEMqq	VPADDB	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPADDB	0	0	0	-	sweep,upstream
+VPADDB_YMMqq_YMMqq_YMMqq	VPADDB	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPADDB	0	0	0	-	sweep,upstream
+VPADDD_XMMdq_XMMdq_MEMdq	VPADDD	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPADDD	0	0	0	-	sweep,upstream
+VPADDD_XMMdq_XMMdq_XMMdq	VPADDD	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPADDD	0	0	0	-	sweep,upstream
+VPADDD_YMMqq_YMMqq_MEMqq	VPADDD	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPADDD	0	0	0	-	sweep,upstream
+VPADDD_YMMqq_YMMqq_YMMqq	VPADDD	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPADDD	0	0	0	-	sweep,upstream
+VPADDQ_XMMdq_XMMdq_MEMdq	VPADDQ	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPADDQ	0	0	0	-	sweep,upstream
+VPADDQ_XMMdq_XMMdq_XMMdq	VPADDQ	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPADDQ	2	2	0	-	sweep,target,upstream
+VPADDQ_YMMqq_YMMqq_MEMqq	VPADDQ	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPADDQ	0	0	0	-	sweep,upstream
+VPADDQ_YMMqq_YMMqq_YMMqq	VPADDQ	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPADDQ	0	0	0	hashing	family,sweep,upstream
+VPADDW_XMMdq_XMMdq_MEMdq	VPADDW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPADDW	0	0	0	-	sweep,upstream
+VPADDW_XMMdq_XMMdq_XMMdq	VPADDW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPADDW	0	0	0	-	sweep,upstream
+VPADDW_YMMqq_YMMqq_MEMqq	VPADDW	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPADDW	0	0	0	-	sweep,upstream
+VPADDW_YMMqq_YMMqq_YMMqq	VPADDW	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPADDW	0	0	0	-	sweep,upstream
+VPANDN_XMMdq_XMMdq_MEMdq	VPANDN	AVX	AVX	LOGICAL	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPANDN	0	0	0	-	sweep,upstream
+VPANDN_XMMdq_XMMdq_XMMdq	VPANDN	AVX	AVX	LOGICAL	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPANDN	0	0	0	-	sweep,upstream
+VPANDN_YMMqq_YMMqq_MEMqq	VPANDN	AVX2	AVX2	LOGICAL	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPANDN	0	0	0	-	sweep,upstream
+VPANDN_YMMqq_YMMqq_YMMqq	VPANDN	AVX2	AVX2	LOGICAL	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPANDN	0	0	0	equality	family,sweep,upstream
+VPAND_XMMdq_XMMdq_MEMdq	VPAND	AVX	AVX	LOGICAL	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPAND	0	0	0	-	sweep,upstream
+VPAND_XMMdq_XMMdq_XMMdq	VPAND	AVX	AVX	LOGICAL	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPAND	0	0	0	-	sweep,upstream
+VPAND_YMMqq_YMMqq_MEMqq	VPAND	AVX2	AVX2	LOGICAL	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPAND	0	0	0	-	sweep,upstream
+VPAND_YMMqq_YMMqq_YMMqq	VPAND	AVX2	AVX2	LOGICAL	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPAND	0	0	0	equality	family,sweep,upstream
+VPBLENDD_XMMdq_XMMdq_MEMdq_IMMb	VPBLENDD	AVX2	AVX2	AVX2	decoded	v1l0w0|-	-	-	0	-	yes	VPBLENDD	0	0	0	-	sweep,upstream
+VPBLENDD_XMMdq_XMMdq_XMMdq_IMMb	VPBLENDD	AVX2	AVX2	AVX2	decoded	v1l0w0|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VPBLENDD	0	0	0	-	sweep,upstream
+VPBLENDD_YMMqq_YMMqq_MEMqq_IMMb	VPBLENDD	AVX2	AVX2	AVX2	decoded	v1l1w0|-	-	-	0	-	yes	VPBLENDD	0	0	0	-	sweep,upstream
+VPBLENDD_YMMqq_YMMqq_YMMqq_IMMb	VPBLENDD	AVX2	AVX2	AVX2	decoded	v1l1w0|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VPBLENDD	0	0	0	-	sweep,upstream
+VPBLENDVB_XMMdq_XMMdq_MEMdq_XMMdq	VPBLENDVB	AVX	AVX	AVX	decoded	v1l0w0|-	-	-	0	-	yes	VPBLENDVB	0	0	0	-	sweep,upstream
+VPBLENDVB_XMMdq_XMMdq_XMMdq_XMMdq	VPBLENDVB	AVX	AVX	AVX	decoded	v1l0w0|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VPBLENDVB	0	0	0	-	sweep,upstream
+VPBLENDVB_YMMqq_YMMqq_MEMqq_YMMqq	VPBLENDVB	AVX2	AVX2	AVX2	decoded	v1l1w0|-	-	-	0	-	yes	VPBLENDVB	0	0	0	-	sweep,upstream
+VPBLENDVB_YMMqq_YMMqq_YMMqq_YMMqq	VPBLENDVB	AVX2	AVX2	AVX2	decoded	v1l1w0|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VPBLENDVB	0	0	0	-	sweep,upstream
+VPBLENDW_XMMdq_XMMdq_MEMdq_IMMb	VPBLENDW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPBLENDW	0	0	0	-	sweep,upstream
+VPBLENDW_XMMdq_XMMdq_XMMdq_IMMb	VPBLENDW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPBLENDW	0	0	0	-	sweep,upstream
+VPBLENDW_YMMqq_YMMqq_MEMqq_IMMb	VPBLENDW	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPBLENDW	0	0	0	-	sweep,upstream
+VPBLENDW_YMMqq_YMMqq_YMMqq_IMMb	VPBLENDW	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPBLENDW	0	0	0	-	sweep,upstream
+VPBROADCASTB_YMMqq_XMMb	VPBROADCASTB	AVX2	AVX2	BROADCAST	not-decoded	-	-	-	1	no clause for VEX.0F38.L1.78 (decode.ml:862)	no	-	0	0	0	zero	family,sweep
+VPBROADCASTB_ZMMu8_MASKmskw_GPR32u8_AVX512	VPBROADCASTB	AVX512EVEX	AVX512BW_512	BROADCAST	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	0	0	zero	family
+VPBROADCASTD_XMMdq_MEMd	VPBROADCASTD	AVX2	AVX2	BROADCAST	decoded	v1l0w0|-	-	-	0	-	yes	VPBROADCASTD	0	0	0	-	sweep,upstream
+VPBROADCASTD_XMMdq_XMMd	VPBROADCASTD	AVX2	AVX2	BROADCAST	decoded	v1l0w0|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VPBROADCASTD	0	0	0	-	sweep,upstream
+VPBROADCASTD_YMMqq_MEMd	VPBROADCASTD	AVX2	AVX2	BROADCAST	decoded	v1l1w0|-	-	-	0	-	yes	VPBROADCASTD	0	0	0	-	sweep,upstream
+VPBROADCASTD_YMMqq_XMMd	VPBROADCASTD	AVX2	AVX2	BROADCAST	decoded	v1l1w0|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VPBROADCASTD	0	0	0	zero	family,sweep,upstream
+VPBROADCASTQ_XMMdq_MEMq	VPBROADCASTQ	AVX2	AVX2	BROADCAST	decoded	v1l0w0|-	-	-	0	-	yes	VPBROADCASTQ	0	0	0	-	sweep,upstream
+VPBROADCASTQ_XMMdq_XMMq	VPBROADCASTQ	AVX2	AVX2	BROADCAST	decoded	v1l0w0|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VPBROADCASTQ	0	0	0	-	sweep,upstream
+VPBROADCASTQ_YMMqq_MEMq	VPBROADCASTQ	AVX2	AVX2	BROADCAST	decoded	v1l1w0|-	-	-	0	-	yes	VPBROADCASTQ	0	0	0	zero	family,sweep,upstream
+VPBROADCASTQ_YMMqq_XMMq	VPBROADCASTQ	AVX2	AVX2	BROADCAST	decoded	v1l1w0|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VPBROADCASTQ	0	0	0	-	sweep,upstream
+VPBROADCASTQ_ZMMu64_MASKmskw_GPR64u64_AVX512	VPBROADCASTQ	AVX512EVEX	AVX512F_512	BROADCAST	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	0	0	zero	family
+VPBROADCASTW_XMMdq_MEMw	VPBROADCASTW	AVX2	AVX2	BROADCAST	decoded	v1l0w0|-	-	-	0	-	yes	VPBROADCASTW	0	0	0	-	sweep,upstream
+VPBROADCASTW_XMMdq_XMMw	VPBROADCASTW	AVX2	AVX2	BROADCAST	decoded	v1l0w0|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VPBROADCASTW	0	0	0	-	sweep,upstream
+VPBROADCASTW_YMMqq_MEMw	VPBROADCASTW	AVX2	AVX2	BROADCAST	decoded	v1l1w0|-	-	-	0	-	yes	VPBROADCASTW	0	0	0	-	sweep,upstream
+VPBROADCASTW_YMMqq_XMMw	VPBROADCASTW	AVX2	AVX2	BROADCAST	decoded	v1l1w0|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VPBROADCASTW	0	0	0	zero	family,sweep,upstream
+VPCLMULQDQ_XMMdq_XMMdq_MEMdq_IMMb	VPCLMULQDQ	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPCLMULQDQ	0	0	0	-	sweep,upstream
+VPCLMULQDQ_XMMdq_XMMdq_XMMdq_IMMb	VPCLMULQDQ	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPCLMULQDQ	0	0	0	hashing	family,sweep,upstream
+VPCLMULQDQ_YMMu128_YMMu64_MEMu64_IMM8	VPCLMULQDQ	VPCLMULQDQ	VPCLMULQDQ	VPCLMULQDQ	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPCLMULQDQ	0	0	0	-	sweep,upstream
+VPCLMULQDQ_YMMu128_YMMu64_YMMu64_IMM8	VPCLMULQDQ	VPCLMULQDQ	VPCLMULQDQ	VPCLMULQDQ	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPCLMULQDQ	0	0	0	hashing	family,sweep,upstream
+VPCMPB_MASKmskw_MASKmskw_ZMMi8_ZMMi8_IMM8_AVX512	VPCMPB	AVX512EVEX	AVX512BW_512	AVX512	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	0	0	equality	family
+VPCMPD_MASKmskw_MASKmskw_ZMMi32_ZMMi32_IMM8_AVX512	VPCMPD	AVX512EVEX	AVX512F_512	AVX512	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	1	0	equality	family,target
+VPCMPEQB_MASKmskw_MASKmskw_ZMMu8_ZMMu8_AVX512	VPCMPEQB	AVX512EVEX	AVX512BW_512	AVX512	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	0	0	equality	family
+VPCMPEQB_XMMdq_XMMdq_XMMdq	VPCMPEQB	AVX	AVX	AVX	not-decoded	-	-	-	1	no clause for VEX.0F.L0.74 (decode.ml:1176)	no	-	0	0	0	equality	family,sweep
+VPCMPEQB_YMMqq_YMMqq_MEMqq	VPCMPEQB	AVX2	AVX2	AVX2	not-decoded	-	-	-	1	no clause for VEX.0F.L1.74 (decode.ml:1176)	no	-	0	0	0	equality	family,sweep
+VPCMPEQB_YMMqq_YMMqq_YMMqq	VPCMPEQB	AVX2	AVX2	AVX2	not-decoded	-	-	-	1	no clause for VEX.0F.L1.74 (decode.ml:1176)	no	-	0	0	0	equality	family,sweep
+VPCMPEQD_YMMqq_YMMqq_YMMqq	VPCMPEQD	AVX2	AVX2	AVX2	not-decoded	-	-	-	1	no clause for VEX.0F.L1.76 (decode.ml:1176)	no	-	0	0	0	equality	family,sweep
+VPCMPEQQ_MASKmskw_MASKmskw_ZMMu64_ZMMu64_AVX512	VPCMPEQQ	AVX512EVEX	AVX512F_512	AVX512	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	0	0	equality	family
+VPCMPEQQ_YMMqq_YMMqq_YMMqq	VPCMPEQQ	AVX2	AVX2	AVX2	not-decoded	-	-	-	1	no clause for VEX.0F38.L1.29 (decode.ml:862)	no	-	0	0	0	equality	family,sweep
+VPCMPEQW_YMMqq_YMMqq_YMMqq	VPCMPEQW	AVX2	AVX2	AVX2	not-decoded	-	-	-	1	no clause for VEX.0F.L1.75 (decode.ml:1176)	no	-	0	0	0	equality	family,sweep
+VPCMPGTB_YMMqq_YMMqq_YMMqq	VPCMPGTB	AVX2	AVX2	AVX2	not-decoded	-	-	-	1	no clause for VEX.0F.L1.64 (decode.ml:1176)	no	-	0	0	0	equality	family,sweep
+VPCMPGTD_XMMdq_XMMdq_MEMdq	VPCMPGTD	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPCMPGTD	0	0	0	-	sweep,upstream
+VPCMPGTD_XMMdq_XMMdq_XMMdq	VPCMPGTD	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPCMPGTD	0	0	0	-	sweep,upstream
+VPCMPGTD_YMMqq_YMMqq_MEMqq	VPCMPGTD	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPCMPGTD	0	0	0	-	sweep,upstream
+VPCMPGTD_YMMqq_YMMqq_YMMqq	VPCMPGTD	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPCMPGTD	0	0	0	equality	family,sweep,upstream
+VPCMPGTQ_YMMqq_YMMqq_YMMqq	VPCMPGTQ	AVX2	AVX2	AVX2	not-decoded	-	-	-	1	no clause for VEX.0F38.L1.37 (decode.ml:862)	no	-	0	0	0	equality	family,sweep
+VPCMPGTW_XMMdq_XMMdq_MEMdq	VPCMPGTW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPCMPGTW	0	0	0	-	sweep,upstream
+VPCMPGTW_XMMdq_XMMdq_XMMdq	VPCMPGTW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPCMPGTW	0	0	0	-	sweep,upstream
+VPCMPGTW_YMMqq_YMMqq_MEMqq	VPCMPGTW	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPCMPGTW	0	0	0	-	sweep,upstream
+VPCMPGTW_YMMqq_YMMqq_YMMqq	VPCMPGTW	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPCMPGTW	0	0	0	-	sweep,upstream
+VPCMPISTRI_XMMdq_XMMdq_IMMb	VPCMPISTRI	AVX	AVX	STTNI	not-decoded	-	-	-	1	no clause for VEX.0F3A.L0.63 (decode.ml:1300)	no	-	0	0	0	equality	family,sweep
+VPCMPUB_MASKmskw_MASKmskw_ZMMu8_ZMMu8_IMM8_AVX512	VPCMPUB	AVX512EVEX	AVX512BW_512	AVX512	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	0	0	equality	family
+VPCMPUQ_MASKmskw_MASKmskw_ZMMu64_ZMMu64_IMM8_AVX512	VPCMPUQ	AVX512EVEX	AVX512F_512	AVX512	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	0	0	equality	family
+VPERM2I128_YMMqq_YMMqq_MEMqq_IMMb	VPERM2I128	AVX2	AVX2	AVX2	decoded	v1l1w0|-	-	-	0	-	yes	VPERM2I128	0	0	0	-	sweep,upstream
+VPERM2I128_YMMqq_YMMqq_YMMqq_IMMb	VPERM2I128	AVX2	AVX2	AVX2	decoded	v1l1w0|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VPERM2I128	0	0	0	copy	family,sweep,upstream
+VPERMB_ZMMu8_MASKmskw_ZMMu8_ZMMu8_AVX512	VPERMB	AVX512EVEX	AVX512_VBMI_512	AVX512_VBMI	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	0	0	hashing	family
+VPERMD_YMMqq_YMMqq_MEMqq	VPERMD	AVX2	AVX2	AVX2	decoded	v1l1w0|-	-	-	0	-	yes	VPERMD	0	0	0	-	sweep,upstream
+VPERMD_YMMqq_YMMqq_YMMqq	VPERMD	AVX2	AVX2	AVX2	decoded	v1l1w0|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VPERMD	0	0	0	hashing	family,sweep,upstream
+VPERMD_ZMMu32_MASKmskw_ZMMu32_ZMMu32_AVX512	VPERMD	AVX512EVEX	AVX512F_512	AVX512	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	2	0	-	target
+VPERMQ_YMMqq_MEMqq_IMMb	VPERMQ	AVX2	AVX2	AVX2	decoded	v1l1w1|-	-	-	0	-	yes	VPERMQ	0	0	0	-	upstream
+VPERMQ_YMMqq_YMMqq_IMMb	VPERMQ	AVX2	AVX2	AVX2	decoded	v1l1w1|-	-	-	0	-	yes	VPERMQ	0	0	0	hashing	family,upstream
+VPEXTRD_GPR32d_XMMdq_IMMb	VPEXTRD	AVX	AVX	AVX	decoded	v1l0w0|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VPEXTRD	0	0	0	-	sweep,upstream
+VPEXTRD_MEMd_XMMdq_IMMb	VPEXTRD	AVX	AVX	AVX	decoded	v1l0w0|-	-	-	0	-	yes	VPEXTRD	0	0	0	-	sweep,upstream
+VPEXTRQ_GPR64q_XMMdq_IMMb	VPEXTRQ	AVX	AVX	AVX	decoded	v1l0w1|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VPEXTRQ	0	0	0	-	sweep,upstream
+VPEXTRQ_MEMq_XMMdq_IMMb	VPEXTRQ	AVX	AVX	AVX	decoded	v1l0w1|-	-	-	0	-	yes	VPEXTRQ	0	0	0	-	sweep,upstream
+VPEXTRW_GPR32d_XMMdq_IMMb_15	VPEXTRW	AVX	AVX	AVX	decoded	v1l0w0|-	-	-	5	VEX.0F3A.L0.15: needs W0 (decode.ml:1212)	yes	VPEXTRW	0	0	0	-	sweep,upstream
+VPEXTRW_GPR32d_XMMdq_IMMb_C5	VPEXTRW	AVX	AVX	AVX	decoded	v1l0w0|-	-	-	5	VEX.0F.L0.C5: needs W0 (decode.ml:1158)	yes	VPEXTRW	0	0	0	-	sweep,upstream
+VPEXTRW_MEMw_XMMdq_IMMb	VPEXTRW	AVX	AVX	AVX	decoded	v1l0w0|-	-	-	1	VEX.0F3A.L0.15: needs W0 (decode.ml:1212)	yes	VPEXTRW	1	1	0	-	sweep,target,upstream
+VPINSRD_XMMdq_XMMdq_GPR32d_IMMb	VPINSRD	AVX	AVX	AVX	decoded	v1l0w0|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VPINSRD	0	0	0	-	sweep,upstream
+VPINSRD_XMMdq_XMMdq_MEMd_IMMb	VPINSRD	AVX	AVX	AVX	decoded	v1l0w0|-	-	-	0	-	yes	VPINSRD	0	0	0	-	sweep,upstream
+VPINSRQ_XMMdq_XMMdq_GPR64q_IMMb	VPINSRQ	AVX	AVX	AVX	decoded	v1l0w1|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VPINSRQ	0	2	0	-	sweep,target,upstream
+VPINSRQ_XMMdq_XMMdq_MEMq_IMMb	VPINSRQ	AVX	AVX	AVX	decoded	v1l0w1|-	-	-	0	-	yes	VPINSRQ	0	0	0	-	sweep,upstream
+VPINSRW_XMMdq_XMMdq_GPR32d_IMMb	VPINSRW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPINSRW	0	0	0	-	sweep,upstream
+VPINSRW_XMMdq_XMMdq_MEMw_IMMb	VPINSRW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPINSRW	4	4	0	-	sweep,target,upstream
+VPLZCNTQ_ZMMu64_MASKmskw_ZMMu64_AVX512CD	VPLZCNTQ	AVX512EVEX	AVX512CD_512	CONFLICT	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	0	0	bitscan	family
+VPMADDUBSW_XMMdq_XMMdq_MEMdq	VPMADDUBSW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPMADDUBSW	0	0	0	-	sweep,upstream
+VPMADDUBSW_XMMdq_XMMdq_XMMdq	VPMADDUBSW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPMADDUBSW	0	0	0	-	sweep,upstream
+VPMADDUBSW_YMMqq_YMMqq_MEMqq	VPMADDUBSW	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPMADDUBSW	0	0	0	-	sweep,upstream
+VPMADDUBSW_YMMqq_YMMqq_YMMqq	VPMADDUBSW	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPMADDUBSW	0	0	0	-	sweep,upstream
+VPMADDWD_XMMdq_XMMdq_MEMdq	VPMADDWD	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPMADDWD	0	0	0	-	sweep,upstream
+VPMADDWD_XMMdq_XMMdq_XMMdq	VPMADDWD	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPMADDWD	0	0	0	-	sweep,upstream
+VPMADDWD_YMMqq_YMMqq_MEMqq	VPMADDWD	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPMADDWD	0	0	0	-	sweep,upstream
+VPMADDWD_YMMqq_YMMqq_YMMqq	VPMADDWD	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPMADDWD	0	0	0	-	sweep,upstream
+VPMASKMOVD_YMMqq_YMMqq_MEMqq	VPMASKMOVD	AVX2	AVX2	AVX2	not-decoded	-	-	-	1	no clause for VEX.0F38.L1.8C (decode.ml:862)	no	-	0	0	0	copy	family,sweep
+VPMASKMOVQ_MEMqq_YMMqq_YMMqq	VPMASKMOVQ	AVX2	AVX2	AVX2	not-decoded	-	-	-	1	no clause for VEX.0F38.L1.8E (decode.ml:862)	no	-	0	0	0	copy	family
+VPMAXUB_YMMqq_YMMqq_YMMqq	VPMAXUB	AVX2	AVX2	AVX2	not-decoded	-	-	-	1	no clause for VEX.0F.L1.DE (decode.ml:1176)	no	-	0	0	0	equality	family,sweep
+VPMAXUD_XMMdq_XMMdq_MEMdq	VPMAXUD	AVX	AVX	AVX	not-decoded	-	-	-	1	no clause for VEX.0F38.L0.3F (decode.ml:862)	no	-	7	3	0	-	sweep,target
+VPMAXUD_XMMdq_XMMdq_XMMdq	VPMAXUD	AVX	AVX	AVX	not-decoded	-	-	-	1	no clause for VEX.0F38.L0.3F (decode.ml:862)	no	-	7	0	0	equality	family,sweep,target
+VPMAXUQ_XMMu64_MASKmskw_XMMu64_XMMu64_AVX512	VPMAXUQ	AVX512EVEX	AVX512F_128	AVX512	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	2	2	0	-	target
+VPMINSB_YMMqq_YMMqq_YMMqq	VPMINSB	AVX2	AVX2	AVX2	not-decoded	-	-	-	1	no clause for VEX.0F38.L1.38 (decode.ml:862)	no	-	0	0	0	equality	family,sweep
+VPMINUB_YMMqq_YMMqq_YMMqq	VPMINUB	AVX2	AVX2	AVX2	not-decoded	-	-	-	1	no clause for VEX.0F.L1.DA (decode.ml:1176)	no	-	0	0	0	equality	family,sweep
+VPMINUD_YMMqq_YMMqq_YMMqq	VPMINUD	AVX2	AVX2	AVX2	not-decoded	-	-	-	1	no clause for VEX.0F38.L1.3B (decode.ml:862)	no	-	0	0	0	equality	family,sweep
+VPMINUQ_XMMu64_MASKmskw_XMMu64_XMMu64_AVX512	VPMINUQ	AVX512EVEX	AVX512F_128	AVX512	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	2	2	0	-	target
+VPMINUW_YMMqq_YMMqq_YMMqq	VPMINUW	AVX2	AVX2	AVX2	not-decoded	-	-	-	1	no clause for VEX.0F38.L1.3A (decode.ml:862)	no	-	0	0	0	equality	family,sweep
+VPMOVMSKB_GPR32d_XMMdq	VPMOVMSKB	AVX	AVX	AVX	not-decoded	-	-	-	6	VEX.0F.L0.D7: needs vvvv=1111 and L1 (decode.ml:881)	no	-	0	0	0	equality	family,sweep
+VPMOVMSKB_GPR32d_YMMqq	VPMOVMSKB	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPMOVMSKB	0	0	0	equality	family,sweep,upstream
+VPMOVSXBD_XMMdq_MEMd	VPMOVSXBD	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPMOVSXBD	0	0	0	-	sweep,upstream
+VPMOVSXBD_XMMdq_XMMd	VPMOVSXBD	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPMOVSXBD	0	0	0	-	sweep,upstream
+VPMOVSXBD_YMMqq_MEMq	VPMOVSXBD	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPMOVSXBD	0	0	0	-	sweep,upstream
+VPMOVSXBD_YMMqq_XMMq	VPMOVSXBD	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPMOVSXBD	0	0	0	-	sweep,upstream
+VPMOVZXBD_XMMdq_MEMd	VPMOVZXBD	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPMOVZXBD	0	0	0	-	sweep,upstream
+VPMOVZXBD_XMMdq_XMMd	VPMOVZXBD	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPMOVZXBD	0	0	0	-	sweep,upstream
+VPMOVZXBD_YMMqq_MEMq	VPMOVZXBD	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPMOVZXBD	0	0	0	-	sweep,upstream
+VPMOVZXBD_YMMqq_XMMq	VPMOVZXBD	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPMOVZXBD	0	0	0	-	sweep,upstream
+VPMOVZXBD_ZMMi32_MASKmskw_MEMi8_AVX512	VPMOVZXBD	AVX512EVEX	AVX512F_512	DATAXFER	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	1	0	-	target
+VPMOVZXBW_XMMdq_MEMq	VPMOVZXBW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPMOVZXBW	0	0	0	-	sweep,upstream
+VPMOVZXBW_XMMdq_XMMq	VPMOVZXBW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPMOVZXBW	0	0	0	-	sweep,upstream
+VPMOVZXBW_YMMqq_MEMdq	VPMOVZXBW	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPMOVZXBW	0	0	0	-	sweep,upstream
+VPMOVZXBW_YMMqq_XMMdq	VPMOVZXBW	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPMOVZXBW	0	0	0	-	sweep,upstream
+VPMULDQ_XMMdq_XMMdq_MEMdq	VPMULDQ	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPMULDQ	0	0	0	-	sweep,upstream
+VPMULDQ_XMMdq_XMMdq_XMMdq	VPMULDQ	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPMULDQ	0	0	0	-	sweep,upstream
+VPMULDQ_YMMqq_YMMqq_MEMqq	VPMULDQ	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPMULDQ	0	0	0	-	sweep,upstream
+VPMULDQ_YMMqq_YMMqq_YMMqq	VPMULDQ	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPMULDQ	0	0	0	-	sweep,upstream
+VPMULHRSW_XMMdq_XMMdq_MEMdq	VPMULHRSW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPMULHRSW	0	0	0	-	sweep,upstream
+VPMULHRSW_XMMdq_XMMdq_XMMdq	VPMULHRSW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPMULHRSW	0	0	0	-	sweep,upstream
+VPMULHRSW_YMMqq_YMMqq_MEMqq	VPMULHRSW	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPMULHRSW	0	0	0	-	sweep,upstream
+VPMULHRSW_YMMqq_YMMqq_YMMqq	VPMULHRSW	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPMULHRSW	0	0	0	-	sweep,upstream
+VPMULHUW_XMMdq_XMMdq_MEMdq	VPMULHUW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPMULHUW	0	0	0	-	sweep,upstream
+VPMULHUW_XMMdq_XMMdq_XMMdq	VPMULHUW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPMULHUW	0	0	0	-	sweep,upstream
+VPMULHUW_YMMqq_YMMqq_MEMqq	VPMULHUW	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPMULHUW	0	0	0	-	sweep,upstream
+VPMULHUW_YMMqq_YMMqq_YMMqq	VPMULHUW	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPMULHUW	0	0	0	-	sweep,upstream
+VPMULHW_XMMdq_XMMdq_MEMdq	VPMULHW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPMULHW	0	0	0	-	sweep,upstream
+VPMULHW_XMMdq_XMMdq_XMMdq	VPMULHW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPMULHW	0	0	0	-	sweep,upstream
+VPMULHW_YMMqq_YMMqq_MEMqq	VPMULHW	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPMULHW	0	0	0	-	sweep,upstream
+VPMULHW_YMMqq_YMMqq_YMMqq	VPMULHW	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPMULHW	0	0	0	-	sweep,upstream
+VPMULLD_XMMdq_XMMdq_MEMdq	VPMULLD	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPMULLD	0	0	0	-	sweep,upstream
+VPMULLD_XMMdq_XMMdq_XMMdq	VPMULLD	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPMULLD	0	0	0	-	sweep,upstream
+VPMULLD_YMMqq_YMMqq_MEMqq	VPMULLD	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPMULLD	0	0	0	-	sweep,upstream
+VPMULLD_YMMqq_YMMqq_YMMqq	VPMULLD	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPMULLD	0	0	0	-	sweep,upstream
+VPMULLQ_ZMMu64_MASKmskw_ZMMu64_ZMMu64_AVX512	VPMULLQ	AVX512EVEX	AVX512DQ_512	AVX512	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	0	0	hashing	family
+VPMULLW_XMMdq_XMMdq_MEMdq	VPMULLW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPMULLW	0	0	0	-	sweep,upstream
+VPMULLW_XMMdq_XMMdq_XMMdq	VPMULLW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPMULLW	0	0	0	-	sweep,upstream
+VPMULLW_YMMqq_YMMqq_MEMqq	VPMULLW	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPMULLW	0	0	0	-	sweep,upstream
+VPMULLW_YMMqq_YMMqq_YMMqq	VPMULLW	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPMULLW	0	0	0	-	sweep,upstream
+VPMULUDQ_YMMqq_YMMqq_YMMqq	VPMULUDQ	AVX2	AVX2	AVX2	not-decoded	-	-	-	1	no clause for VEX.0F.L1.F4 (decode.ml:1176)	no	-	0	0	0	hashing	family,sweep
+VPOPCNTB_ZMMu8_MASKmskw_ZMMu8_AVX512	VPOPCNTB	AVX512EVEX	AVX512_BITALG_512	AVX512_BITALG	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	0	0	bitscan	family
+VPOPCNTQ_ZMMu64_MASKmskw_ZMMu64_AVX512	VPOPCNTQ	AVX512EVEX	AVX512_VPOPCNTDQ_512	AVX512	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	0	0	bitscan	family
+VPOR_XMMdq_XMMdq_MEMdq	VPOR	AVX	AVX	LOGICAL	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPOR	0	0	0	-	sweep,upstream
+VPOR_XMMdq_XMMdq_XMMdq	VPOR	AVX	AVX	LOGICAL	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPOR	0	0	0	equality	family,sweep,upstream
+VPOR_YMMqq_YMMqq_MEMqq	VPOR	AVX2	AVX2	LOGICAL	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPOR	0	0	0	-	sweep,upstream
+VPOR_YMMqq_YMMqq_YMMqq	VPOR	AVX2	AVX2	LOGICAL	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPOR	0	0	0	equality	family,sweep,upstream
+VPROLQ_ZMMu64_MASKmskw_ZMMu64_IMM8_AVX512	VPROLQ	AVX512EVEX	AVX512F_512	AVX512	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	0	0	hashing	family
+VPSADBW_YMMqq_YMMqq_YMMqq	VPSADBW	AVX2	AVX2	AVX2	not-decoded	-	-	-	1	no clause for VEX.0F.L1.F6 (decode.ml:1176)	no	-	0	0	0	equality	family,sweep
+VPSHUFB_XMMdq_XMMdq_MEMdq	VPSHUFB	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPSHUFB	0	0	0	-	sweep,upstream
+VPSHUFB_XMMdq_XMMdq_XMMdq	VPSHUFB	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPSHUFB	0	0	0	-	sweep,upstream
+VPSHUFB_YMMqq_YMMqq_MEMqq	VPSHUFB	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPSHUFB	0	0	0	-	sweep,upstream
+VPSHUFB_YMMqq_YMMqq_YMMqq	VPSHUFB	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPSHUFB	0	0	0	hashing	family,sweep,upstream
+VPSHUFD_YMMqq_YMMqq_IMMb	VPSHUFD	AVX2	AVX2	AVX2	not-decoded	-	-	-	1	no clause for VEX.0F.L1.70 (decode.ml:1176)	no	-	0	0	0	hashing	family,sweep
+VPSLLD_XMMdq_XMMdq_IMMb	VPSLLD	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPSLLD	0	0	0	-	sweep,upstream
+VPSLLD_YMMqq_YMMqq_IMMb	VPSLLD	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPSLLD	0	0	0	-	sweep,upstream
+VPSLLQ_XMMdq_XMMdq_IMMb	VPSLLQ	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPSLLQ	0	0	0	-	sweep,upstream
+VPSLLQ_YMMqq_YMMqq_IMMb	VPSLLQ	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPSLLQ	0	0	0	hashing	family,sweep,upstream
+VPSLLVD_XMMdq_XMMdq_MEMdq	VPSLLVD	AVX2	AVX2	AVX2	decoded	v1l0w0|-	-	-	0	-	yes	VPSLLVD	0	0	0	-	sweep,upstream
+VPSLLVD_XMMdq_XMMdq_XMMdq	VPSLLVD	AVX2	AVX2	AVX2	decoded	v1l0w0|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VPSLLVD	0	0	0	-	sweep,upstream
+VPSLLVD_YMMqq_YMMqq_MEMqq	VPSLLVD	AVX2	AVX2	AVX2	decoded	v1l1w0|-	-	-	0	-	yes	VPSLLVD	0	0	0	-	sweep,upstream
+VPSLLVD_YMMqq_YMMqq_YMMqq	VPSLLVD	AVX2	AVX2	AVX2	decoded	v1l1w0|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VPSLLVD	0	0	0	-	sweep,upstream
+VPSLLW_XMMdq_XMMdq_IMMb	VPSLLW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPSLLW	0	0	0	-	sweep,upstream
+VPSLLW_YMMqq_YMMqq_IMMb	VPSLLW	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPSLLW	0	0	0	-	sweep,upstream
+VPSRAD_XMMdq_XMMdq_IMMb	VPSRAD	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPSRAD	0	0	0	-	sweep,upstream
+VPSRAD_YMMqq_YMMqq_IMMb	VPSRAD	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPSRAD	0	0	0	-	sweep,upstream
+VPSRAW_XMMdq_XMMdq_IMMb	VPSRAW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPSRAW	0	0	0	-	sweep,upstream
+VPSRAW_YMMqq_YMMqq_IMMb	VPSRAW	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPSRAW	0	0	0	-	sweep,upstream
+VPSRLDQ_XMMdq_XMMdq_IMMb	VPSRLDQ	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPSRLDQ	0	0	0	-	sweep,upstream
+VPSRLDQ_YMMqq_YMMqq_IMMb	VPSRLDQ	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPSRLDQ	0	0	0	-	sweep,upstream
+VPSRLD_XMMdq_XMMdq_IMMb	VPSRLD	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPSRLD	0	0	0	-	sweep,upstream
+VPSRLD_YMMqq_YMMqq_IMMb	VPSRLD	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPSRLD	0	0	0	-	sweep,upstream
+VPSRLQ_XMMdq_XMMdq_IMMb	VPSRLQ	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPSRLQ	0	0	0	-	sweep,upstream
+VPSRLQ_YMMqq_YMMqq_IMMb	VPSRLQ	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPSRLQ	0	0	0	hashing	family,sweep,upstream
+VPSRLVD_XMMdq_XMMdq_MEMdq	VPSRLVD	AVX2	AVX2	AVX2	decoded	v1l0w0|-	-	-	0	-	yes	VPSRLVD	0	0	0	-	sweep,upstream
+VPSRLVD_XMMdq_XMMdq_XMMdq	VPSRLVD	AVX2	AVX2	AVX2	decoded	v1l0w0|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VPSRLVD	0	0	0	-	sweep,upstream
+VPSRLVD_YMMqq_YMMqq_MEMqq	VPSRLVD	AVX2	AVX2	AVX2	decoded	v1l1w0|-	-	-	0	-	yes	VPSRLVD	0	0	0	-	sweep,upstream
+VPSRLVD_YMMqq_YMMqq_YMMqq	VPSRLVD	AVX2	AVX2	AVX2	decoded	v1l1w0|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VPSRLVD	0	0	0	-	sweep,upstream
+VPSRLVQ_XMMdq_XMMdq_MEMdq	VPSRLVQ	AVX2	AVX2	AVX2	decoded	v1l0w1|-	-	-	0	-	yes	VPSRLVQ	0	0	0	-	sweep,upstream
+VPSRLVQ_XMMdq_XMMdq_XMMdq	VPSRLVQ	AVX2	AVX2	AVX2	decoded	v1l0w1|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VPSRLVQ	0	0	0	-	sweep,upstream
+VPSRLVQ_YMMqq_YMMqq_MEMqq	VPSRLVQ	AVX2	AVX2	AVX2	decoded	v1l1w1|-	-	-	0	-	yes	VPSRLVQ	0	0	0	-	sweep,upstream
+VPSRLVQ_YMMqq_YMMqq_YMMqq	VPSRLVQ	AVX2	AVX2	AVX2	decoded	v1l1w1|-	-	-	2	legacy prefix before VEX (decode.ml:703)	yes	VPSRLVQ	0	0	0	hashing	family,sweep,upstream
+VPSRLW_XMMdq_XMMdq_IMMb	VPSRLW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPSRLW	0	0	0	-	sweep,upstream
+VPSRLW_YMMqq_YMMqq_IMMb	VPSRLW	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPSRLW	0	0	0	-	sweep,upstream
+VPSUBB_XMMdq_XMMdq_MEMdq	VPSUBB	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPSUBB	0	0	0	-	sweep,upstream
+VPSUBB_XMMdq_XMMdq_XMMdq	VPSUBB	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPSUBB	0	0	0	-	sweep,upstream
+VPSUBB_YMMqq_YMMqq_MEMqq	VPSUBB	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPSUBB	0	0	0	-	sweep,upstream
+VPSUBB_YMMqq_YMMqq_YMMqq	VPSUBB	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPSUBB	0	0	0	-	sweep,upstream
+VPSUBD_XMMdq_XMMdq_MEMdq	VPSUBD	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPSUBD	0	0	0	-	sweep,upstream
+VPSUBD_XMMdq_XMMdq_XMMdq	VPSUBD	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPSUBD	0	0	0	-	sweep,upstream
+VPSUBD_YMMqq_YMMqq_MEMqq	VPSUBD	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPSUBD	0	0	0	-	sweep,upstream
+VPSUBD_YMMqq_YMMqq_YMMqq	VPSUBD	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPSUBD	0	0	0	-	sweep,upstream
+VPSUBQ_XMMdq_XMMdq_MEMdq	VPSUBQ	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPSUBQ	0	0	0	-	sweep,upstream
+VPSUBQ_XMMdq_XMMdq_XMMdq	VPSUBQ	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPSUBQ	0	0	0	-	sweep,upstream
+VPSUBQ_YMMqq_YMMqq_MEMqq	VPSUBQ	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPSUBQ	0	0	0	-	sweep,upstream
+VPSUBQ_YMMqq_YMMqq_YMMqq	VPSUBQ	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPSUBQ	0	0	0	-	sweep,upstream
+VPSUBUSB_YMMqq_YMMqq_YMMqq	VPSUBUSB	AVX2	AVX2	AVX2	not-decoded	-	-	-	1	no clause for VEX.0F.L1.D8 (decode.ml:1176)	no	-	0	0	0	equality	family,sweep
+VPSUBW_XMMdq_XMMdq_MEMdq	VPSUBW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPSUBW	0	0	0	-	sweep,upstream
+VPSUBW_XMMdq_XMMdq_XMMdq	VPSUBW	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPSUBW	0	0	0	-	sweep,upstream
+VPSUBW_YMMqq_YMMqq_MEMqq	VPSUBW	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPSUBW	0	0	0	-	sweep,upstream
+VPSUBW_YMMqq_YMMqq_YMMqq	VPSUBW	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPSUBW	0	0	0	-	sweep,upstream
+VPTERNLOGD_YMMu32_MASKmskw_YMMu32_YMMu32_IMM8_AVX512	VPTERNLOGD	AVX512EVEX	AVX512F_256	LOGICAL	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	0	0	hashing	family
+VPTERNLOGD_ZMMu32_MASKmskw_ZMMu32_ZMMu32_IMM8_AVX512	VPTERNLOGD	AVX512EVEX	AVX512F_512	LOGICAL	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	1	1	0	-	target
+VPTERNLOGQ_ZMMu64_MASKmskw_ZMMu64_ZMMu64_IMM8_AVX512	VPTERNLOGQ	AVX512EVEX	AVX512F_512	LOGICAL	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	0	0	hashing	family
+VPTESTMB_MASKmskw_MASKmskw_ZMMu8_ZMMu8_AVX512	VPTESTMB	AVX512EVEX	AVX512BW_512	LOGICAL	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	0	0	equality	family
+VPTESTNMB_MASKmskw_MASKmskw_ZMMu8_ZMMu8_AVX512	VPTESTNMB	AVX512EVEX	AVX512BW_512	LOGICAL	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	0	0	equality	family
+VPTEST_XMMdq_MEMdq	VPTEST	AVX	AVX	LOGICAL	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPTEST	0	0	0	-	sweep,upstream
+VPTEST_XMMdq_XMMdq	VPTEST	AVX	AVX	LOGICAL	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPTEST	0	0	0	equality	family,sweep,upstream
+VPTEST_YMMqq_MEMqq	VPTEST	AVX	AVX	LOGICAL	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPTEST	0	0	0	equality	family,sweep,upstream
+VPTEST_YMMqq_YMMqq	VPTEST	AVX	AVX	LOGICAL	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPTEST	0	0	0	equality	family,sweep,upstream
+VPUNPCKHQDQ_XMMdq_XMMdq_MEMdq	VPUNPCKHQDQ	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPUNPCKHQDQ	0	0	0	-	sweep,upstream
+VPUNPCKHQDQ_XMMdq_XMMdq_XMMdq	VPUNPCKHQDQ	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPUNPCKHQDQ	0	0	0	-	sweep,upstream
+VPUNPCKHQDQ_YMMqq_YMMqq_MEMqq	VPUNPCKHQDQ	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPUNPCKHQDQ	0	0	0	-	sweep,upstream
+VPUNPCKHQDQ_YMMqq_YMMqq_YMMqq	VPUNPCKHQDQ	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPUNPCKHQDQ	0	0	0	-	sweep,upstream
+VPUNPCKLQDQ_XMMdq_XMMdq_MEMdq	VPUNPCKLQDQ	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPUNPCKLQDQ	0	0	0	-	sweep,upstream
+VPUNPCKLQDQ_XMMdq_XMMdq_XMMdq	VPUNPCKLQDQ	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPUNPCKLQDQ	0	0	0	-	sweep,upstream
+VPUNPCKLQDQ_YMMqq_YMMqq_MEMqq	VPUNPCKLQDQ	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPUNPCKLQDQ	0	0	0	-	sweep,upstream
+VPUNPCKLQDQ_YMMqq_YMMqq_YMMqq	VPUNPCKLQDQ	AVX2	AVX2	AVX2	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPUNPCKLQDQ	0	0	0	-	sweep,upstream
+VPXORD_ZMMu32_MASKmskw_ZMMu32_ZMMu32_AVX512	VPXORD	AVX512EVEX	AVX512F_512	LOGICAL	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	0	0	zero	family
+VPXORQ_ZMMu64_MASKmskw_ZMMu64_ZMMu64_AVX512	VPXORQ	AVX512EVEX	AVX512F_512	LOGICAL	not-decoded	-	-	-	1	no clause for opcode 62 (decode.ml:1335)	no	-	0	0	0	zero	family
+VPXOR_XMMdq_XMMdq_MEMdq	VPXOR	AVX	AVX	LOGICAL	decoded	v1l0w0|- v1l0w1|-	-	-	0	-	yes	VPXOR	0	0	0	-	sweep,upstream
+VPXOR_XMMdq_XMMdq_XMMdq	VPXOR	AVX	AVX	LOGICAL	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPXOR	46	86	0	zero	family,sweep,target,upstream
+VPXOR_YMMqq_YMMqq_MEMqq	VPXOR	AVX2	AVX2	LOGICAL	decoded	v1l1w0|- v1l1w1|-	-	-	0	-	yes	VPXOR	0	0	0	-	sweep,upstream
+VPXOR_YMMqq_YMMqq_YMMqq	VPXOR	AVX2	AVX2	LOGICAL	decoded	v1l1w0|- v1l1w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VPXOR	0	0	0	zero	family,sweep,upstream
+VSUBSD_XMMdq_XMMdq_MEMq	VSUBSD	AVX	AVX	AVX	not-decoded	-	-	-	2	no clause for VEX.0F.L0.5C (decode.ml:1176)	no	-	0	2	0	-	sweep,target
+VSUBSD_XMMdq_XMMdq_XMMq	VSUBSD	AVX	AVX	AVX	not-decoded	-	-	-	2	no clause for VEX.0F.L0.5C (decode.ml:1176)	no	-	1	0	0	-	sweep,target
+VXORPD_XMMdq_XMMdq_XMMdq	VXORPD	AVX	AVX	LOGICAL_FP	not-decoded	-	-	-	1	no clause for VEX.0F.L0.57 (decode.ml:1176)	no	-	0	2	0	-	sweep,target
+VXORPS_XMMdq_XMMdq_XMMdq	VXORPS	AVX	AVX	LOGICAL_FP	not-decoded	-	-	-	1	no clause for VEX.0F.L0.57 (decode.ml:1176)	no	-	1	1	0	-	sweep,target
+VXORPS_YMMqq_YMMqq_YMMqq	VXORPS	AVX	AVX	LOGICAL_FP	not-decoded	-	-	-	1	no clause for VEX.0F.L1.57 (decode.ml:1176)	no	-	0	0	0	zero	family,sweep
+VZEROALL	VZEROALL	AVX	AVX	AVX	not-decoded	-	-	-	6	VEX.0F.L1.77: VZEROALL (L1) is not decoded (decode.ml:911)	no	-	0	0	0	zero	family,sweep
+VZEROUPPER	VZEROUPPER	AVX	AVX	AVX	decoded	v1l0w0|- v1l0w1|-	-	-	4	legacy prefix before VEX (decode.ml:703)	yes	VZEROUPPER	73	132	0	zero	family,sweep,target,upstream
+XADD_LOCK_MEMv_GPRv	XADD_LOCK	BASE	I486REAL	SEMAPHORE	not-decoded	-	-	-	1	LOCK prefix (decode.ml:90)	no	-	0	0	0	control	family
+XCHG_GPR8_GPR8	XCHG	BASE	I86	DATAXFER	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on XCHG r,r/m (decode.ml:659)	yes	XCHG8	0	0	0	-	sweep,upstream
+XCHG_GPRv_GPRv	XCHG	BASE	I86	DATAXFER	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on XCHG r,r/m (decode.ml:659)	yes	XCHG16,XCHG32,XCHG64	2	1	0	-	sweep,target,upstream
+XCHG_GPRv_OrAX	XCHG	BASE	I86	DATAXFER	decoded	o32|- o64|-	-	-	34	REP or segment prefix on 90+r (decode.ml:674)	yes	XCHG32,XCHG64	0	0	0	integer	family,sweep,upstream
+XCHG_MEMb_GPR8	XCHG	BASE	I86	DATAXFER	decoded	o16|66 o32|- o64|- o64|66	-	-	34	REP or segment prefix on XCHG r,r/m (decode.ml:659)	yes	XCHG8	0	0	0	-	sweep,upstream
+XCHG_MEMv_GPRv	XCHG	BASE	I86	DATAXFER	decoded	o16|66 o32|- o64|- o64|66	-	-	34	REP or segment prefix on XCHG r,r/m (decode.ml:659)	yes	XCHG16,XCHG32,XCHG64	0	0	0	control	family,sweep,upstream
+XORPS_XMMxud_XMMxud	XORPS	SSE	SSE	LOGICAL_FP	not-decoded	-	-	-	2	no clause for 0F 57 (decode.ml:625)	no	-	0	0	0	zero	family,sweep
+XOR_AL_IMMb	XOR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU acc,imm (decode.ml:326)	yes	XOR8	0	0	0	-	sweep,upstream
+XOR_GPR8_GPR8_30	XOR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	XOR8	2	2	0	-	sweep,target,upstream
+XOR_GPR8_GPR8_32	XOR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	XOR8	0	0	0	-	sweep,upstream
+XOR_GPR8_IMMb_80r6	XOR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	XOR8	0	0	0	-	sweep,upstream
+XOR_GPR8_MEMb	XOR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	XOR8	0	0	0	-	sweep,upstream
+XOR_GPRv_GPRv_31	XOR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	XOR16,XOR32,XOR64	904	742	13	-	sweep,target,upstream
+XOR_GPRv_GPRv_33	XOR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	XOR16,XOR32,XOR64	0	0	0	-	sweep,upstream
+XOR_GPRv_IMMb	XOR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm8 (decode.ml:650)	yes	XOR16,XOR32,XOR64	3	5	0	-	sweep,target,upstream
+XOR_GPRv_IMMz	XOR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	XOR16,XOR32,XOR64	0	0	0	-	sweep,upstream
+XOR_GPRv_MEMv	XOR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	XOR16,XOR32,XOR64	0	0	0	-	sweep,upstream
+XOR_MEMb_GPR8	XOR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	XOR8	0	0	0	-	sweep,upstream
+XOR_MEMb_IMMb_80r6	XOR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	XOR8	0	0	0	-	sweep,upstream
+XOR_MEMv_GPRv	XOR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,r (decode.ml:321)	yes	XOR16,XOR32,XOR64	0	0	0	-	sweep,upstream
+XOR_MEMv_IMMb	XOR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm8 (decode.ml:650)	yes	XOR16,XOR32,XOR64	0	0	0	-	sweep,upstream
+XOR_MEMv_IMMz	XOR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU r/m,imm (decode.ml:645)	yes	XOR16,XOR32,XOR64	0	0	0	-	sweep,upstream
+XOR_OrAX_IMMz	XOR	BASE	I86	LOGICAL	decoded	o16|66 o32|- o64|- o64|66	-	-	32	REP or segment prefix on ALU acc,imm (decode.ml:326)	yes	XOR16,XOR32,XOR64	0	0	0	-	sweep,upstream

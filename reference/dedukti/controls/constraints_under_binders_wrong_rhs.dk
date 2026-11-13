@@ -1,0 +1,17 @@
+(; expect 1 ;)
+(; Negative control: the constraint under the binders, x, y |- y == b x y, is satisfiable (by the
+   rule for b below, every instance satisfies it), and it does not make b a a' convertible to a:
+   it gives b a a' == a'.  The right-hand side P (t (b a a')) needs T (b a a') == T a, so admitting
+   the rule would break subject reduction once b x y --> y is added.  It must not be accepted. ;)
+A : Type.
+T : A -> Type.
+t : a : A -> T a.
+a : A.
+a' : A.
+P : T a -> Type.
+def b : A -> A -> A.
+
+def d : X : (A -> A -> A) -> (x : A -> y : A -> T (b x y)) -> Type.
+[X] d (x => y => X x y) (x => y => t y) --> P (t (b a a')).
+
+[x, y] b x y --> y.

@@ -1,0 +1,22 @@
+(; expect dk=0 complete=0 ;)
+(; Matches Dedukti makes, which both profiles keep: F once outside and once under a binder
+   with an open instance; an applied pattern variable `F x` twice under a binder with an open
+   instance; F twice under a binder with a closed instance. ;)
+
+A : Type.
+a : A.
+ok : A.
+c : A -> A -> A.
+d : A -> A.
+e : A -> A -> A.
+def h : A -> (A -> A) -> A.
+def g1 : (A -> A) -> A.
+def g2 : (A -> A) -> A.
+
+[F] h F (x => F) --> ok.
+[F] g1 (x => c (F x) (F x)) --> ok.
+[F] g2 (x => c F F) --> ok.
+
+#ASSERT (q : A => h (d q) (u => d q)) == (q : A => ok).
+#ASSERT (q : A => g1 (u => c (e q u) (e q u))) == (q : A => ok).
+#ASSERT g2 (u => c (d a) (d a)) == ok.

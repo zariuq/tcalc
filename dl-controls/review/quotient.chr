@@ -1,0 +1,5 @@
+% expect: rc=0 status=completed detail=[q(3)]
+% `//` truncates.
+:- chr_constraint p/1,q/1.
+r @ p(X) <=> Y is X // 2, q(Y).
+?- p(7).

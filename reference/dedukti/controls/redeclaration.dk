@@ -1,0 +1,5 @@
+(; expect 1 ;)
+(; Negative control: a symbol is declared once. ;)
+A : Type.
+a : A.
+a : A.

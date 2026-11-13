@@ -1,0 +1,6 @@
+THEOREM unpack_post: |- forall u t k.
+THEOREM UNPACK_RUN: |- forall t k u.
+THEOREM UNPACK_DECLS: |- tisa_decls unpack = []
+THEOREM UNPACK_LEAF_WF: |- tisa_leaf_wf unpack
+THEOREM UNPACK_X86: |- tisa_entry_ok unpack t /\
+THEOREM UNPACK_LEAF_SPEC: |- forall pc. tisa_leaf_spec unpack unpack_mc pc

@@ -1,0 +1,26 @@
+(; An invalid file: its assertion denies that two differently built copies of the unary
+   numeral 2^26 are convertible, and they are.  Deciding that takes more terms than a small
+   memory allowance holds.  Under such an allowance the checker has to say that it has no
+   verdict; above all it may not accept the file because the comparison could not be
+   carried out. ;)
+
+N : Type.
+z : N.
+s : N -> N.
+
+def dbl : N -> N.
+[] dbl z --> z.
+[n] dbl (s n) --> s (s (dbl n)).
+
+def pow2 : N -> N.
+[] pow2 z --> s z.
+[n] pow2 (s n) --> dbl (pow2 n).
+
+def ten : N := s (s (s (s (s (s (s (s (s (s z))))))))).
+def plus : N -> N -> N.
+[m] plus z m --> m.
+[n, m] plus (s n) m --> s (plus n m).
+
+def n24 : N := plus ten (plus ten (s (s (s (s z))))).
+
+#ASSERTNOT pow2 (s (s n24)) == plus (pow2 (s n24)) (pow2 (s n24)).

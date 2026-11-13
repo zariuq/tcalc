@@ -7,9 +7,11 @@
 #define MAKE(i, j) GUARD(i, j, 0, 0)
 
 static int failures;
+static unsigned checks;
 
 static void expect_words(const char *name, const uint32_t *got,
                          const uint32_t *want, uint64_t n) {
+  checks++;
   if (memcmp(got, want, n * sizeof *got)) {
     fprintf(stderr, "%s: wrong words\n", name);
     failures++;
@@ -17,6 +19,7 @@ static void expect_words(const char *name, const uint32_t *got,
 }
 
 static void expect_u64(const char *name, uint64_t got, uint64_t want) {
+  checks++;
   if (got != want) {
     fprintf(stderr, "%s: got %llu, want %llu\n", name,
             (unsigned long long)got, (unsigned long long)want);
@@ -71,7 +74,24 @@ int main(void) {
   expect_u64("empty refused conclusion",
              flat_fire(failing_fields, rows, guards, 2, NULL, 0, NULL, NULL), 0);
 
+  /* uint32_t row/column addition is deliberately modular in the proved ABI. */
+  const uint32_t wrap_rows[] = {UINT32_MAX};
+  const uint32_t wrap_fields[] = {17, 17};
+  const uint32_t wrap_guards[] = {GUARD(0, 1, 0, 2)};
+  const uint32_t wrap_make[] = {MAKE(0, 1)};
+  uint32_t wrap_dest[] = {91}, wrap_scratch[] = {92};
+  expect_u64("wrapped offset admitted",
+             flat_fire(wrap_fields, wrap_rows, wrap_guards, 1, wrap_make, 1,
+                       wrap_dest, wrap_scratch), 1);
+  expect_words("wrapped offset selected", wrap_dest, (uint32_t[]){17}, 1);
+  const uint32_t wrap_bad[] = {17, 18};
+  expect_u64("wrapped offset refusal",
+             flat_fire(wrap_bad, wrap_rows, wrap_guards, 1, wrap_make, 1,
+                       wrap_dest, wrap_scratch), 0);
+  expect_words("wrapped refusal retains destination", wrap_dest, (uint32_t[]){17}, 1);
+  expect_words("wrapped refusal retains scratch", wrap_scratch, (uint32_t[]){17}, 1);
+
   if (failures) return 1;
-  puts("flat_fire: 10 positive/negative controls passed");
+  printf("flat_fire: %u assertion checks passed (including wrapped offsets)\n", checks);
   return 0;
 }

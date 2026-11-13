@@ -1,0 +1,9 @@
+A : Type.
+a : A.
+b : A.
+ok : A.
+c : A -> A -> A.
+d : A -> A.
+def g3 : (A -> A -> A -> A) -> A.
+[] g3 (x => y => z => c _ a) --> ok.
+#ASSERT g3 (u => v => w => c (d b) a) == ok.

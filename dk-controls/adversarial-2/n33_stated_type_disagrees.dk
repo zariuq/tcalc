@@ -1,0 +1,6 @@
+(; The context states x : B; the left-hand side gives x the type A. ;)
+A : Type.
+B : Type.
+a0 : A.
+def f : A -> A.
+[x : B] f x --> a0.

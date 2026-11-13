@@ -1,0 +1,117 @@
+Verification boundaries
+=======================
+
+Reference machine code
+----------------------
+compiled/proofs/flat_fire.ml proves FLAT_FIRE_CORRECT for the exact 211-byte
+flat_fire.S implementation on the s2n-bignum x86 model, under its explicit
+memory, bounds and SysV ABI hypotheses. compiled/flat_fire.h states the caller
+conditions, including scratch separation, 32-bit modular offsets and the
+56-byte stack/return exclusion. The pointer-based Flat adapter and wide-term
+packing are separate correspondence obligations. Neither the whole tcalc C
+implementation nor arbitrary compiler output is covered by this theorem.
+
+The proof gate is compiled/proofs/check.sh. The runtime controls are
+compiled/test_flat_fire.c. Source-to-byte agreement, logical correctness and
+the caller's satisfaction of the theorem hypotheses are distinct checks.
+
+Hosted proof systems
+--------------------
+Protected spaces restrict ordinary posting after sealing. The rule tables,
+signature admission code, source readers, C conversion/substitution/context
+helpers, arena operations and selected axioms remain part of each checker's
+trust boundary. Named SPACE_HELPER facts are host-issued facts: naming and
+ledgering them does not independently verify their contents.
+
+LCF describes control over theorem construction; natural deduction describes
+rules and proof terms. They can be used together. The current mg_tcalc checks
+proof terms without an --nd flag. Complete THM articles require one checked
+PROOF before QED; equivalent definition restatements are allowed, incompatible
+bodies/types are refused.
+
+dk_tcalc defaults to LF without eta conversion. --pts cc / --coc and --eta are
+explicit extensions. --no-eta restores conversion without eta. Changing these
+profiles resets the active checking context; proofs admitted in a stronger
+profile must not silently become evidence in a weaker one. User rewrite rules
+can still be nonterminating; successful finite tests do not establish totality
+of conversion or a general rewrite-admission theorem.
+
+The --emit-dk translator uses proof syntax, binder contexts and accumulated
+definition-transparency choices. Its output is checked by independent tools
+on the selected corpora. This is differential evidence, not a proof of general
+conservativity, full abstraction, or substitution/translation correctness.
+Opaque versus transparent definitions must remain part of an artifact's
+interpretation and revision contract.
+
+Runtime bridge
+--------------
+bridge/tc_cetta_bridge.h follows the mathematical effect/admission layering.
+Its C realization is not formally proved equivalent to EffectCore or Step.
+Preparation/permission/commit require externally serialized kernel access.
+Callbacks are pure predicates on retained immutable data; profile contexts are
+borrowed. Authentic guard evidence comes from execution, not from an untrusted
+client filling in a public struct.
+
+TcAdmittedEvent owns its firing arrays (owned_take, owned_keep, owned_inst,
+owned_seeds) and profile descriptor (owned_profile) by value, so events can be
+returned from stack frames without dangling pointers. Calling tc_event_firing(ev)
+binds a TcPreparedStep view to ev's live address.
+
+Profile transport separates two operations:
+1. tc_event_restrict_included(src, inc, dst) transports an admitted event along
+   an explicit TcAdmissionInclusion capability token (matching Lean's
+   Event.restrict: first f prepared -> second f prepared) without re-running
+   custom callbacks in the post-state.
+2. tc_event_restrict(src, target_profile, dst) checks retained pre-state built-in
+   guard bits and re-evaluates target_profile->permit on that single event.
+Budget exhaustion preserves the next candidate for resumption. The live CeTTa
+adapter remains a separate integration task; the existing stream adapter is a
+standalone test boundary.
+
+GSLT D0/Datalog and C0/CHR lowering consumer
+--------------------------------------------
+dl_tcalc.c lowers positive D0 Datalog (.dl + .facts and MeTTa D0Program IR) and
+ground C0 CHR (.chr) into sealed tcalc rules over protected spaces:
+- D0 Datalog relations R/k lower to n-ary tcalc constructors in sort_fact;
+  clauses retain their source statement and clause origins and lower to rules
+  with Rule.keep, Rule.tell (=), Rule.neq (!=), Rule.absent (set semantics in
+  SPACE_FACT), and named SPACE_HELPER scalar comparisons (<, <=, >, >=) via
+  TcAdmissionProfile.permit.
+- Completeness of D0 set saturation requires: (1) range-restricted positive
+  clauses over a finite scalar Herbrand universe, (2) a fair candidate
+  enumeration policy (M1 naive or M2 semi-naive delta-frontier + Term-ID join
+  index) run until an epoch admits zero new events, and (3) no budget cutoff
+  (TC_BRIDGE_BUDGET_EXHAUSTED is an incomplete prefix, never a fixed point).
+- C0 CHR lowers simplification (<=>), simpagation (\ <=>), and propagation (==>)
+  rules over sealed SPACE_QUERY, SPACE_CHR, and SPACE_HISTORY using Rule.take
+  for linear removal, Rule.keep for kept heads, Rule.neq for distinct occurrence
+  IDs, and Rule.absent + Rule.make in SPACE_HISTORY for per-occurrence
+  propagation history.
+
+Cesta and application-level claims
+---------------------------------
+Cesta's checked-c scanner rules and native-c ownership contracts are checked
+under their declared semantics and foreign-call obligations. The differential
+gate compares exported C with the baseline implementations. These checks do
+not establish the complete parser's correctness against a source grammar, nor
+verify all foreign C calls.
+
+The HOTG care example proves properties of a declared set-theoretic model.
+R_ACT_GATE checks a closed proof of a requested proposition and capability
+reach. Connecting that proposition to an actual action and its effects on
+participants requires an additional interpretation; theorem replay alone
+does not establish real-world ethical safety.
+
+Executable evidence
+-------------------
+make check runs the core suites, proof-system fixtures, tower mutations and
+Cesta differential checks. It requires the reference checker executables
+before claiming oracle agreement. MG_BIN, DK_BIN and KO_BIN can select those
+executables. Kontroli's Sudoku fixture uses one concatenated article because
+the files share unqualified names; warnings about unannotated rewrite
+variables remain a limitation of that reference check.
+
+check_admission_controls.py tests conversion profiles against both Dedukti
+and Kontroli, and checks malformed/incomplete Megalodon articles. Source
+replay timings include different work from tactic/source elaboration timings.
+Time divided by total firing count is not a measured primitive firing cost.

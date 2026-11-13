@@ -1,0 +1,26 @@
+== default: 200000 random pairs per image, seed 0x5EED
+seed 0x5eed, 200000 random pairs per image, 256 edge pairs
+cet: x86_Thread_features:	
+cet: x86_Thread_features_locked:	
+probe control (stub clearing RCX and writing out[1]): RCX change detected, out[1] change detected
+add64: 200256 inputs, each by pointer and by probe; failures 0
+sub64: 200256 inputs, each by pointer and by probe; failures 0
+and64: 200256 inputs, each by pointer and by probe; failures 0
+or64: 200256 inputs, each by pointer and by probe; failures 0
+xor64: 200256 inputs, each by pointer and by probe; failures 0
+control add64-with-0x29: refused, 224 of 256 edge inputs miss add64's reference; first x=0000000000000000 y=0000000000000001 gives ffffffffffffffff, add64 wants 0000000000000001
+TOTAL failures 0, control refused, probe control ok
+EXIT 0
+== 1000000 random pairs per image, seed 0xC0FFEE
+seed 0xc0ffee, 1000000 random pairs per image, 256 edge pairs
+cet: x86_Thread_features:	
+cet: x86_Thread_features_locked:	
+probe control (stub clearing RCX and writing out[1]): RCX change detected, out[1] change detected
+add64: 1000256 inputs, each by pointer and by probe; failures 0
+sub64: 1000256 inputs, each by pointer and by probe; failures 0
+and64: 1000256 inputs, each by pointer and by probe; failures 0
+or64: 1000256 inputs, each by pointer and by probe; failures 0
+xor64: 1000256 inputs, each by pointer and by probe; failures 0
+control add64-with-0x29: refused, 224 of 256 edge inputs miss add64's reference; first x=0000000000000000 y=0000000000000001 gives ffffffffffffffff, add64 wants 0000000000000001
+TOTAL failures 0, control refused, probe control ok
+EXIT 0

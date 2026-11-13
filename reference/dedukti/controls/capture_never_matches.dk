@@ -1,0 +1,9 @@
+(; expect 1 ;)
+(; Negative control: u is the pattern's binder, which F may not mention; the redex does not
+   rewrite to u, in either order, so this assertion is refused. ;)
+A : Type.
+ok : A.
+c : A -> A -> A.
+def g : (A -> A) -> A.
+[F] g (x => c F F) --> F.
+#ASSERT (q : A => g (u => c u q)) == (q : A => q).

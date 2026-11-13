@@ -27,6 +27,11 @@ LEAVES="mm_sub1_leaf mm_sub2_leaf"
 W=build
 rm -rf ./build
 mkdir -p ./build
+ROOT=$PWD
+if [ ! -f "$TCALC/micromath_tcalc_gen.h" ]; then
+  gcc -O3 -march=native -Wall -Wextra -Werror "$TCALC/tcalc_compile.c" -o "$W/tcalc_compile"
+  (cd "$TCALC" && "$ROOT/$W/tcalc_compile")
+fi
 
 gcc -O2 -D_GNU_SOURCE -c "$TCALC/ref/kernel.c" -I"$TCALC/ref" -o "$W/micromath_kernel.o"
 
@@ -105,6 +110,12 @@ outside input-missing       's/(rule proj2 () (EQ a Y x a))/(rule proj2 () (EQ a
 outside premise-missing     's/(EQ x1 t u1 w1)) (EQ x1 x a b))/(EQ x1 t u1 w1)) (EQ x1 x a z))/' 'mm_sub2: a conclusion hole'
 outside keeps-no-premises   's/(entry mm_sub1 (keeps sub1))/(entry mm_sub1 (keeps def))/' 'keeps rule def'
 outside fresh-also-input    's/(fresh def x1 (t u w))/(fresh def x1 (x1 u w))/' 'also an input'
+as --64 flat_fire.S -o "$W/flat_fire.o"
+gcc -O2 -Wall -Wextra -Werror flat_fire.S test_flat_fire.c -o "$W/test_flat_fire"
+"$W/test_flat_fire"
+if objdump -r "$W/flat_fire.o" | grep -q 'R_X86_64'; then echo "flat_fire has relocations"; exit 1; fi
+if objdump -d "$W/flat_fire.o" | grep -q '[[:space:]]call'; then echo "flat_fire makes calls"; exit 1; fi
+objdump -d --disassemble=flat_fire "$W/flat_fire.o" | awk -F'\t' '/^ *[0-9a-f]+:\t/ { n += split($2,b," ") } END { print "flat_fire.o:",n,"bytes, no relocations or calls" }'
 rm -rf ./build
 
 # With PROOF=1, also check the machine-code proofs of the leaf objects (HOL Light and

@@ -1,0 +1,106 @@
+(cesta native-c/1 compact-c/2
+  (unit
+    (ownership (check-all)
+      (record TcPreparedStep
+        (field take (borrow read nullable))
+        (field keep (borrow read nullable))
+        (field inst (borrow read nullable))
+        (field seeds (borrow read nullable)))
+      (record TcCandidateCursor
+        (field ctx (borrow read nullable))
+        (field next (borrow read nullable)))
+      (function tc_clear_receipt (nullable 0))
+      (function tc_commit_prepared (nullable 0) (nullable 1))
+      (function tc_step_cursor (nullable 0) (nullable 1))
+      (foreign tc_rule_count
+        (obligation "Returns the number of installed rules in the kernel without retaining any pointer."))
+      (foreign tc_rule_fibre
+        (obligation "Returns the fibre bitmask of the given rule id without side effects."))
+      (foreign tc_flat_fire (nullable 1) (nullable 2)
+        (obligation "Reads keep and inst arrays for the duration of the call without retaining pointers."))
+      (foreign tc_fire_reach (nullable 1) (nullable 2) (nullable 3) (nullable 4)
+        (obligation "Reads take, keep, inst, and seeds arrays for the duration of the call without retaining pointers."))
+      (foreign tc_fire (nullable 1) (nullable 2) (nullable 3)
+        (obligation "Reads take, keep, and inst arrays for the duration of the call without retaining pointers."))
+      (foreign tc_term
+        (obligation "Returns the Term of a live occurrence without side effects."))
+      (foreign tc_last_extra
+        (obligation "Returns the extra made occurrence at index 0..3 from the last firing."))
+      (foreign tc_cursor_next_raw
+        (obligation "Advances the candidate cursor by one prepared step without retaining the output pointer.")))
+    (native "
+#include \"tcalc.h\"
+
+void tc_clear_receipt(TcAdmissionReceipt *receipt) {
+  if (!receipt) return;
+  receipt->admitted = false;
+  receipt->rule = 0;
+  receipt->out = 0;
+  receipt->nextra = 0;
+  receipt->extra[0] = 0;
+  receipt->extra[1] = 0;
+  receipt->extra[2] = 0;
+  receipt->extra[3] = 0;
+  receipt->out_term = 0;
+}
+
+bool tc_commit_prepared(const TcPreparedStep *step, TcAdmissionReceipt *receipt) {
+  tc_clear_receipt(receipt);
+  if (!step) return false;
+  int r = step->rule;
+  if (r < 0 || r >= tc_rule_count()) return false;
+  Occ out = 0;
+  if (step->dest && (tc_rule_fibre(r) & FIBRE_FLAT) && !step->take && step->nseeds <= 0) {
+    out = tc_flat_fire(r, step->keep, step->inst, step->dest);
+  } else if (step->nseeds > 0) {
+    out = tc_fire_reach(r, step->take, step->keep, step->inst, step->seeds, step->nseeds);
+  } else {
+    out = tc_fire(r, step->take, step->keep, step->inst);
+  }
+  if (!out) return false;
+  if (receipt) {
+    receipt->admitted = true;
+    receipt->rule = r;
+    receipt->out = out;
+    receipt->out_term = tc_term(out);
+    uint8_t ne = 0;
+    Occ e0 = tc_last_extra(0);
+    if (e0) { receipt->extra[0] = e0; ne = 1; }
+    Occ e1 = tc_last_extra(1);
+    if (e1) {
+      if (ne == 0) receipt->extra[0] = e1;
+      else receipt->extra[1] = e1;
+      ne = (uint8_t)(ne + 1);
+    }
+    Occ e2 = tc_last_extra(2);
+    if (e2) {
+      if (ne == 0) receipt->extra[0] = e2;
+      else if (ne == 1) receipt->extra[1] = e2;
+      else receipt->extra[2] = e2;
+      ne = (uint8_t)(ne + 1);
+    }
+    Occ e3 = tc_last_extra(3);
+    if (e3) {
+      if (ne == 0) receipt->extra[0] = e3;
+      else if (ne == 1) receipt->extra[1] = e3;
+      else if (ne == 2) receipt->extra[2] = e3;
+      else receipt->extra[3] = e3;
+      ne = (uint8_t)(ne + 1);
+    }
+    receipt->nextra = ne;
+  }
+  return true;
+}
+
+int tc_step_cursor(TcCandidateCursor *cursor, TcAdmissionReceipt *receipt) {
+  tc_clear_receipt(receipt);
+  if (!cursor || !cursor->next) return -1;
+  const TcCandidateCursor *c = cursor;
+  for (;;) {
+    TcPreparedStep cand = { 0, 0, 0, 0, 0, 0, 0 };
+    if (!tc_cursor_next_raw(c, &cand)) break;
+    if (tc_commit_prepared(&cand, receipt)) return 1;
+  }
+  return 0;
+}
+")))

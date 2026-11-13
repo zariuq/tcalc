@@ -1,0 +1,5 @@
+A : Type.
+a : A.
+def k : ((A -> A) -> A -> A) -> A.
+[] k (f => y => f y) --> a.
+#ASSERT k (h => z => h z) == a.

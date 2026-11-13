@@ -1,0 +1,25 @@
+(; expect 0 --type-lhs ;)
+(; Positive control under --type-lhs: constraints under the pattern's binders that a later rule (or
+   an instance) can satisfy are not refuted.  b y y == y (b definable: a rule b x x --> x would
+   make it hold), Y y == y (Y := z => z), b x y == X x y (X := b): each rule is admitted.  Then the
+   rule for b is added: the first left-hand side has a typable instance; the second rule fires. ;)
+A : Type.
+T : A -> Type.
+t : a : A -> T a.
+a : A.
+def b : A -> A -> A.
+c : A -> A -> A.
+
+def d1 : X : (A -> A -> A) -> (x : A -> y : A -> T y) -> Type.
+[X] d1 (x => y => X x y) (x => y => t (b y y)) --> A.
+
+def d2 : Y : (A -> A) -> (x : A -> y : A -> T y) -> Type.
+[Y] d2 (y => Y y) (x => y => t (Y y)) --> A.
+
+def d3 : X : (A -> A -> A) -> (x : A -> y : A -> T (b x y)) -> Type.
+[X] d3 (x => y => X x y) (x => y => t (X x y)) --> A.
+
+[x] b x x --> x.
+#ASSERT d1 (x => y => c x y) (x => y => t (b y y)) : Type.
+#ASSERT d2 (y => y) (x => y => t y) : Type.
+#ASSERT d2 (y => y) (x => y => t y) == A.

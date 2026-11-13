@@ -1,0 +1,12 @@
+(; expect 0 ;)
+(; Positive control: a is used at two positions, of types Univ s1 and Univ s2.  Its type is pinned
+   by the first position (a constant-headed application), so every typable instance makes
+   Univ s1 == Univ s2: the rule is typed under that hypothesis.  The right-hand side then uses a
+   where Univ s2 is expected. ;)
+Sort : Type.
+Univ : Sort -> Type.
+bool : Type.
+true : bool.
+def id : s : Sort -> Univ s -> Univ s.
+def eq : s1 : Sort -> s2 : Sort -> Univ s1 -> Univ s2 -> Univ s2.
+[s1, s2, a] eq s1 s2 a a --> id s2 a.

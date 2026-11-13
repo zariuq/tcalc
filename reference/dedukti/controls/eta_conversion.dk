@@ -1,0 +1,10 @@
+(; expect 0 --eta ;)
+(; With --eta, f and x => f x are convertible, and a type that needs it is accepted. ;)
+A : Type.
+f : A -> A.
+g : A -> A.
+P : (A -> A) -> Type.
+p : P f.
+def q : P (x => f x) := p.
+#ASSERT (x : A => f x) == f.
+#ASSERTNOT (x : A => g x) == f.

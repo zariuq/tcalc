@@ -1,0 +1,5 @@
+(; A name qualified with the file's own module is the local name. ;)
+A : Type.
+a : A.
+def b : A := p22_own_module_name_ok.a.
+#ASSERT b == a.

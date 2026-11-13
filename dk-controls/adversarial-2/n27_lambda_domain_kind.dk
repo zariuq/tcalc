@@ -1,0 +1,3 @@
+(; Abstraction over a kind-sorted domain is outside the lambda-Pi calculus. ;)
+A : Type.
+def k : (A -> Type) -> Type := F : (A -> Type) => A.

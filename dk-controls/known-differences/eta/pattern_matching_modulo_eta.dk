@@ -1,0 +1,22 @@
+(; expect dk=1 complete=0 ;)
+(; Checked with --eta.
+
+   With eta in the conversion, `c` and `x => y => c x y` are the same term, so `g c` is an
+   instance of the left-hand side below modulo eta and rewrites to `c a b`.
+
+   dk_tcalc --eta (complete matching, the default) matches patterns modulo eta: a target that
+   is not an abstraction stands for its eta-expansion, and the assertion holds.  dk check --eta
+   uses eta in the conversion test only, not in matching: `g c` stays as it is and the
+   assertion fails; dk_tcalc --eta --dk-matching does the same.
+
+   Without --eta both refuse this file. ;)
+
+A : Type.
+a : A.
+b : A.
+c : A -> A -> A.
+def g : (A -> A -> A) -> A.
+
+[F] g (x => y => F x y) --> F a b.
+
+#ASSERT g c == c a b.

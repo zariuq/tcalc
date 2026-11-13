@@ -1,0 +1,43 @@
+(cesta native-c/1 compact-c/2
+  (unit
+    (ownership (check-all)
+      (record TcPreparedStep
+        (field take (borrow read nullable))
+        (field keep (borrow read nullable))
+        (field inst (borrow read nullable))
+        (field seeds (borrow read nullable)))
+      (record TcCettaCandidateState
+        (field candidate (borrow read nullable)))
+      (callback TcCettaRecordedNext (targets tc_cetta_recorded_read))
+      (function tc_cetta_recorded_read
+        (returns-borrow 0 candidate nullable))
+      (function tc_cetta_cursor_advance (nullable 0) (nullable 1)
+        (returns-borrow 0 nullable)))
+    (native "
+#include \"bridge/tc_cetta_bridge.h\"
+
+typedef struct {
+  const TcPreparedStep *candidate;
+  size_t position, limit;
+} TcCettaCandidateState;
+typedef const TcPreparedStep *(*TcCettaRecordedNext)(TcCettaCandidateState *);
+
+static const TcPreparedStep *tc_cetta_recorded_read(TcCettaCandidateState *state) {
+  if (!state->candidate || state->position >= state->limit) return NULL;
+  ++state->position;
+  return state->candidate;
+}
+")
+    (use-macros "../../cesta/macros/Records.module" Cursors)
+    (state-cursor TcPreparedStep TcCettaCandidateState TcCettaRecordedNext candidate
+            TcCettaBorrowCursor tc_cetta_borrow_cursor_next)
+    (native "
+const TcPreparedStep *tc_cetta_cursor_advance(const TcPreparedStep *input,
+                                            size_t *position, size_t limit) {
+  if (!position) return NULL;
+  TcCettaBorrowCursor cursor = {{input, *position, limit}, tc_cetta_recorded_read};
+  const TcPreparedStep *candidate = tc_cetta_borrow_cursor_next(&cursor);
+  *position = cursor.ctx.position;
+  return candidate;
+}
+")))

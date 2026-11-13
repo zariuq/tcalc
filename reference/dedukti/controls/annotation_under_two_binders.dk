@@ -1,0 +1,15 @@
+(; expect 1 ;)
+(; Negative control, annotation_under_binder.dk two binders deep: x is annotated with T, but its
+   position (the body of z => w => x, where K z w is expected) gives it the type U0, since K z w
+   reduces to U0.  An instance need not respect the annotation: g (f (z => w => u0)), of type T,
+   would rewrite to u0, of type U0.  The obligation through nested abstractions is made only at a
+   constant-headed body, never at a pattern variable. ;)
+U0 : Type.
+T : Type.
+D : Type.
+u0 : U0.
+def K : D -> D -> Type.
+[z, w] K z w --> U0.
+f : (z : D -> w : D -> K z w) -> T.
+def g : T -> T.
+[x : T] g (f (z => w => x)) --> x.

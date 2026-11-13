@@ -1,0 +1,7 @@
+(; expect 0 --coc ;)
+(; Abstraction over Type is the Calculus of Constructions (Dedukti's --coc); lambda-Pi refuses it
+   (see lambdapi_no_polymorphism.dk). ;)
+def id : A : Type -> A -> A := A : Type => x : A => x.
+N : Type.
+z : N.
+#ASSERT id N z == z.

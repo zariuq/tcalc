@@ -1,0 +1,3 @@
+hoisted-image runs equal to the reference: 158680
+seeds: 12 x 20000 programs; exits: 12 of 12 zero
+seconds: 6

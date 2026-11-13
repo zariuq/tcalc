@@ -1,0 +1,546 @@
+Native record plans: nat_step's 29 clauses as driver plans
+===========================================================
+
+Each HOLR record kind is handled by a plan: data in the driver's plan
+language (driver.ml, drv_sem), run by the record loop (records.ml,
+REC_CORRECT) after the decode plan. This file fixes the plans, the leaves
+they call, the representation of the native state in memory, and the
+theorems that close the ledger's NATIVE_RUN and PLAN_STEPS_OK items.
+
+HOL: tcalc/native/hol/plans_abs.ml (the abstract machine, the plans as
+data, PL_<KIND> theorems), plans_leaves.ml (the new leaves' functional
+specifications), plans_drv.ml (drv_sem against the abstract machine, and
+PL_<KIND>_DRV through the driver), ledger_plans.ml (LEDGER.txt part 4).
+
+
+1. The plan language, as the plans use it
+-----------------------------------------
+A step is 18 words (driver.ml): word 0 the leaf index; words 1..9 binding
+slots, one per region the leaf declares (region r's base is bw(slot), its
+length bw(slot + 1)); words 10, 11 the control words copied to arg0 and arg1
+(frame words 22, 23); words 12..16 the control words copied to v1..v5; word
+17 the control word that receives the payload (frame word 19). A plan is a
+list of steps run in order; the first outcome other than FIRED ends it with
+that outcome (drv_sem). Leaves see only their regions, their two arguments
+and v1..v5; every value a plan computes lives in a control word.
+
+The abstract machine (plans_abs.ml) holds the control words as numbers,
+the values of the driver's 64-bit words; the bridge (plans_drv.ml) reads
+each payload word by val.
+
+Outcomes: FIRED 1, REFUSED 0, UNSUPPORTED 2 (resource: a table full),
+INVALID_INPUT 3, EXHAUSTED 4. A record whose clause's guards fail is
+REFUSED, at the step that checks the failing guard. No leaf pays fuel.
+
+Order inside every plan: liveness and shape checks first (pure or
+read-only leaves, which never return UNSUPPORTED on related states), then
+the writes (interning, appends, marks). So a plan REFUSES exactly when a
+guard fails, and REFUSES before it writes anything.
+
+
+2. Fixed numbering
+------------------
+Leaf table (index: program; * = exists):
+   0 intern16*   1 pack       2 unpack      3 eqw         4 row_word
+   5 live        6 append_row 7 hyps_union  8 hyps_find   9 put_word
+  10 hyps_remove 11 ty_list   12 ty_match   13 bind_walk* 14 vfree_hyps
+  15 tyinst      16 vsubst    17 db_closed  18 tyvars_sub 19 tyvars_params
+  20 pol_max     21 ax_ok     22 fnv*       23 intern_name* 24 leb128* (reader)
+
+Binding slots (bw indices; region base bw(s), length bw(s+1)):
+   0 TYR type rows     2 TYS type slots    4 TYC type count
+   6 DBR db rows       8 DBS db slots     10 DBC db count
+  12 TMR term rows (40 B: tag, a, b, type, image)   14 TMC term count
+  16 TMD term marks (one word per id: 0 live, else dropped)
+  18 THR theorem rows (16 B: hypothesis list, conclusion)  20 THC count
+  22 THD theorem marks  24 YMR Y map  26 YMC Y count  28 YMD Y marks
+  30 NMR N map  32 NMC N count  34 NMD N marks (all zero: names are never
+  dropped)  36 FLG name flags (2 words per name row: 1 + 8 arity for a
+  declared type else 0; 1 + 8 g for a constant of generic type row g else
+  0; zero-initialised, one row per name-row capacity)  38 FLC its capacity
+  40 STK operand stack  42 WRK work  44..52 intern_name's regions
+  54 INP input  56 NUL an empty region (unused regions bind to it)
+
+Control words:
+   0..6   K0..K6 = 0..6. They double as the bootstrap rows the plans name:
+          name rows 0 bool, 1 fun, 2 =; type rows 0 nil, 1 bool,
+          3 [bool]; de Bruijn row 0 nil; strides 2 and 5; tags 0..6.
+   7      POL, the policy
+   8..11  OP0..OP3, the record's fixed operands (raw HOLR ids, in format
+          order); 12 NL and 13 LS, a list operand's length and its first
+          word in the operand stack
+  14..16  AX1..AX3, the images of HOL's three axioms once the standard
+          theory is in place (0 before)
+  17..22  the reader's words (section 10): CNT, OPC, ENDW, HDR, RST, FNVB
+  24..    T0, T1, ... temporaries; a record plan writes only temporaries
+          (and POL); the reader's plans write its words
+
+
+3. The representation: plan_rel and pl_inv
+------------------------------------------
+plan_rel bw ctl nctl cfr m (cw, ns, stk) (plans_rel.ml) relates the memory
+m of a plan's run to the abstract state:
+  - pl_layout: the regions of slots 0..22, 40, 42 do not wrap, lie apart
+    from one another, from the control words and from the driver's stack
+    window around cfr; the interners' minimum sizes; mark regions large
+    enough for every row their row region can hold;
+  - control words: 7 <= nctl, words 0..6 hold 0..6, and word k (k < nctl)
+    is cw k;
+  - pl_itab (HANDLER_TABLE_REPRESENTATION for the interners): the regions of
+    slots 0, 2, 4 (types) and 6, 8, 10 (de Bruijn terms) hold a well-formed
+    intern16 table (intern_ok) whose row i is tys (dbs) row i, read back from
+    the packed key as (k0 MOD 8, k0 DIV 8, k1);
+  - pl_rtab and pl_marks: the term rows (5 words, slots 12, count 14) and
+    theorem rows (2 words, slots 18, count 20) hold ntms and ths; their marks
+    (16, 22) are 0 exactly for the live ids, zero beyond the count, and no
+    id at or beyond the count is dropped;
+  - pl_stk: the operand stack (slot 40) holds stk.
+Y map, N map, flags and names come with the records that use them.
+The abstract invariant pl_inv (plans_abs.ml) is what the plans keep:
+nat_ok and a simulated HOLR state; K0..K6; the bootstrap rows above;
+canonical keys and no duplicate rows (nat_keys, keys_distinct:
+HANDLER_CANONICAL_KEYS); tables below 2^60 rows; every theorem row's
+hypotheses a sorted (strictly increasing ids) list row.
+
+
+4. Fragments (step macros)
+--------------------------
+  F(tbl, i, w) -> x        row_word tbl i Kw (v1 the stride, K2 or K5)
+  ITY(tag, a, b) -> x      pack a Ktag; intern16 TY (key, b)      2 steps
+  IDB(tag, a, b) -> x      the same on DB                         2 steps
+  SPLIT(tbl, r, tag) -> (a, b)
+                           F(tbl,r,0); unpack _ Ktag [REFUSED: tag];
+                           F(tbl,r,1)                              3 steps
+  EQPARTS(c) -> (e, q, l, r, ty)   c is l = r at ty:
+                           SPLIT(DB,c,3)->(e,r); SPLIT(DB,e,3)->(q,l);
+                           SPLIT(DB,q,2)->(nm,ty); eqw nm K2      10 steps
+  FUNARGS(y) -> (d, c)     y is d -> c: SPLIT(TY,y,1)->(nm,ls); eqw nm K1;
+                           SPLIT(TY,ls,3)->(d,rs); SPLIT(TY,rs,3)->(c,tl);
+                           eqw tl K0                               11 steps
+  FUNTY(a, b) -> f         ITY(3,b,K0); ITY(3,a,_); ITY(1,K1,_)     6 steps
+  EQTY(y) -> e             y->y->bool: ITY(3,y,K3) [y;bool]; ITY(1,K1,_);
+                           ITY(3,_,K0); ITY(3,y,_); ITY(1,K1,_)    10 steps
+  EQBUILD(y, l, r) -> k    EQTY(y)->e; IDB(2,K2,e); IDB(3,_,l); IDB(3,_,r)
+                                                                   16 steps
+  LIVE(sp, id)             live sp id [REFUSED: not live]          1 step
+  MAPGET(m, id) -> x       row_word m id K0 (stride K1)            1 step
+Fragments that only read REFUSE or FIRE; ITY, IDB, EQBUILD, FUNTY never
+REFUSE (FIRED or UNSUPPORTED).
+
+
+5. Leaves
+---------
+Existing: intern16 (INTERN16_TISA_RUN_COMPLETE, _APPEND_ABSENT; regions
+rows, slots, count; arg0 k0, arg1 k1; its abstract FIRED outcome is one
+fact, pl_interned: the key's row found, or appended when absent, so a chain
+of interns does not multiply the branches of a run), fnv and intern_name (DRV_NAME_TWO),
+leb128 (reader), bind_walk (BIND_WALK_SOUND, BIND_WALK_CANONICAL; regions
+rows, slots, header, work; arg0 the name row x, arg1 the type row, v1 the
+body's image).
+
+New: exact specifications in tcalc/native/hol/plans_leaves.ml, each
+pl_<leaf>_spec prog over tisa_run prog; with the uniform image theorem
+tisa_leaf_spec prog mc pc they are what DRV_CORRECT needs of a leaf. Each:
+  pack        pl_pack_spec        no regions; payload tag + 8a; UNSUPPORTED
+                                  unless a < 2^60, tag < 8
+  unpack      pl_unpack_spec      REFUSED unless k0 MOD 8 = tag; payload
+                                  k0 DIV 8
+  eqw         pl_eqw_spec         REFUSED unless arg0 = arg1
+  row_word    pl_row_word_spec    rows (ro), count (ro); v1 stride; payload
+                                  word w of row i
+  live        pl_live_spec        count (ro), marks (ro); FIRED exactly when
+                                  id < count and its mark is 0
+  append_row  pl_append_row_spec  rows (rw), count (rw); v1 width 1..5;
+                                  words arg0 arg1 v2 v3 v4; payload index
+  put_word    pl_put_word_spec    table (rw), count (ro); v1 stride, v2 the
+                                  word; word w of row i := arg1
+  hyps_union  pl_hyps_union_spec  intern16's regions + work; sorted union of
+                                  two sorted lists; cells appended only on
+                                  FIRED, each over earlier rows
+  hyps_remove pl_hyps_remove_spec the same; the list without arg1
+  hyps_find   pl_hyps_find_spec   db table (ro), term rows, count, marks,
+                                  stack (ro), work; the sorted list of the
+                                  listed terms' images when it is a row and
+                                  every listed term is live and of type bool
+                                  (type row 1); adds no row
+  ty_list     pl_ty_list_spec     type table (rw), Y map, count, marks,
+                                  stack, work; the type list of the listed
+                                  Y ids' rows; REFUSED when one is not live
+  ty_match    pl_ty_match_spec    type table (ro), work; FIRED exactly when
+                                  arg1's type is an instance of arg0's
+  vfree_hyps  pl_vfree_hyps_spec  db table (ro), work; FIRED exactly when
+                                  dbVar(arg1, v1) is free in no element of
+                                  the list arg0
+  db_closed   pl_db_closed_spec   db table (ro), work; FIRED exactly when no
+                                  dbVar occurs in row arg0
+  pol_max     pl_pol_max_spec     no regions; REFUSED unless p <= 2; payload
+                                  MAX pol p
+  ax_ok       pl_ax_ok_spec       no regions; FIRED under OPEN, or under
+                                  STANDARD for the images in v1..v3
+  tyinst, vsubst, tyvars_sub, tyvars_params: section 6 (INST_TYPE, INST,
+  NEW_DEFINITION, NEW_TYPEDEF) gives their contracts; their HOL texts come
+  with those records' proofs (they need hdbINST, hdbVSUBST, htvars over
+  rows, stated as BIND_WALK_SOUND states hbind).
+
+
+6. The plans
+------------
+Notation: one line per step or fragment; "-> X" the payload's control word;
+[R: ...] the steps that REFUSE and the guard they check. Every plan ends by
+appending its result with append_row (width 2 theorem rows, 5 term rows, 1
+map entries). Ledger: every plan discharges, for its kind, NATIVE_RUN's
+step (the plan's run is the clause's nat_step), HANDLER_TABLE_REPRESENTATION
+(plan_rel kept), HANDLER_CANONICAL_KEYS (every interned key is packed from
+existing row ids, its ignored fields zero: ty_key_ok, db_key_ok at its
+index) and HANDLER_DB_DECODES (every appended de Bruijn row is a cell or
+node over rows that decode); PLAN_STEPS_OK is a computation per plan once
+the host's layout bw is fixed (drv_step_ok of each step).
+
+ 1 NAME bs            (OP0 offset, OP1 length of the name in the input)
+     fnv INP OP0 OP1 (v1 the offset basis) -> T0   [R: outside the input]
+     intern_name INP+names OP0 OP1 (v1 T0) -> T1
+     append_row NMR (T1) -> T2
+   relies on: fnv, intern_name (DRV_NAME_TWO; NAME_APPENDED_ABSENT gives
+   nat_new_names), append_row. Guards: none beyond the reader's.
+
+ 2 TYVAR n            LIVE(N, OP0) [R: n >= LENGTH nmap]; MAPGET(N,OP0)->a;
+     ITY(0, a, K0) -> y; append_row YMR (y)
+   relies on: live, row_word, pack, intern16, append_row.
+
+ 3 TYAPP n ys         LIVE(N,OP0); MAPGET(N,OP0) -> a; F(FLG,a,0) -> f;
+     pack NL K1 -> w; eqw f w   [R: n not a type of arity LENGTH ys]
+     ty_list STK LS NL -> l     [R: a Y operand not live]
+     ITY(1, a, l) -> y; append_row YMR (y)
+   relies on: + ty_list.
+
+ 4 VAR n y            LIVE(N,OP0); LIVE(Y,OP1); MAPGET(N,OP0)->a;
+     MAPGET(Y,OP1)->ty; IDB(0,a,ty)->d; append_row TMR (K0,a,ty,ty,d)
+
+ 5 CONST n y          LIVE(N,OP0); LIVE(Y,OP1); MAPGET(N)->a; MAPGET(Y)->ty;
+     F(FLG,a,1) -> f; unpack f K1 -> g   [R: not a constant]
+     ty_match g ty                       [R: not an instance]
+     IDB(2,a,ty)->d; append_row TMR (K1,a,ty,ty,d)
+   relies on: + ty_match.
+
+ 6 COMB s t           LIVE(TM,OP0); LIVE(TM,OP1); F(TM,OP0,3)->fs;
+     F(TM,OP1,3)->tt; FUNARGS(fs)->(A,B) [R: not a function];
+     eqw A tt [R: argument type]; F(TM,OP0,4)->is; F(TM,OP1,4)->it;
+     IDB(3,is,it)->d; append_row TMR (K2,OP0,OP1,B,d)
+
+ 7 ABS v t            LIVE(TM,v); LIVE(TM,t); F(TM,v,0)->tg;
+     eqw tg K0 [R: v not a variable]; F(TM,v,1)->x; F(TM,v,3)->ty;
+     F(TM,t,3)->tb; FUNTY(ty,tb)->yf; F(TM,t,4)->b;
+     bind_walk x ty (v1 b) -> d; append_row TMR (K3,v,t,yf,d)
+   relies on: + bind_walk (bw_ctx from nat_canon).
+
+ 8 REFL t             (plans_abs.ml, pl_plan_refl: 20 steps; PL_REFL)
+     LIVE(TM,OP0) [R: not live]; F(TM,OP0,3)->y;
+     F(TM,OP0,4)->d; EQBUILD(y,d,d)->k; append_row THR (K0,k)
+
+ 9 TRANS h1 h2        (plans_abs.ml, pl_plan_trans: 31 steps; PL_TRANS)
+     LIVE(TH,OP0); LIVE(TH,OP1); F(TH,OP0,1)->c1;
+     EQPARTS(c1)->(e1,_,_,m1,_) [R]; F(TH,OP1,1)->c2;
+     EQPARTS(c2)->(_,_,m2,r,_) [R]; eqw m1 m2 [R: middles differ];
+     IDB(3,e1,r)->k; F(TH,OP0,0)->h1; F(TH,OP1,0)->h2;
+     hyps_union h1 h2 -> hk; append_row THR (hk,k)
+
+10 MK_COMB h1 h2      (plans_abs.ml, pl_plan_mkcomb: 108 steps; PL_MKCOMB)
+     LIVE(TH)x2; c1, c2 as TRANS; EQPARTS(c1)->(_,_,f,g,T1);
+     EQPARTS(c2)->(_,_,a,b,T2); FUNARGS(T1)->(F,R1); FUNARGS(R1)->(F',B1);
+     eqw F' F; eqw B1 K1; FUNARGS(F)->(tx,ty); FUNARGS(T2)->(tx2,R2);
+     eqw tx2 tx; FUNARGS(R2)->(tx3,B2); eqw tx3 tx; eqw B2 K1
+     [R: the guards' type shapes]; IDB(3,f,a)->fa; IDB(3,g,b)->gb;
+     EQBUILD(ty,fa,gb)->k; hyps h1 h2 -> hyps_union -> hk; append_row THR
+
+11 ABS_RULE t h       LIVE(TM,t); LIVE(TH,h); F(TM,t,0)->tg; eqw tg K0
+     [R: not a variable]; F(TM,t,1)->x; F(TM,t,3)->ty; F(TH,h,1)->c;
+     EQPARTS(c)->(_,_,l,r,T); FUNARGS(T)->(A,R); FUNARGS(R)->(A',B);
+     eqw A' A; eqw B K1 [R]; F(TH,h,0)->hs; vfree_hyps hs x (v1 ty)
+     [R: x free in a hypothesis]; bind_walk x ty l -> dl; bind_walk x ty r
+     -> dr; FUNTY(ty,A)->Fy; EQBUILD(Fy,dl,dr)->k; append_row THR (hs,k)
+   relies on: + vfree_hyps, bind_walk.
+
+12 BETA t             LIVE(TM,t); F(TM,t,0)->tg; eqw tg K2 [R: not a
+     combination]; F(TM,t,1)->s; F(TM,t,2)->u; F(TM,s,0)->tg2; eqw tg2 K3
+     [R: not an abstraction]; F(TM,s,1)->v; F(TM,s,2)->b; F(TM,v,4)->iv;
+     F(TM,u,4)->iu; eqw iv iu [R: the argument is not the bound variable];
+     F(TM,t,3)->y; F(TM,t,4)->it; F(TM,b,4)->ib; EQBUILD(y,it,ib)->k;
+     append_row THR (K0,k)
+
+13 ASSUME t           (plans_abs.ml, pl_plan_assume: 7 steps; PL_ASSUME)
+     LIVE(TM,OP0) [R]; F(TM,OP0,3)->y; eqw y K1 [R: not of type bool];
+     F(TM,OP0,4)->p; pack p K6 -> c; intern16 DB (c,K0) -> hk;
+     append_row THR (hk,p)
+
+14 EQ_MP h1 h2        (plans_abs.ml, pl_plan_eqmp: 19 steps; PL_EQMP)
+     LIVE(TH)x2; F(TH,OP0,1)->c; EQPARTS(c)->(_,_,p,q,_)
+     [R]; F(TH,OP1,1)->c2; eqw p c2 [R: not th2's conclusion];
+     F(TH,OP0,0); F(TH,OP1,0); hyps_union -> hk; append_row THR (hk,q)
+
+15 DEDUCT h1 h2       LIVE(TH)x2; F(TH,OP0,1)->p; F(TH,OP1,1)->q;
+     F(TH,OP0,0)->h1; F(TH,OP1,0)->h2; hyps_remove h1 q -> a;
+     hyps_remove h2 p -> b; hyps_union a b -> hk; EQBUILD(K1,p,q)->k;
+     append_row THR (hk,k)
+   relies on: + hyps_remove.
+
+16 INST_TYPE ps h     LIVE(TH,h); every Y id of ps live (tyinst checks,
+     [R]); tyinst (mode term) concl -> k; tyinst (mode list) hyps -> hk
+     (images sorted); append_row THR (hk,k)
+   tyinst contract: regions type table and db table (rw, two interners:
+   9 regions with stack and work), the pairs in the stack; payload the row
+   of hdbINST tyin C, or the sorted list of hdbINST tyin of the hypotheses.
+
+17 INST ps h          LIVE(TH,h); LIVE(TM) of every term of ps and each
+     pair's second a Var row of the first's type (vsubst checks, [R]);
+     vsubst (term) -> k; vsubst (list) -> hk; append_row THR (hk,k)
+   vsubst contract: as tyinst with hdbVSUBST (MAP (hdb x, hdb y) ilist).
+
+18 EXPECT_ALPHA h hl c (plans_abs.ml, pl_plan_expect_alpha: 8 steps;
+     PL_EXPECT_ALPHA)
+     LIVE(TH,OP0) [R]; LIVE(TM,OP2) [R]; F(TH,OP0,1)->k; F(TM,OP2,4)->i;
+     eqw k i [R: the conclusion is not c's]; hyps_find LS NL -> l
+     [R: a listed term not live or not of type bool, or their images'
+     sorted list is not a row: then it is not the theorem's];
+     F(TH,OP0,0)->hs;
+     eqw l hs [R: the hypothesis sets differ]. No row is written.
+
+19 LABEL h n          LIVE(TH,OP0); LIVE(N,OP1)
+20 EMIT h             LIVE(TH,OP0)
+21 DROP_TYPE y        LIVE(Y,OP0); put_word YMD OP0 K1 (stride K1)
+22 DROP_TERM t        LIVE(TM,OP0); put_word TMD OP0 K1
+23 DROP_THM h         LIVE(TH,OP0); put_word THD OP0 K1
+24 POLICY p           pol_max POL OP0 -> POL [R: p > 2]
+25 NEW_TYPE n a       LIVE(N,OP0); MAPGET(N)->nm; F(FLG,nm,0)->f;
+     eqw f K0 [R: declared]; pack OP1 K1 -> w; put_word FLG nm w (word 0)
+26 NEW_CONSTANT n y   LIVE(N); LIVE(Y,OP1); MAPGET(N)->nm; MAPGET(Y)->ty;
+     F(FLG,nm,1)->f; eqw f K0 [R: declared]; pack ty K1 -> w;
+     put_word FLG nm w (word 1)
+27 NEW_AXIOM t        LIVE(TM,OP0); F(TM,OP0,3)->y; eqw y K1 [R: not
+     bool]; F(TM,OP0,4)->p; ax_ok POL p (v1..v3 AX1..AX3) [R: the policy];
+     append_row THR (K0,p)
+   STANDARD: AX1..AX3 are the images of hstd_axioms, written when the
+   standard definitions are in place (hstd_term); until then 0, so no
+   axiom passes under STANDARD before the standard theory.
+28 NEW_DEFINITION t   LIVE(TM,OP0); t is (Var c ty) = r at the named level:
+     F(TM,t,0) eqw K2; F(TM,t,1)->e; F(TM,t,2)->r; F(TM,e,0) eqw K2;
+     F(TM,e,1)->q; F(TM,e,2)->v; F(TM,q,0) eqw K1; F(TM,q,1) eqw K2;
+     F(TM,v,0) eqw K0; F(TM,v,1)->c; F(TM,v,3)->ty [R: not of the form];
+     F(FLG,c,1) eqw K0 [R: c declared]; F(TM,r,4)->ir; db_closed ir
+     [R: r not closed]; tyvars_sub ir ty [R: a type variable of r not in
+     ty]; IDB(2,c,ty)->cc; EQBUILD(ty,cc,ir)->k; append_row THR (K0,k);
+     pack ty K1; put_word FLG c _ (word 1)
+   relies on: + db_closed, tyvars_sub (FIRED exactly when every type
+   variable of the image's types is one of ty's).
+29 NEW_TYPEDEF n a r h  LIVE(TH,h); F(TH,h,0) eqw K0 [R: hypotheses];
+     F(TH,h,1)->c; SPLIT(DB,c,3)->(P,x) [R]; db_closed P [R]; the three
+     names fresh (flags, eqw K0) and a, r distinct [R]; tyvars_params P ->
+     ps (the sorted type variables of P, as TyVar rows of a type list);
+     ITY(1,n_row,ps) -> nty; the images of htydef_abs and htydef_rep
+     (FUNTY, EQBUILD and IDB fragments over nty, x's type, P, x) -> k1, k2;
+     append_row THR (K0,k1); append_row THR (K0,k2); flags: n (arity
+     LENGTH ps), a and r (their generic types).
+   relies on: + tyvars_params (names sorted by their bytes: it reads the
+   names table).
+
+
+7. Refinement statements
+------------------------
+Abstract (plans_abs.ml), per kind with plan P and operands in OP0..:
+  PL_<KIND>: pl_inv (cw,ns,stk) /\ <operands in cw> /\
+             pl_run P 0 (cw,ns,stk) (k,i,(cw',ns',stk'))
+             ==> (k = 1 ==> nat_step ns r ns' /\ pl_inv (cw',ns',stk')) /\
+                 (k = 0 <=> ~<the clause's guards>)
+  proved for ASSUME, REFL, TRANS, EQ_MP, MK_COMB and EXPECT_ALPHA. Each
+  proof runs the plan symbolically (PL_RUN_TAC: one branch for each outcome
+  a leaf can have given the branch's facts), closes every REFUSED and
+  UNSUPPORTED branch with the kind's guard lemma (PL_<KIND>_GUARDS: the
+  clause's guards, stated over decoded terms, are exactly the row
+  conditions the plan checks) and the FIRED branch with its FIRED lemma
+  (the rows the plan reads and interns make the clause's nat_step, and
+  pl_inv is kept).
+Concrete (plans_drv.ml), for any relation prel between memory and
+abstract states:
+  PL_DRV_BRIDGE: if every step of P implements its leaf under prel
+    (pl_impl), drv_sem's run of P from m with prel m s is a pl_run of P
+    from s, step for step: outcome word k with k < 8, the same ending step,
+    the receipt within the allowance (a leaf may pay fuel), and the final
+    memory related when the plan FIRED (pl_impl asks the relation after a
+    step only when the step FIRED: any other outcome ends the plan);
+  PL_DRV_GENERIC: what pl_run's FIRED runs satisfy and the condition for
+    REFUSED carry over to drv_sem's run;
+  PL_<KIND>_DRV: the six kinds through the driver, with one premise per
+    leaf the plan calls (pl_leaf_impl prel ... P n, OPEN as LEAF_<name> in
+    LEDGER.txt part 4).
+With prel = plan_rel (plans_rel.ml) the built leaves are bridged: for
+each binding the plans use, PL_IMPL_<leaf>_<table> proves pl_impl from the
+leaf's functional theorems (intern16 from INTERN16_TISA_RUN_COMPLETE,
+INTERN16_TISA_RUN_APPEND_ABSENT and TISA_RUN_STATUS; pack, unpack, eqw,
+row_word, live and append_row from their PL_<LEAF>_SPEC). PL_LEAF_<KIND>_
+<LEAF> then gives each plan's leaf premise under the host's leaf table
+(pl_progs_ok) and the control-word range, and PL_<KIND>_REL is each kind's
+theorem through the driver under plan_rel. hyps_union and hyps_find are not
+built yet: EQ_MP, TRANS, MK_COMB keep LEAF_hyps_union, EXPECT_ALPHA keeps
+LEAF_hyps_find. Still OPEN in part 4: the record loop's composition
+(DRIVER_RUN, PLAN_REL_BEFORE, BUDGET), the reader (READER_DECODES), pl_inv
+of the bootstrap state, PLAN_STEPS_OK.
+
+
+8. What the plan language lacks
+-------------------------------
+Nothing the records need, given these conventions:
+  - no immediate operands: constants sit in control words 0..6 (section 2);
+  - one payload per step: decompositions take several steps (EQPARTS 10,
+    FUNARGS 11; MK_COMB's plan is 108 steps, 60 of them its type checks:
+    five FUNARGS and five eqw);
+  - no branch or loop in the driver: list operands (TYAPP, INST_TYPE,
+    INST, EXPECT_ALPHA) are walked by leaves from the operand stack; this
+    needs the decode plan to leave a record's list operands in the stack
+    with LS and NL set (a requirement on the reader, READER_DECODES).
+Two properties of the conventions, not gaps:
+  - interned rows may outlive a plan that does not fire. intern16 publishes
+    its count on every append, so a plan that interns and then ends with
+    another outcome leaves those rows behind. They carry no claim: no
+    theorem row is written before a plan's last step (append_row THR), every
+    interned row is canonical and decodes (HANDLER_CANONICAL_KEYS,
+    HANDLER_DB_DECODES hold row by row, not per plan), and the record loop
+    stops at the first record that does not fire, so the run is not
+    accepted. A REFUSED record leaves none: its checks come first. A retry
+    after the host grows the tables finds those rows by interning instead
+    of adding them again. Plans are therefore not transactions, and
+    intern16 keeps its proved contract; a private count published by a last
+    step would complicate that contract with no gain in soundness;
+  - a leaf's work region is shared by the walk leaves and is never
+    trusted across calls (bind_walk's convention).
+
+
+9. New leaves, by the records they unblock
+------------------------------------------
+  row_word    26 records     live       25    append_row 20
+  pack        18             eqw        17    unpack     10
+  put_word     7 (DROP_*, NEW_TYPE, NEW_CONSTANT, NEW_DEFINITION, NEW_TYPEDEF)
+  hyps_union   4 (TRANS, MK_COMB, EQ_MP, DEDUCT)
+  db_closed    2   ty_list 2   then one each: hyps_find (EXPECT_ALPHA),
+  hyps_remove (DEDUCT), ty_match (CONST), vfree_hyps (ABS_RULE), tyinst
+  (INST_TYPE), vsubst (INST), tyvars_sub (NEW_DEFINITION), tyvars_params
+  (NEW_TYPEDEF), pol_max (POLICY), ax_ok (NEW_AXIOM).
+The first eight (row_word, live, append_row, pack, eqw, unpack, hyps_union,
+hyps_find) with intern16 cover REFL, ASSUME, TRANS, EQ_MP, MK_COMB,
+EXPECT_ALPHA, BETA, LABEL and EMIT; with put_word, also DROP_* and the
+theory records NEW_TYPE and NEW_CONSTANT; with fnv, intern_name (built)
+NAME and TYVAR, VAR, COMB; bind_walk (built) adds ABS.
+
+
+10. The reader: header, opcodes, operands, END
+----------------------------------------------
+The record loop (records.ml, rec_run) runs the decode plan dd, reads the
+opcode word at opa, runs the handler the table ht names for it (UNSUPPORTED
+when none), and ends FIRED once a handler has set the END word at enda. No
+plan reads the stream yet: section 6's plans start from operands already in
+OP0..OP3, NL, LS (READER_DECODES). The reader is plans too:
+
+Persistent control words (no plan uses them as temporaries, which start
+at 24): 17 CNT records decoded, 18 OPC the opcode (opa = ctl + 8 * 18),
+19 ENDW the END word (enda = ctl + 8 * 19), 20 HDR 1 once the header is
+checked, 21 RST the offset of the record's first byte; the host zeroes
+them. 22 FNVB holds FNV-1a's offset basis (written by the host, never by a
+plan).
+The input is slot 54 (read-only); the reader's state is a 16-byte region at
+slot 58 (word 0 the cursor, word 1 work); the header constant (the 39 bytes
+after "H": the rest of the magic and the kernel id) is slot 60.
+
+New leaves (exact HOL texts go to plans_leaves.ml with the leaves):
+  cur        regions state (ro); payload the cursor.                   FIRED
+  leb_next   regions input (ro), state (rw); the minimal LEB128 at the
+             cursor, value < 2^62: FIRED with the value, cursor advanced
+             by its length; REFUSED when malformed or short (leb128's
+             contract, with the cursor in the state region).
+  ids_next   regions input (ro), state (rw), stack (rw); a count n and n
+             LEB128 values at the cursor: FIRED with n, the values in stack
+             words 0 .. n - 1, cursor advanced; REFUSED as leb_next.
+  skip       regions input (ro), state (rw); arg0 n: FIRED, cursor + n,
+             when cursor + n <= the input's length; else REFUSED.
+  le8_next   regions input (ro), state (rw); the 8 bytes at the cursor
+             read little-endian: FIRED with them, cursor + 8; else REFUSED.
+  at_end     regions input (ro), state (ro); FIRED exactly when the cursor
+             is the input's length, else REFUSED.
+  const_next regions input (ro), state (rw), constant (ro): FIRED exactly
+             when the bytes at the cursor are the constant's, cursor
+             advanced past them; else REFUSED.
+  inc        no regions; arg0 a: FIRED with a + 1 when a + 1 < 2^62, else
+             UNSUPPORTED.
+Existing: fnv (arg0 offset, arg1 length, v1 the offset basis),
+intern_name, eqw, and pol_max (section 5).
+
+Plans:
+  dd (decode)  cur -> RST; leb_next -> OPC.  2 steps; REFUSED when the
+               opcode is not a minimal LEB128 at the cursor (a byte below
+               128 is its own value).
+  H (72, "H")  eqw HDR K0 [R: header seen]; eqw CNT K0; const_next;
+               leb_next eqw K1 (version 1); leb_next eqw K0; leb_next ->
+               p; pol_max K0 p -> POL [R: p > 2]; leb_next eqw K0 (flags,
+               strict); eqw K1 K1 -> HDR.
+  record kind K, opcode c (holr_rec_enc's)  eqw HDR K1 [R: no header];
+               the operands in format order: leb_next -> OP0 .. OPn, or
+               ids_next -> NL for a list (LS is K0: lists start at stack
+               word 0; eqw K0 K0 -> LS), NAME: leb_next -> len; cur -> off;
+               fnv INP off len (v1 FNVB) -> h; intern_name off len h; skip
+               len; then section 6's plan
+               for K; inc CNT -> CNT.
+  END (127)    eqw HDR K1; fnv INP K0 RST (v1 FNVB) -> h;
+               leb_next -> n; eqw n CNT [R: count]; le8_next -> c; eqw h c
+               [R: checksum]; at_end [R: trailing bytes]; eqw K1 K1 -> ENDW.
+  Every other opcode: no handler (UNSUPPORTED).
+
+Theorem (READER_DECODES, to prove from the leaves' specifications and
+plan_rel with a reader component: input bytes, cursor, CNT, RST, HDR): a run
+of the record loop that ends FIRED has decoded bytes = holr_stream pol 0
+recs, with pol the header's policy, and for every record the handler of its
+opcode FIRED from operands placed as section 6's plans read them.
+
+What the first end-to-end fragment needs beyond REFL, ASSUME, EXPECT_ALPHA:
+the initial native state has no terms and no theorems (NAT_ACCEPTS_SOUND
+starts from empty term and theorem tables), so every REFL, ASSUME or
+EXPECT_ALPHA record of a stream made only of them refuses; accepted streams
+of that fragment are header and END alone. Records that make terms are
+needed for the theorem to cover anything else: NAME, TYAPP (ty_list) or
+TYVAR, and VAR for REFL and ASSUME of a variable (ASSUME needs a bool term,
+so TYAPP "bool" []); EMIT to deliver a theorem (HOLR_ACCEPTS_SPEC's specs).
+
+
+11. The end-to-end theorem: what it takes
+-----------------------------------------
+Target: from a host memory meeting the host's obligations, a run of the
+proved record loop (REC_CORRECT) that ends FIRED has bytes = holr_stream pol
+0 recs (READER_DECODES) and tc_path nat_step recs from the bootstrap state
+(NATIVE_RUN), so NAT_ACCEPTS_SOUND gives holr_accepts hpol bytes.
+
+Proof, by induction on rec_run with the invariant: after k records, the
+memory is related (plan_rel) to an abstract state s with pl_inv s, reached
+from the bootstrap state by tc_path nat_step over the k records decoded so
+far; the reader's state relation holds (input bytes, cursor at the end of
+those records' encodings, CNT = k, HDR set, POL the header's policy).
+  - dd: the opcode at the cursor (OPC), RST the record's first byte;
+  - the handler of a record kind: its operand prefix places the operands
+    the bytes encode (holr_rec_enc), then PL_<KIND>_REL gives the record's
+    nat_step and plan_rel after it, then inc CNT;
+  - END: the count, the FNV-1a of the body and the end of input give
+    bytes = holr_stream pol 0 recs; it sets ENDW and the loop ends FIRED;
+  - the header: magic and kernel id, version 1 0, policy at most 2, flags 0,
+    before any record (HDR, CNT 0).
+Pieces, named:
+  READER_LEAVES   cur, leb_next, ids_next, skip, le8_next, at_end,
+                  const_next, inc (pl_<leaf>_spec in plans_leaves.ml);
+  READER_REL      the reader's component of plan_rel (input region, state
+                  region, CNT, OPC, ENDW, HDR, RST, FNVB) and the bridges of
+                  the reader's leaves to it;
+  DRV_SEM_APPEND  drv_sem of P1 ++ P2 is drv_sem of P1, then of P2 when P1
+                  FIRED (a lemma of driver.ml's semantics);
+  PREFIX_<KIND>   each kind's operand prefix places its operands;
+  READER_PLANS    dd, the header plan and the END plan, and their theorems;
+  REC_INDUCTION   the induction over rec_run above;
+  BOOT            plan_rel and pl_inv of the bootstrap state, from the
+                  host's initial tables (HOST_TABLES);
+  ESCAPES         no handler for any other opcode (the table holds zeros).
+A stream of REFL, ASSUME and EXPECT_ALPHA records alone is refused at its
+first record (no terms or theorems exist yet), so the fragment is non-trivial
+only with NAME, TYAPP (ty_list) or TYVAR and VAR, and EMIT to deliver.

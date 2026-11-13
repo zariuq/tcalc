@@ -1,0 +1,13 @@
+(; expect dk=0 complete=1 ;)
+(; Checked with --eta.  The negative assertion of a match Dedukti does not make: dk check
+   --eta accepts it, and so does dk_tcalc --eta --dk-matching; by default `g c` rewrites to
+   `c a` and the assertion fails. ;)
+
+A : Type.
+a : A.
+c : A -> A.
+def g : (A -> A) -> A.
+
+[F] g (x => F x) --> F a.
+
+#ASSERTNOT g c == c a.

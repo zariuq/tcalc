@@ -1,0 +1,6 @@
+(; expect 1 ;)
+(; Negative control: a static symbol takes no rules. ;)
+A : Type.
+a : A.
+f : A -> A.
+[] f a --> a.

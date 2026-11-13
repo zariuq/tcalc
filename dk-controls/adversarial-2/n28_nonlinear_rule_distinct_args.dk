@@ -1,0 +1,10 @@
+(; A non-linear rule fires only on convertible instances. ;)
+A : Type.
+a : A.
+b : A.
+B : Type.
+tt : B.
+def same : A -> A -> B.
+[x] same x x --> tt.
+P : B -> Type.
+thm t : P (same a b) -> P tt := p : P (same a b) => p.

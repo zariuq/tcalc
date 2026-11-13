@@ -1,0 +1,7 @@
+Set : Type.
+injective El : Set -> Type.
+Prop : Type.
+s : Set.
+bind : (A : Set) -> (El A -> Prop) -> Prop.
+P : El s -> Prop.
+def allP : Prop := bind s (x: El s => P x).

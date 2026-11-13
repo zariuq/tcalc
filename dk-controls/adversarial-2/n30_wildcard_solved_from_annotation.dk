@@ -1,0 +1,9 @@
+(; The context states x : El ca, but the left-hand side only gives x the type El _.
+   The rule would rewrite f cb b : El ca to b : El cb. ;)
+U : Type.
+def El : U -> Type.
+ca : U.
+cb : U.
+b : El cb.
+def f : (T : U) -> El T -> El ca.
+[x : El ca] f _ x --> x.

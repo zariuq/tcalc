@@ -1,0 +1,13 @@
+(; expect 1 --type-lhs ;)
+(; Negative control under --type-lhs (Dedukti: "forbid rules with untypable left-hand side", error
+   108): the typing constraints a == f b d and b == f a c have no well-founded solution, a fact made
+   by firings (a == f (f a c) d, a inside it under the static f), and the rule is refused with that
+   reason.  Without the flag it is admitted (constraints_no_wf_solution.dk): a fixpoint of a
+   non-terminating rule can solve such constraints, and the rule is sound. ;)
+A : Type.
+B : A -> Type.
+f : a : A -> B a -> A.
+cons : a : A -> b : B a -> B (f a b).
+
+def calc : a : A -> b : A -> B a -> B b -> Type.
+[a, b, c, d] calc a b (cons b d) (cons a c) --> A.

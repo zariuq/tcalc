@@ -1,0 +1,5 @@
+(; #ASSERT on typed, convertible terms. ;)
+A : Type.
+a : A.
+def b : A := a.
+#ASSERT b == a.

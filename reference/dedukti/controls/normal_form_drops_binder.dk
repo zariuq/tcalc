@@ -1,0 +1,10 @@
+(; expect 0 ;)
+(; An instance that mentions the pattern's binder only inside a redex whose normal form drops it
+   matches (Dedukti normalizes the instance before giving up; the old prototype did not). ;)
+A : Type.
+ok : A.
+c : A -> A -> A.
+def g : (A -> A) -> A.
+[F] g (x => c F F) --> ok.
+#ASSERT g (u => c ((v : A => ok) u) ok) == ok.
+#ASSERT (q : A => g (u => c ((v : A => q) u) q)) == (q : A => ok).

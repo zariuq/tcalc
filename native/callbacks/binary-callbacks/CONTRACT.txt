@@ -1,0 +1,56 @@
+Native U64 binary producers: shared ABI and graph contract
+=========================================================
+2026-11-13. Oruzi / codex, Co VibeITP.
+
+Artifacts: add64.hex, sub64.hex, and64.hex, or64.hex, xor64.hex.
+Each contains 34 bytes: ENDBR64 F3 0F 1E FA at offset0, then the 30-byte
+body at offset4. capture.json contains the exact byte arrays and spans.
+Operations occur in that order at capture sample indices0..4.
+
+ABI: bool fn(const uint64_t *in, uint64_t *out), x86-64 System V.
+At entry RDI=in, RSI=out, RSP=s, memory[s..s+7]=caller return address.
+At return AL=1 (the proved body actually sets RAX=1), RSP=s+8, RIP=return.
+RBX,RBP,R12,R13,R14,R15 are preserved. The bodies also preserve RDI,RSI
+and all other registers except RAX,RDX, arithmetic flags, RSP and RIP.
+Memory changes only in out[0..7]; out[1..] is untouched.
+
+Read x=in[0], y=in[1] as unsigned, little-endian 64-bit words in the
+initial memory. Write out[0]=r, where:
+  add64: r = (x+y) mod 2^64
+  sub64: r = (x-y) mod 2^64
+  and64: r = bitwise AND of x and y
+  or64:  r = bitwise OR of x and y
+  xor64: r = bitwise XOR of x and y
+Zero is an ordinary successful result, including UINT64_MAX+1.
+Undefined AF for logical operations is unobserved; no specific value is
+asserted for it. The function reads no state outside the declared buffers,
+instruction bytes and caller return word.
+
+Shared entry assumptions for qualification:
+- In and out and the return-word address are 8-byte aligned.
+- The two input words are readable, the output word is writable, and the
+  caller return word is readable. Their addresses are canonical and their
+  byte ranges do not wrap; the caller return address is canonical.
+- out[0..7] is disjoint from the entire 34-byte code and the return word.
+  For the shared contract also require it disjoint from the 16 input bytes.
+  The Lean body theorem is more permissive about input/output overlap, but
+  this shared profile gives the conventional unchanged-input guarantee.
+- Standard 64-bit application-mode ISA entry facts and a valid caller stack
+  are required. The stack after return remains canonical.
+
+Current Lean evidence:
+X86BinaryCallbackProbe.executes proves the six-fetch BODY for every one of
+the five operations, under the pinned original Sail/ACL2 x86 definitions.
+It gives the exact output bytes, RAX=1, caller RIP/RSP, the full register/
+byte frame and preservation of the loaded body. Constructive fixtures and
+opcode-mutation controls are being qualified in the same development.
+
+The full 34-byte entry has a separate open Lean obligation: this pinned
+Sail snapshot rejects opcode0F1E. The artifact includes ENDBR64 for IBT
+portability, but no Lean proof of that entry instruction is assumed.
+The native owner's independent HOL Light/s2n qualification must include
+the landing pad and complete subroutine contract above.
+
+These are candidate artifacts, not authorization to mark the C entries
+proved or replace them without completed proof, byte/link identity and
+native integration checks. IBT enforcement has not been tested on this host.

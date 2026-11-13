@@ -1,0 +1,402 @@
+Scope for dl_tcalc.c:5042:
+Symbol boundaries is multi-location:
+  Range 0x3020f3-0x302102: a variable in $rax
+  Range 0x302102-0x302150: a variable in $rbx
+  Range 0x302470-0x302488: a variable in $rbx
+  Range 0x302488-0x30248e: a variable in $rax
+  Range 0x30248e-0x302512: a variable in $rbx
+, length 8.
+Symbol pts is multi-location:
+  Range 0x302290-0x30229f: a variable in $rax
+  Range 0x30229f-0x3023ce: a variable in $rbx
+  Range 0x3026f8-0x302710: a variable in $rbx
+  Range 0x302710-0x302716: a variable in $rax
+  Range 0x302716-0x3028de: a variable in $rbx
+  Range 0x302903-0x302931: a variable in $rbx
+, length 8.
+Symbol sym_ord is multi-location:
+  Range 0x30235f-0x3023ce: a complex DWARF expression:
+     0: DW_OP_addr 0x36b4a0
+     9: DW_OP_stack_value
+
+  Range 0x30279a-0x318e3d: a complex DWARF expression:
+     0: DW_OP_addr 0x36b4a0
+     9: DW_OP_stack_value
+
+, length 8.
+Symbol basic is multi-location:
+  Range 0x302093-0x3020a5: a variable in $rax
+  Range 0x3020a5-0x3020e4: a variable in $rbx
+  Range 0x3023ce-0x3023e6: a variable in $rbx
+  Range 0x3023e6-0x3023ec: a variable in $rax
+, length 8.
+Symbol nonlinear is multi-location:
+  Range 0x302150-0x30215f: a variable in $rax
+  Range 0x30215f-0x3021ad: a variable in $rbx
+  Range 0x302512-0x30252a: a variable in $rbx
+  Range 0x30252a-0x302530: a variable in $rax
+  Range 0x302530-0x3025b4: a variable in $rbx
+, length 8.
+Symbol same_gen is multi-location:
+  Range 0x3021ad-0x3021bc: a variable in $rax
+  Range 0x3021bc-0x30220a: a variable in $rbx
+  Range 0x3025b4-0x3025cc: a variable in $rbx
+  Range 0x3025cc-0x3025d2: a variable in $rax
+  Range 0x3025d2-0x302656: a variable in $rbx
+, length 8.
+Symbol cyclic is multi-location:
+  Range 0x30220a-0x302219: a variable in $rax
+  Range 0x302219-0x302290: a variable in $rbx
+  Range 0x302656-0x30266e: a variable in $rbx
+  Range 0x30266e-0x302674: a variable in $rax
+  Range 0x302674-0x3026f8: a variable in $rbx
+, length 8.
+Symbol cmp_dl is multi-location:
+  Range 0x302307-0x3023ce: a complex DWARF expression:
+     0: DW_OP_addr 0x36afc0
+     9: DW_OP_stack_value
+
+  Range 0x30279a-0x318e3d: a complex DWARF expression:
+     0: DW_OP_addr 0x36afc0
+     9: DW_OP_stack_value
+
+, length 8.
+Symbol int_widths is multi-location:
+  Range 0x302333-0x3023ce: a complex DWARF expression:
+     0: DW_OP_addr 0x36b2a0
+     9: DW_OP_stack_value
+
+  Range 0x30279a-0x318e3d: a complex DWARF expression:
+     0: DW_OP_addr 0x36b2a0
+     9: DW_OP_stack_value
+
+, length 8.
+Scope for dl_tcalc.c:5502:
+Symbol loop_chr is a complex DWARF expression:
+     0: DW_OP_addr 0x36eac0
+     9: DW_OP_stack_value
+, length 8.
+Symbol cpl is optimized out.
+Symbol al is optimized out.
+Symbol dl_diag is optimized out.
+Symbol err_l is optimized out.
+Symbol el is multi-location:
+  Range 0x30630e-0x306328: a variable in $rax
+  Range 0x306328-0x3063f7: a variable in $rbx
+  Range 0x306999-0x306a1a: a variable in $rbx
+, length 8.
+Symbol ce_overflow is a complex DWARF expression:
+     0: DW_OP_addr 0x36e880
+     9: DW_OP_stack_value
+, length 8.
+Symbol ce_body_fault is a complex DWARF expression:
+     0: DW_OP_addr 0x36e3e0
+     9: DW_OP_stack_value
+, length 8.
+Symbol ce_assign_existing_ok is a complex DWARF expression:
+     0: DW_OP_addr 0x36e5c0
+     9: DW_OP_stack_value
+, length 8.
+Symbol ce_explicit_fail is a complex DWARF expression:
+     0: DW_OP_addr 0x36ea20
+     9: DW_OP_stack_value
+, length 8.
+Symbol kept_scan_chr is multi-location:
+  Range 0x3064dc-0x30698f: a complex DWARF expression:
+     0: DW_OP_addr 0x36ec00
+     9: DW_OP_stack_value
+
+  Range 0x306a1a-0x318e3d: a complex DWARF expression:
+     0: DW_OP_addr 0x36ec00
+     9: DW_OP_stack_value
+
+, length 8.
+Symbol tuple_chr is multi-location:
+  Range 0x306506-0x30698f: a complex DWARF expression:
+     0: DW_OP_addr 0x36edc0
+     9: DW_OP_stack_value
+
+  Range 0x306a1a-0x318e3d: a complex DWARF expression:
+     0: DW_OP_addr 0x36edc0
+     9: DW_OP_stack_value
+
+, length 8.
+Symbol wide_int_chr is multi-location:
+  Range 0x306530-0x30698f: a complex DWARF expression:
+     0: DW_OP_addr 0x36efe0
+     9: DW_OP_stack_value
+
+  Range 0x306a1a-0x318e3d: a complex DWARF expression:
+     0: DW_OP_addr 0x36efe0
+     9: DW_OP_stack_value
+
+, length 8.
+Symbol ce_ordered_body is a complex DWARF expression:
+     0: DW_OP_addr 0x36e300
+     9: DW_OP_stack_value
+, length 8.
+Symbol ce_assign_existing_fail is a complex DWARF expression:
+     0: DW_OP_addr 0x36e4a0
+     9: DW_OP_stack_value
+, length 8.
+Symbol ce_quotient is a complex DWARF expression:
+     0: DW_OP_addr 0x36e6e0
+     9: DW_OP_stack_value
+, length 8.
+Symbol ce_non_integer is a complex DWARF expression:
+     0: DW_OP_addr 0x36e960
+     9: DW_OP_stack_value
+, length 8.
+Symbol anon_head_chr is multi-location:
+  Range 0x306640-0x30698f: a complex DWARF expression:
+     0: DW_OP_addr 0x36f260
+     9: DW_OP_stack_value
+
+  Range 0x306a1f-0x318e3d: a complex DWARF expression:
+     0: DW_OP_addr 0x36f260
+     9: DW_OP_stack_value
+
+, length 8.
+Scope for dl_tcalc.c:6106:
+Symbol a1 is optimized out.
+Symbol cp2 is optimized out.
+Symbol err is optimized out.
+Symbol ok1 is multi-location:
+  Range 0x30da6b-0x30db82: a complex DWARF expression:
+     0: DW_OP_fbreg -11649712
+
+  Range 0x30dd3c-0x30e03a: a complex DWARF expression:
+     0: DW_OP_fbreg -11649712
+
+, length 1.
+Symbol e1 is multi-location:
+  Range 0x30db1f-0x30db2d: a variable in $rax
+  Range 0x30db2d-0x30dc7c: a variable in $r15
+  Range 0x30ddf1-0x30ddff: a variable in $rax
+  Range 0x30ddff-0x30dfc4: a variable in $r15
+  Range 0x30dfce-0x30e2cd: a variable in $r15
+  Range 0x30e3a0-0x30e50c: a variable in $r15
+, length 8.
+Symbol n is multi-location:
+  Range 0x30d505-0x30d587: a variable in $r14
+  Range 0x30d587-0x30e2cd: a complex DWARF expression:
+     0: DW_OP_fbreg -11649688
+
+  Range 0x30e343-0x30e391: a variable in $r13
+  Range 0x30e391-0x30e3a0: a variable in $rax
+  Range 0x30e3a0-0x30fb83: a complex DWARF expression:
+     0: DW_OP_fbreg -11649688
+
+  Range 0x31114a-0x311551: a complex DWARF expression:
+     0: DW_OP_fbreg -11649688
+
+, length 4.
+Symbol cap is multi-location:
+  Range 0x30d505-0x30db1f: a variable in $r15
+  Range 0x30db1f-0x30dc7c: a complex DWARF expression:
+     0: DW_OP_fbreg -11649688
+     5: DW_OP_deref_size 4
+     7: DW_OP_const1u 32
+     9: DW_OP_shl
+    10: DW_OP_const1u 32
+    12: DW_OP_shra
+    13: DW_OP_lit5
+    14: DW_OP_mul
+    15: DW_OP_lit2
+    16: DW_OP_shl
+    17: DW_OP_plus_uconst 256
+    20: DW_OP_stack_value
+
+  Range 0x30dc7c-0x30ddf1: a variable in $r15
+  Range 0x30ddf1-0x30dfc4: a complex DWARF expression:
+     0: DW_OP_fbreg -11649688
+     5: DW_OP_deref_size 4
+     7: DW_OP_const1u 32
+     9: DW_OP_shl
+    10: DW_OP_const1u 32
+    12: DW_OP_shra
+    13: DW_OP_lit5
+    14: DW_OP_mul
+    15: DW_OP_lit2
+    16: DW_OP_shl
+    17: DW_OP_plus_uconst 256
+    20: DW_OP_stack_value
+
+  Range 0x30dfc4-0x30dfce: a variable in $r15
+  Range 0x30dfce-0x30e2cd: a complex DWARF expression:
+     0: DW_OP_fbreg -11649688
+     5: DW_OP_deref_size 4
+     7: DW_OP_const1u 32
+     9: DW_OP_shl
+    10: DW_OP_const1u 32
+    12: DW_OP_shra
+    13: DW_OP_lit5
+    14: DW_OP_mul
+    15: DW_OP_lit2
+    16: DW_OP_shl
+    17: DW_OP_plus_uconst 256
+    20: DW_OP_stack_value
+
+  Range 0x30e352-0x30e3a0: a variable in $r15
+  Range 0x30e3a0-0x30fb83: a complex DWARF expression:
+     0: DW_OP_fbreg -11649688
+     5: DW_OP_deref_size 4
+     7: DW_OP_const1u 32
+     9: DW_OP_shl
+    10: DW_OP_const1u 32
+    12: DW_OP_shra
+    13: DW_OP_lit5
+    14: DW_OP_mul
+    15: DW_OP_lit2
+    16: DW_OP_shl
+    17: DW_OP_plus_uconst 256
+    20: DW_OP_stack_value
+
+  Range 0x31114a-0x311551: a complex DWARF expression:
+     0: DW_OP_fbreg -11649688
+     5: DW_OP_deref_size 4
+     7: DW_OP_const1u 32
+     9: DW_OP_shl
+    10: DW_OP_const1u 32
+    12: DW_OP_shra
+    13: DW_OP_lit5
+    14: DW_OP_mul
+    15: DW_OP_lit2
+    16: DW_OP_shl
+    17: DW_OP_plus_uconst 256
+    20: DW_OP_stack_value
+
+, length 8.
+Symbol a2 is optimized out.
+Symbol d1 is optimized out.
+Symbol ok2 is multi-location:
+  Range 0x30db0d-0x30dbc2: the constant 0
+  Range 0x30dddf-0x30dfc4: a complex DWARF expression:
+     0: DW_OP_fbreg -11649720
+
+  Range 0x30dfce-0x30e03a: a complex DWARF expression:
+     0: DW_OP_fbreg -11649720
+
+, length 1.
+Symbol e2 is multi-location:
+  Range 0x30db31-0x30db4f: a variable in $rax
+  Range 0x30db4f-0x30dc7c: a variable in $r13
+  Range 0x30de03-0x30de21: a variable in $rax
+  Range 0x30de21-0x30dfc4: a variable in $r13
+  Range 0x30dfce-0x30e2cd: a variable in $r13
+  Range 0x30e3a0-0x30e4cd: a variable in $r13
+  Range 0x30e4f8-0x30e50c: a variable in $r13
+, length 8.
+Symbol d2 is optimized out.
+Symbol s1 is optimized out.
+Symbol pbuf is multi-location:
+  Range 0x30d505-0x30e2cd: a variable in $rbx
+  Range 0x30e35d-0x30e377: a variable in $rax
+  Range 0x30e377-0x30e50c: a variable in $rbx
+, length 8.
+Symbol pos is multi-location:
+  Range 0x30d505-0x30db91: a variable in $r12
+  Range 0x30dc7c-0x30dd86: a variable in $r12
+  Range 0x30dfc4-0x30dfce: a variable in $r12
+  Range 0x30e35d-0x30e37f: the constant 0
+  Range 0x30e37f-0x30e3a0: a variable in $r12
+, length 8.
+Symbol cp1 is optimized out.
+Symbol s2 is optimized out.
+Symbol pi is multi-location:
+  Range 0x30d48e-0x30d4ac: the constant 0
+  Range 0x30d4bb-0x30e2b4: a complex DWARF expression:
+     0: DW_OP_fbreg -11649680
+
+  Range 0x30e2bb-0x30e2cd: a variable in $rax
+  Range 0x30e2cd-0x30e3b4: a complex DWARF expression:
+     0: DW_OP_fbreg -11649680
+
+  Range 0x30e3b4-0x30e3c2: a variable in $rax
+  Range 0x30e3c2-0x30e50c: a complex DWARF expression:
+     0: DW_OP_fbreg -11649680
+
+, length 8.
+Symbol part_sizes is optimized out.
+Symbol tc_src is multi-location:
+  Range 0x30b53b-0x30b65f: a complex DWARF expression:
+     0: DW_OP_addr 0x371fc0
+     9: DW_OP_stack_value
+
+  Range 0x30b7db-0x318e3d: a complex DWARF expression:
+     0: DW_OP_addr 0x371fc0
+     9: DW_OP_stack_value
+
+, length 8.
+Symbol ce_overflow is a complex DWARF expression:
+     0: DW_OP_addr 0x36e880
+     9: DW_OP_stack_value
+, length 8.
+Symbol ce_body_fault is a complex DWARF expression:
+     0: DW_OP_addr 0x36e3e0
+     9: DW_OP_stack_value
+, length 8.
+Symbol ce_assign_existing_ok is a complex DWARF expression:
+     0: DW_OP_addr 0x36e5c0
+     9: DW_OP_stack_value
+, length 8.
+Symbol ce_explicit_fail is a complex DWARF expression:
+     0: DW_OP_addr 0x36ea20
+     9: DW_OP_stack_value
+, length 8.
+Symbol kept_scan_chr is multi-location:
+  Range 0x3064dc-0x30698f: a complex DWARF expression:
+     0: DW_OP_addr 0x36ec00
+     9: DW_OP_stack_value
+
+  Range 0x306a1a-0x318e3d: a complex DWARF expression:
+     0: DW_OP_addr 0x36ec00
+     9: DW_OP_stack_value
+
+, length 8.
+Symbol tuple_chr is multi-location:
+  Range 0x306506-0x30698f: a complex DWARF expression:
+     0: DW_OP_addr 0x36edc0
+     9: DW_OP_stack_value
+
+  Range 0x306a1a-0x318e3d: a complex DWARF expression:
+     0: DW_OP_addr 0x36edc0
+     9: DW_OP_stack_value
+
+, length 8.
+Symbol wide_int_chr is multi-location:
+  Range 0x306530-0x30698f: a complex DWARF expression:
+     0: DW_OP_addr 0x36efe0
+     9: DW_OP_stack_value
+
+  Range 0x306a1a-0x318e3d: a complex DWARF expression:
+     0: DW_OP_addr 0x36efe0
+     9: DW_OP_stack_value
+
+, length 8.
+Symbol ce_ordered_body is a complex DWARF expression:
+     0: DW_OP_addr 0x36e300
+     9: DW_OP_stack_value
+, length 8.
+Symbol ce_assign_existing_fail is a complex DWARF expression:
+     0: DW_OP_addr 0x36e4a0
+     9: DW_OP_stack_value
+, length 8.
+Symbol ce_quotient is a complex DWARF expression:
+     0: DW_OP_addr 0x36e6e0
+     9: DW_OP_stack_value
+, length 8.
+Symbol ce_non_integer is a complex DWARF expression:
+     0: DW_OP_addr 0x36e960
+     9: DW_OP_stack_value
+, length 8.
+Symbol anon_head_chr is multi-location:
+  Range 0x306640-0x30698f: a complex DWARF expression:
+     0: DW_OP_addr 0x36f260
+     9: DW_OP_stack_value
+
+  Range 0x306a1f-0x318e3d: a complex DWARF expression:
+     0: DW_OP_addr 0x36f260
+     9: DW_OP_stack_value
+
+, length 8.

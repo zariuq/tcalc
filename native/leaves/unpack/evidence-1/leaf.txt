@@ -1,0 +1,30 @@
+leaf: unpack
+JOIN : thm =
+JOIN : thm =
+JOIN : thm =
+JOIN unpack: the proved program is the image's program
+AUDIT LEAF_ENTRY_FRAME: 0 hyps
+AUDIT LEAF_RUN_BY_WP: 0 hyps
+AUDIT LEAF_WORD_ADD_1: 0 hyps
+AUDIT LEAF_DIV8_LT: 0 hyps
+AUDIT LEAF_VAL_MUL_EXACT: 0 hyps
+AUDIT LEAF_VAL_SHL_EXACT: 0 hyps
+AUDIT LEAF_HALVES: 0 hyps
+AUDIT LEAF_PRODUCT_WITHIN: 0 hyps
+AUDIT LEAF_PRODUCT_GUARD: 0 hyps
+AUDIT LEAF_ROW_INDEX: 0 hyps
+AUDIT LEAF_FRAME_WORDS: 0 hyps
+AUDIT UNPACK_TERM: 0 hyps
+AUDIT UNPACK_DECLS: 0 hyps
+AUDIT UNPACK_LEAF_WF: 0 hyps
+AUDIT unpack_post: 0 hyps
+AUDIT UNPACK_LOW: 0 hyps
+AUDIT UNPACK_HIGH: 0 hyps
+AUDIT UNPACK_WP: 0 hyps
+AUDIT UNPACK_RUN: 0 hyps
+AUDIT UNPACK_X86: 0 hyps
+AUDIT UNPACK_LEAF_SPEC: 0 hyps
+AUDIT theorems 21, with hypotheses 0
+AXIOMS 3:
+new_axiom, mk_thm, CHEAT_TAC in the leaf's sources: 0
+evidence check: ok; EVIDENCE-CHECK files 107, stale or missing 0

@@ -1,0 +1,35 @@
+leaf: put_word
+JOIN : thm =
+JOIN : thm =
+JOIN : thm =
+JOIN put_word: the proved program is the image's program
+AUDIT LEAF_ENTRY_FRAME: 0 hyps
+AUDIT LEAF_RUN_BY_WP: 0 hyps
+AUDIT LEAF_WORD_ADD_1: 0 hyps
+AUDIT LEAF_DIV8_LT: 0 hyps
+AUDIT LEAF_VAL_MUL_EXACT: 0 hyps
+AUDIT LEAF_VAL_SHL_EXACT: 0 hyps
+AUDIT LEAF_HALVES: 0 hyps
+AUDIT LEAF_PRODUCT_WITHIN: 0 hyps
+AUDIT LEAF_PRODUCT_GUARD: 0 hyps
+AUDIT LEAF_ROW_INDEX: 0 hyps
+AUDIT LEAF_FRAME_WORDS: 0 hyps
+AUDIT put_word_checks: 0 hyps
+AUDIT put_word_access: 0 hyps
+AUDIT put_word: 0 hyps
+AUDIT PUT_WORD_TERM: 0 hyps
+AUDIT PUT_WORD_DECLS: 0 hyps
+AUDIT PUT_WORD_LEAF_WF: 0 hyps
+AUDIT put_word_post: 0 hyps
+AUDIT PUT_WORD_ENTRY: 0 hyps
+AUDIT put_word_mid: 0 hyps
+AUDIT PUT_WORD_CHECKS_WP: 0 hyps
+AUDIT PUT_WORD_ACCESS_WP: 0 hyps
+AUDIT PUT_WORD_WP: 0 hyps
+AUDIT PUT_WORD_RUN: 0 hyps
+AUDIT PUT_WORD_X86: 0 hyps
+AUDIT PUT_WORD_LEAF_SPEC: 0 hyps
+AUDIT theorems 26, with hypotheses 0
+AXIOMS 3:
+new_axiom, mk_thm, CHEAT_TAC in the leaf's sources: 0
+evidence check: ok; EVIDENCE-CHECK files 107, stale or missing 0

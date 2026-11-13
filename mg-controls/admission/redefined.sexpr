@@ -1,0 +1,2 @@
+(DEF "F" "same" 0 (PROP) (ALL (PROP) (DB 0)) 1)
+(DEF "T" "same" 0 (PROP) (ALL (PROP) (IMP (DB 0) (DB 0))) 2)

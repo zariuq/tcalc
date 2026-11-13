@@ -1,0 +1,28 @@
+(cesta checked-c/1
+  (module tc_lean_guard)
+  (word-bits 64)
+  (failure tc_lean_guard_failure)
+
+  (fn rec_ih_step_ok
+    (params (lo u32) (hi u32) (has_prev bool) (prev_field u32) (major_fvar_idx u32))
+    (returns bool)
+    (effects)
+    (body
+      (if (or (lt major_fvar_idx lo) (ge major_fvar_idx hi))
+        (then (return (eq (u32 0) (u32 1))))
+        (else
+          (return
+            (or (not has_prev)
+                (gt (sub major_fvar_idx lo) prev_field)))))))
+
+  (fn rec_ih_count_allowed
+    (params (is_rec bool) (is_nested_rec bool) (num_nested u32) (nfields u32) (ih_count u32))
+    (returns bool)
+    (effects)
+    (body
+      (return
+        (or (eq ih_count (u32 0))
+          (and (gt nfields (u32 0))
+            (and (le ih_count nfields)
+              (or is_rec (or is_nested_rec (gt num_nested (u32 0))))))))))
+)

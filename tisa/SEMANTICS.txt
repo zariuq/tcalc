@@ -1,0 +1,234 @@
+t-ISA, profile p1: machine semantics
+====================================
+
+t-ISA is the admitted, compilable profile of transform-calculus rules over
+machine resources: typed registers, byte regions held by capabilities, and
+structured control. This text defines its meaning. The reference evaluator
+implements it section by section, and every native emitter must refine it.
+Profile p1 keeps p0's instructions, types, frame layout and outcome codes.
+It changes how cost is accounted (section 8), makes loop typing sound
+(section 4), and fixes what a run leaves behind (section 7).
+
+
+1. Values and types
+-------------------
+
+A value is a 64-bit word. Each register has a static type, and holds a
+canonical value of that type at every point of a run:
+
+  U64        any word
+  U32Z       a word whose upper 32 bits are zero
+  I32S       a word equal to the sign extension of its low 32 bits
+  BOOL       0 or 1
+  PTR(r)     an address a with base(r) <= a <= base(r) + len(r), where
+             base and len are region r's frame fields (one past the end is
+             a position, not an access)
+
+norm(t, w) is w for U64 and PTR, w mod 2^32 for U32Z, the sign extension
+of w mod 2^32 for I32S, and w for BOOL (whose operands are checked first).
+Arithmetic is modular: + - * on words are taken mod 2^64, then normalized.
+
+
+2. State
+--------
+
+  regs      v0..v11, each a value; v0 is the frame address and never changes
+  frame     the 192-byte runtime frame (tisa.h): nine regions (ptr, len),
+            status, ret_val, fuel_budget, fuel_used, arg0, arg1
+  memory    the bytes of the nine regions; little-endian; nothing else is
+            addressable
+
+The scratch registers s0, s1 belong to emitters and do not exist here.
+
+
+3. Program
+----------
+
+A program declares its regions (mode RO or RW, minimum length, alignment),
+the registers initialized on entry with their types (only v0..v5), and a
+statement tree:
+
+  INSTR i                      one instruction (section 5)
+  SEQ a b                      a, then b
+  IF c a b                     c a BOOL register; b may be empty
+  COUNT_LOOP x n cap body      x := 0; while x < n: body; x := x + 1
+  EARLY_EXIT_LOOP x n k cap body
+                               x := 0; while x < n:
+                                 if k = 0 stop; body; if k = 0 stop;
+                                 x := x + 1
+  RETURN o r                   finish with outcome o (FIRED, REFUSED or
+                               UNSUPPORTED) and return value regs[r]
+  FUND u                       pay u units of the program's cost grading
+                               (section 8)
+
+In both loops, n is read once, when the loop is entered; n > cap is
+UNSUPPORTED. x and n are not written in the body. cap >= 1.
+
+
+4. Admission (static)
+---------------------
+
+Admission assigns each program point a typing: for each register, either a
+type or nothing (uninitialized, unusable). It is an abstract interpretation.
+Types are sets of words: BOOL lies within U32Z and within I32S, and every
+type, PTR(r) included, lies within U64. Where paths meet, a register gets the
+least type holding both values (two pointers into different regions meet at
+U64), and has no type if it is uninitialized on either path.
+
+- An instruction reads only registers with a type, of the kinds section 5
+  requires, and gives its destination the result type.
+- After IF, each register has the meeting type of the two branches; a branch
+  that always returns contributes nothing.
+- A loop body is checked under the typing that holds at every entry to it:
+  the least typing above the loop's entry typing that the body preserves.
+  Admission iterates the body to this fixpoint; each round can only widen a
+  register (at most three times: BOOL, U32Z, U64, nothing), so it ends within
+  37 rounds. After the loop, the typing is that same invariant, with x as
+  U64. A register first written in the body has no type after the loop,
+  since the body may run zero times.
+- v0 is the frame's address and is never written; whatever type the program
+  declares for it, admission reads it only through frame LOADs. x and n are
+  not written in the body. Loop registers are distinct (x, n and, for
+  EARLY_EXIT_LOOP, k), n is an integer, and k is BOOL at the invariant.
+- Every path ends in RETURN, with outcome FIRED, REFUSED or UNSUPPORTED.
+- Fields an instruction does not use are ignored and are not part of its
+  meaning; region numbers name declared regions.
+- FUND u has 1 <= u <= 2^32 - 1.
+
+
+5. Instructions
+---------------
+
+Each instruction writes only its destination register, except STORE, which
+writes only memory. A failure condition ends the run with that outcome
+(section 7). "Bool-check w" fails with INVALID_INPUT unless w <= 1.
+
+IMM t d k        regs[d] := norm(t, k)              k canonical for t; t not PTR
+MOV t d a        bool-check a if t = BOOL;           regs[d] := norm(t, regs[a])
+BIN t op d a b   op in ADD SUB AND OR XOR MULLO;     t in U64 U32Z I32S BOOL;
+                 BOOL allows AND OR XOR only, after bool-checks;
+                 regs[d] := norm(t, regs[a] op regs[b])
+SHIFT t op d a s op in SHL SHRU SHRS; t in U64 U32Z I32S; s < width(t);
+                 32-bit types shift the low 32 bits (SHRS signed, SHRU
+                 unsigned), then normalize
+EXTRACT t d a l w   0 < w, l + w <= 64;  regs[d] := norm(t, (regs[a] >> l) mod 2^w)
+CMP t c d a b    c in EQ NE ULT ULE SLT SLE; the right operand is regs[b] or
+                 an immediate; 32-bit types compare the low 32 bits;
+                 regs[d] := 1 if the comparison holds, else 0
+SELECT t d k a b bool-check k; for t = BOOL bool-check a and b;
+                 regs[d] := norm(t, regs[a] if regs[k] = 1 else regs[b])
+ADDR r d p i s o p is PTR(r); i an index register or none; 0 <= s <= 3.
+                 A pointer never leaves its region, even in passing:
+                 m := regs[p] + regs[i] * 2^s and a := m + o, computed without
+                 wraparound; INVALID_INPUT unless both m and a lie in
+                 [base(r), base(r) + len(r)]; regs[d] := a, typed PTR(r)
+LOAD t w r d p o w in 1 4 8; e := regs[p] + o; INVALID_INPUT unless
+                 base(r) <= e and e + w <= base(r) + len(r), computed without
+                 wraparound; the little-endian w bytes at e, bool-checked if
+                 t = BOOL; regs[d] := norm(t, those bytes)
+LOAD frame       r = FRAME, p = v0, w = 8, o a multiple of 8 below 192:
+                 the frame word at o, bool-checked if t = BOOL (typed PTR(o/16)
+                 when o names a declared region's pointer field)
+STORE w r p o v  r an RW region; the same bounds as LOAD; writes the low w
+                 bytes of regs[v], little-endian
+
+
+6. Entry
+--------
+
+Before the first statement, the frame and initial registers are validated:
+for each declared region, base + len does not wrap, len >= its minimum, base
+is aligned; RW regions overlap no other declared region; initial registers
+hold canonical values of their declared types, and PTR(r) registers point
+into r; fuel_used <= fuel_budget. A violation is INVALID_INPUT, before any
+statement runs.
+
+
+7. Outcomes and what a run leaves
+---------------------------------
+
+  FIRED (1), REFUSED (0)   from RETURN; status := o, ret_val := regs[r]
+  UNSUPPORTED (2)          from RETURN, or a loop bound above its cap
+  INVALID_INPUT (3)        entry validation or an instruction's failure
+  EXHAUSTED (4)            a FUND the remaining allowance cannot cover
+
+On a failure (2 from a cap, 3, 4), status := ret_val := the outcome code.
+Stores already performed stay: a run that stops leaves the completed
+prefix of its effects, and only its status says it did not finish. Callers
+that need atomic publication commit outputs only after FIRED, as tcalc's
+admission and commit already do. Registers are not observable after a run.
+
+
+8. Cost
+-------
+
+Cost is selected structure, not hidden semantics. A program's cost is a
+grading of the steps of the calculus it was compiled from, and only a
+compiler writes it down: the compiler that produces a t-ISA program from
+source rules (tcalc firings) places a FUND point where a source step
+happens, at that step's grade. t-ISA is a compilation target; FUND is never
+authored by hand. Native instructions are not source steps and are never
+charged. Termination does not depend on cost: loop caps bound every run.
+
+  allowance A := frame.fuel_budget     a number of units; nothing else
+  receipt   R := frame.fuel_used       the caller's running total, R <= A
+
+FUND u:  if A - R < u then EXHAUSTED (R unchanged) else R := R + u
+
+There is no "unbounded" value. Admission computes max_receipt, a bound on
+what one run can pay: FUND amounts summed along a path, the larger branch of
+an IF, a loop's cap times its body. The bound is a natural number and may
+exceed 64 bits (two nested loops capped at 2^32 - 1 around FUND 2 have the
+bound 2 * (2^32 - 1)^2). When it fits, max_receipt_fits holds and an
+allowance with A >= R + max_receipt (as naturals) cannot be exhausted. When
+it does not fit, no allowance is certified sufficient; such a program is
+still admitted, and its runs pay and exhaust as below. The receipt is not
+reset on entry, so one allowance can span many leaf invocations. These laws
+hold for every program:
+
+- Zero allowance pays for nothing: the first FUND reached exhausts.
+- Exhaustion is reported only when the allowance ends first; it never stands
+  for "no answer". A determinate outcome (FIRED, REFUSED, UNSUPPORTED,
+  INVALID_INPUT) is the same at every larger allowance.
+- More allowance only extends a run: the run at A is a prefix of the run at
+  any A' > A, with the same effects and receipt up to where it stopped.
+- Erasure: when max_receipt fits and A >= R + max_receipt, a run has the
+  outcome and effects of the same program with every FUND removed, and pays
+  exactly the FUND points it passes.
+- The compiler that writes FUND points owes the theorem that the receipt
+  equals the source cost of the steps it realizes; the machine guarantees
+  only the laws above.
+- An emitter preserves FUND points exactly: the same points, amounts and
+  order, so the native receipt equals this one.
+
+
+9. What a native realization must establish
+-------------------------------------------
+
+For every admitted program, entry state and allowance, the native run ends
+with the same outcome, status, ret_val, receipt and region bytes as this
+semantics, writes nothing outside RW regions and its own frame words
+(status, ret_val, fuel_used), preserves the caller's ABI state, and touches
+no stack below the wrapper's declared frame. The scratch registers and the
+emitter's internal layout are not observable.
+
+
+10. Changes from p0
+-------------------
+
+p0 is the profile tisa_core.c implemented. On the same program and input,
+p1 differs from it only here:
+
+- Cost. p0 charged one unit before every instruction, read budget 0 as
+  unbounded, and reset fuel_used on entry. p1 charges only at the FUND points
+  a compiler places, reads every allowance as a number (0 is none), and keeps
+  the caller's receipt.
+- A word loaded as BOOL that is not 0 or 1 is INVALID_INPUT; p0 kept its low
+  bit.
+- p0 checked a loop body once, under the loop's entry typing, and kept that
+  typing after the loop. A body that changed a register's type, or moved a
+  pointer to another region, was accepted; a later use could then read a
+  non-Boolean word as BOOL, or reach one region's bytes under another's
+  bounds. p1 checks bodies at their invariant and refuses such programs.
+- p1 joins types where paths meet, so it also admits programs whose
+  registers p0 dropped at a merge but which use them only as words.

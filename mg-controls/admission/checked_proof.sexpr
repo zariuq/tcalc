@@ -1,0 +1,3 @@
+(THM "identity" "identity" 0 0 (ALL (PROP) (IMP (DB 0) (DB 0))) nil)
+(PROOF "identity" (TLAM (PROP) (PLAM (DB 0) (HYP 0))))
+(QED)

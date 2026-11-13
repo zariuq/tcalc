@@ -1,0 +1,7 @@
+(; The right-hand side has type El ca; the left-hand side has type El _. ;)
+U : Type.
+def El : U -> Type.
+ca : U.
+a0 : El ca.
+def f : (T : U) -> El T -> El T.
+[x] f _ x --> a0.

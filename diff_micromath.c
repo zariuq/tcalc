@@ -10,8 +10,77 @@
 #include "kernel.h"
 #include "micromath_tcalc.h"
 #include "micromath_tcalc_gen.h"
+#include "tisa/tisa.h"
 
-static uint64_t ops, agree_acc, agree_ref;
+static uint64_t ops, agree_acc, agree_ref, pinned;
+static TcIsaArena       g_tisa_arena;
+static TcIsaProgram     g_tisa_prog_sub1, g_tisa_prog_sub2;
+static TcIsaCompiledX86 g_tisa_comp_sub1, g_tisa_comp_sub2;
+static TcIsaRuntimeFrame g_tisa_fast_frame = {
+  .s0_len = sizeof(TcGenTuple),
+  .s1_len = sizeof(TcGenTuple),
+  .s2_len = sizeof(TcGenTuple),
+  .s3_len = sizeof(TcGenTuple),
+  .s4_len = sizeof(TcGenTuple),
+  .arg1   = 16777216ull,
+};
+
+static bool mm_tisa_init(void) {
+  tisa_arena_init(&g_tisa_arena, 256);
+  TcInspectRule ir1, ir2;
+  TcInspectFlat ifl1, ifl2;
+  char err[256] = {0};
+  if (!tc_inspect_rule(3, &ir1, &ifl1) ||
+      !tc_inspect_rule(4, &ir2, &ifl2)) return false;
+  if (!tisa_specialize_micromath_sub_rule(&g_tisa_arena, &ir1, &ifl1, "mm_sub1", &g_tisa_prog_sub1, err, sizeof(err)) ||
+      !tisa_specialize_micromath_sub_rule(&g_tisa_arena, &ir2, &ifl2, "mm_sub2", &g_tisa_prog_sub2, err, sizeof(err))) return false;
+  if (!tisa_compile_x86(&g_tisa_prog_sub1, TISA_PROFILE_P1, &g_tisa_comp_sub1, err, sizeof(err)) ||
+      !tisa_compile_x86(&g_tisa_prog_sub2, TISA_PROFILE_P1, &g_tisa_comp_sub2, err, sizeof(err))) return false;
+  return true;
+}
+
+static inline bool mm_tisa_run_leaf(const TcIsaCompiledX86 *comp,
+                                    uint64_t m, uint64_t u, uint64_t v, uint64_t x, uint64_t d,
+                                    TcGenTuple *out_tuple) {
+  const TcGenTuple *p0 = g_at(m), *p1 = g_at(u), *p2 = g_at(v), *p3 = g_at(x);
+  g_tisa_fast_frame.arg0 = d;
+  return comp->entry(&g_tisa_fast_frame,
+                     (uint64_t)(uintptr_t)p0,
+                     (uint64_t)(uintptr_t)p1,
+                     (uint64_t)(uintptr_t)p2,
+                     (uint64_t)(uintptr_t)p3,
+                     (uint64_t)(uintptr_t)out_tuple) == TISA_OUTCOME_FIRED;
+}
+
+static inline bool mm_tisa_sub1_fast(uint64_t m, uint64_t u, uint64_t v, uint64_t x, uint64_t d) {
+  if (__builtin_expect(d < g_nslot, 1)) {
+    g_tisa_fast_frame.arg0 = d;
+    return g_tisa_comp_sub1.entry(&g_tisa_fast_frame,
+                                  (uint64_t)(uintptr_t)g_at(m),
+                                  (uint64_t)(uintptr_t)g_at(u),
+                                  (uint64_t)(uintptr_t)g_at(v),
+                                  (uint64_t)(uintptr_t)g_at(x),
+                                  (uint64_t)(uintptr_t)&g_slot[d]) == TISA_OUTCOME_FIRED;
+  }
+  TcGenTuple out = {{0, 0, 0, 0}};
+  if (!mm_tisa_run_leaf(&g_tisa_comp_sub1, m, u, v, x, d, &out)) return false;
+  return g_put(d, out);
+}
+
+static inline bool mm_tisa_sub2_fast(uint64_t m, uint64_t u, uint64_t v, uint64_t x, uint64_t d) {
+  if (__builtin_expect(d < g_nslot, 1)) {
+    g_tisa_fast_frame.arg0 = d;
+    return g_tisa_comp_sub2.entry(&g_tisa_fast_frame,
+                                  (uint64_t)(uintptr_t)g_at(m),
+                                  (uint64_t)(uintptr_t)g_at(u),
+                                  (uint64_t)(uintptr_t)g_at(v),
+                                  (uint64_t)(uintptr_t)g_at(x),
+                                  (uint64_t)(uintptr_t)&g_slot[d]) == TISA_OUTCOME_FIRED;
+  }
+  TcGenTuple out = {{0, 0, 0, 0}};
+  if (!mm_tisa_run_leaf(&g_tisa_comp_sub2, m, u, v, x, d, &out)) return false;
+  return g_put(d, out);
+}
 
 static void fail(const char *what, uint64_t slot) {
   const ThmBody *a = get_thm(slot); MmBody b = mm_get(slot), c = mm_gen_get(slot);
@@ -32,8 +101,24 @@ static void verdict(bool a, bool b, bool c, uint64_t dest, const char *what) {
   same_slot(dest, what);
 }
 #define BOTH(what, dest, mcall, tcall, gcall) verdict((mcall), (tcall), (gcall), (dest), (what))
-#define SUB1(what, d, m, u, v, x) do { bool aok = false; bool tr = mm_sub1_verify((m), (u), (v), (x), (d), &aok); if (!aok) fail(what " (arena-gen)", (d)); BOTH((what), (d), rule_substitute1((m), (u), (v), (x), (d)), tr, mm_gen_sub1((m), (u), (v), (x), (d))); } while (0)
-#define SUB2(what, d, m, u, v, x) do { bool aok = false; bool tr = mm_sub2_verify((m), (u), (v), (x), (d), &aok); if (!aok) fail(what " (arena-gen)", (d)); BOTH((what), (d), rule_substitute2((m), (u), (v), (x), (d)), tr, mm_gen_sub2((m), (u), (v), (x), (d))); } while (0)
+#define SUB1(what_, d_, m_, u_, v_, x_) do { \
+  bool aok = false; \
+  TcGenTuple tisa_out = {{0, 0, 0, 0}}; \
+  bool xok = mm_tisa_run_leaf(&g_tisa_comp_sub1, (m_), (u_), (v_), (x_), (d_), &tisa_out); \
+  bool tr = mm_sub1_verify((m_), (u_), (v_), (x_), (d_), &aok); \
+  if (!aok || xok != tr) fail(what_ " (arena-gen/tisa-x86)", (d_)); \
+  BOTH((what_), (d_), rule_substitute1((m_), (u_), (v_), (x_), (d_)), tr, mm_gen_sub1((m_), (u_), (v_), (x_), (d_))); \
+  if (xok) { const ThmBody *tb = get_thm(d_); if (tb->out != tisa_out.a[0] || tb->f != tisa_out.a[1] || tb->x != tisa_out.a[2] || tb->y != tisa_out.a[3]) fail(what_ " (tisa-x86 tuple)", (d_)); } \
+} while (0)
+#define SUB2(what_, d_, m_, u_, v_, x_) do { \
+  bool aok = false; \
+  TcGenTuple tisa_out = {{0, 0, 0, 0}}; \
+  bool xok = mm_tisa_run_leaf(&g_tisa_comp_sub2, (m_), (u_), (v_), (x_), (d_), &tisa_out); \
+  bool tr = mm_sub2_verify((m_), (u_), (v_), (x_), (d_), &aok); \
+  if (!aok || xok != tr) fail(what_ " (arena-gen/tisa-x86)", (d_)); \
+  BOTH((what_), (d_), rule_substitute2((m_), (u_), (v_), (x_), (d_)), tr, mm_gen_sub2((m_), (u_), (v_), (x_), (d_))); \
+  if (xok) { const ThmBody *tb = get_thm(d_); if (tb->out != tisa_out.a[0] || tb->f != tisa_out.a[1] || tb->x != tisa_out.a[2] || tb->y != tisa_out.a[3]) fail(what_ " (tisa-x86 tuple)", (d_)); } \
+} while (0)
 
 static void set_both(uint64_t s, uint64_t o, uint64_t f, uint64_t x, uint64_t y) {
   BOTH("axiom", s, _set_thm(o, f, x, y, s), mm_set(o, f, x, y, s), mm_gen_set(o, f, x, y, s));
@@ -66,7 +151,7 @@ static uint64_t rng = 0x243F6A8885A308D3u;
 static uint64_t rnd(uint64_t m) { rng ^= rng << 13; rng ^= rng >> 7; rng ^= rng << 17; return rng % m; }
 
 int main(void) {
-  if (!init() || !mm_init() || !mm_gen_init()) { fprintf(stderr, "init failed\n"); return 1; }
+  if (!init() || !mm_init() || !mm_gen_init() || !mm_tisa_init()) { fprintf(stderr, "init failed\n"); return 1; }
   for (int i = 0; i < 16; i++) opaque_both();                   /* names 2..17: the 16 Boolean functions */
 
   for (uint64_t x = 0; x < 18; x++) {                           /* basic rules */
@@ -77,9 +162,14 @@ int main(void) {
     BOTH("refl", 12, rule_refl(x, 12), mm_refl(x, 12), mm_gen_refl(x, 12));
   }
   uint64_t future = get_last_const() + 100;                     /* names not yet allocated */
-  BOTH("proj1 future", 23, rule_proj1(future, UINT64_MAX, 23), mm_proj1(future, UINT64_MAX, 23), mm_gen_proj1(future, UINT64_MAX, 23));
-  BOTH("proj2 future", 24, rule_proj2(UINT64_MAX, future, 24), mm_proj2(UINT64_MAX, future, 24), mm_gen_proj2(UINT64_MAX, future, 24));
-  BOTH("refl future", 25, rule_refl(UINT64_MAX, 25), mm_refl(UINT64_MAX, 25), mm_gen_refl(UINT64_MAX, 25));
+  /* Micromath accepts symbols it has not allocated. The tcalc runtime mints names before use, so it
+     refuses them (a fresh name is then new to the whole state). The schema route works on raw ids
+     and is not compared on these rows. The three slots are then re-synchronized. */
+  if (!rule_proj1(future, UINT64_MAX, 23) || mm_proj1(future, UINT64_MAX, 23)) fail("proj1 future", 23);
+  if (!rule_proj2(UINT64_MAX, future, 24) || mm_proj2(UINT64_MAX, future, 24)) fail("proj2 future", 24);
+  if (!rule_refl(UINT64_MAX, 25) || mm_refl(UINT64_MAX, 25)) fail("refl future", 25);
+  pinned += 3;                                                  /* counted apart: these three differ by design */
+  for (uint64_t s = 23; s <= 25; s++) BOTH("future resync", s, rule_refl(0, s), mm_refl(0, s), mm_gen_refl(0, s));
 
   for (unsigned t = 0; t < 16; t++)                             /* exhaustive Boolean sweep */
     for (unsigned u = 0; u < 16; u++)
@@ -134,12 +224,12 @@ int main(void) {
     else if (k < 98) { uint64_t x = rnd(4), y = rnd(4); BOTH("fuzz proj2", d, rule_proj2(x, y, d), mm_proj2(x, y, d), mm_gen_proj2(x, y, d)); }
     else { uint64_t x = rnd(4); BOTH("fuzz refl", d, rule_refl(x, d), mm_refl(x, d), mm_gen_refl(x, d)); }
   }
-  printf("differential: %" PRIu64 " operations, verdicts and theorems identical across micromath, tcalc-runtime, tcalc-arena-gen, and tcalc-schema-gen (%" PRIu64 " accepted, %" PRIu64 " refused)\n",
-         ops, agree_acc, agree_ref);
+  printf("differential: %" PRIu64 " operations, verdicts and theorems identical across micromath, tcalc-runtime, tcalc-arena-gen, tcalc-schema-gen, and tcalc-tisa-x86 (%" PRIu64 " accepted, %" PRIu64 " refused); %" PRIu64 " further operations on unallocated symbols differ by design (micromath accepts, tcalc-runtime refuses, the generated routes are not compared)\n",
+         ops, agree_acc, agree_ref, pinned);
 
   /* Cost, each kernel alone: (a) the exhaustive sweep, five axioms and two substitutions per
      fixture; (b) one valid substitution repeated, premises already in place. */
-  double t0, tm, tt, ta, tg; volatile bool sink = 0; const uint64_t REP = 20000000;
+  double t0, tm, tt, ta, tg, tx; volatile bool sink = 0; const uint64_t REP = 20000000;
   t0 = now();
   for (unsigned t = 0; t < 16; t++) for (unsigned u = 0; u < 16; u++) for (unsigned v = 0; v < 16; v++)
     for (unsigned a = 0; a < 16; a++) for (unsigned b = 0; b < 16; b++) {
@@ -176,15 +266,28 @@ int main(void) {
       mm_gen_set(named(xa), named(t), named(ua), named(va), 4);
       sink ^= mm_gen_sub1(0, 1, 2, 3, 5); sink ^= mm_gen_sub2(0, 1, 2, 4, 6);
     }
-  tg = now() - t0;
-  printf("cost (a) sweep, 1048576 fixtures: micromath %.3f s | tcalc-runtime %.3f s (%.1fx) | tcalc-arena-gen %.3f s (%.1fx) | tcalc-schema-gen %.3f s (%.2fx)\n",
-         tm, tt, tt / tm, ta, ta / tm, tg, tg / tm);
+  tg = now() - t0; t0 = now();
+  for (unsigned t = 0; t < 16; t++) for (unsigned u = 0; u < 16; u++) for (unsigned v = 0; v < 16; v++)
+    for (unsigned a = 0; a < 16; a++) for (unsigned b = 0; b < 16; b++) {
+      unsigned x = superpose(t, u, v), ua = superpose(u, a, b), va = superpose(v, a, b), xa = superpose(x, a, b);
+      mm_gen_set(named(x), named(t), named(u), named(v), 0); mm_gen_set(named(ua), named(u), named(a), named(b), 1);
+      mm_gen_set(named(va), named(v), named(a), named(b), 2); mm_gen_set(named(xa), named(x), named(a), named(b), 3);
+      mm_gen_set(named(xa), named(t), named(ua), named(va), 4);
+      sink ^= mm_tisa_sub1_fast(0, 1, 2, 3, 5); sink ^= mm_tisa_sub2_fast(0, 1, 2, 4, 6);
+    }
+  tx = now() - t0;
+  printf("cost (a) sweep, 1048576 fixtures: micromath %.3f s | tcalc-runtime %.3f s (%.1fx) | tcalc-arena-gen %.3f s (%.1fx) | tcalc-schema-gen %.3f s (%.2fx) | tcalc-tisa-x86 %.3f s (%.2fx)\n",
+         tm, tt, tt / tm, ta, ta / tm, tg, tg / tm, tx, tx / tm);
   fixture(1, 6, 8, 3, 5);
   t0 = now(); for (uint64_t i = 0; i < REP; i++) sink ^= rule_substitute1(0, 1, 2, 3, 5); tm = now() - t0;
   t0 = now(); for (uint64_t i = 0; i < REP; i++) sink ^= mm_sub1(0, 1, 2, 3, 5); tt = now() - t0;
   t0 = now(); for (uint64_t i = 0; i < REP; i++) sink ^= mm_sub1_arena(0, 1, 2, 3, 5); ta = now() - t0;
   t0 = now(); for (uint64_t i = 0; i < REP; i++) sink ^= mm_gen_sub1(0, 1, 2, 3, 5); tg = now() - t0;
-  printf("cost (b) substitute1: micromath %.1f ns | tcalc-runtime %.1f ns (%.1fx) | tcalc-arena-gen %.1f ns (%.1fx) | tcalc-schema-gen %.1f ns (%.2fx)\n",
-         tm / REP * 1e9, tt / REP * 1e9, tt / tm, ta / REP * 1e9, ta / tm, tg / REP * 1e9, tg / tm);
+  t0 = now(); for (uint64_t i = 0; i < REP; i++) sink ^= mm_tisa_sub1_fast(0, 1, 2, 3, 5); tx = now() - t0;
+  printf("cost (b) substitute1: micromath %.1f ns | tcalc-runtime %.1f ns (%.1fx) | tcalc-arena-gen %.1f ns (%.1fx) | tcalc-schema-gen %.1f ns (%.2fx) | tcalc-tisa-x86 %.1f ns (%.2fx)\n",
+         tm / REP * 1e9, tt / REP * 1e9, tt / tm, ta / REP * 1e9, ta / tm, tg / REP * 1e9, tg / tm, tx / REP * 1e9, tx / tm);
+  tisa_free_x86(&g_tisa_comp_sub1);
+  tisa_free_x86(&g_tisa_comp_sub2);
+  tisa_arena_free(&g_tisa_arena);
   return 0;
 }

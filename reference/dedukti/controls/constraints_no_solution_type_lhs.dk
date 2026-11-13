@@ -1,0 +1,10 @@
+(; expect 1 --type-lhs ;)
+(; Negative control under --type-lhs: the typing constraint B a == C b has no solution (two distinct
+   static heads), a fact made by firings, and the rule is refused with that reason. ;)
+A : Type.
+B : A -> Type.
+C : A -> Type.
+mkB : a : A -> B a.
+
+def g : b : A -> C b -> C b.
+[a, b] g b (mkB a) --> mkB a.

@@ -1,0 +1,14 @@
+(; expect dk=1 complete=0 ;)
+(; The first instance `(y : A => d q) a` is a redex whose normal form `d q` mentions q:
+   Dedukti does not match, nor does --dk-matching; by default dk_tcalc matches. ;)
+
+A : Type.
+a : A.
+ok : A.
+k : A -> A -> A.
+d : A -> A.
+def g1 : (A -> A) -> A.
+
+[F] g1 (x => k F F) --> ok.
+
+#ASSERT (q : A => g1 (u => k ((y : A => d q) a) (d q))) == (q : A => ok).

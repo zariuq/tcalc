@@ -1,0 +1,19 @@
+(; expect 0 --type-lhs ;)
+(; Positive control under --type-lhs: the typing constraint a == g a b mentions a under a definable
+   symbol g, which an instance can make reduce away: a := zero, b := zero solves it in normal forms
+   (g zero zero --> zero), so the left-hand side has a typable instance and is not refused.  An
+   occurs check through a definable symbol is no refutation.  Dedukti refuses it under --type-lhs
+   (error 108; it checks the occurrence in the normal form of g a b) and admits it without the
+   flag. ;)
+A : Type.
+B : A -> Type.
+zero : A.
+def g : A -> A -> A.
+[x] g x zero --> zero.
+mk : a : A -> b : A -> B (g a b).
+
+def h : a : A -> B a -> Type.
+[a, b] h a (mk a b) --> A.
+
+#ASSERT h zero (mk zero zero) : Type.
+#ASSERT h zero (mk zero zero) == A.

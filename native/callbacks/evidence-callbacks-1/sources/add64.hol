@@ -1,0 +1,3 @@
+(* add64: native binary callback image, 34 bytes (ENDBR64, then the 30-byte body).
+   Bytes of the artifact add64.bin, sha256 8bd7d062bf7f730f611796bd212315ba680feb8984f5ec6081b76211c53f24a9. *)
+cb_image "add64" "f30f1efa488b8700000000488b97080000004801d048898600000000b801000000c3";;

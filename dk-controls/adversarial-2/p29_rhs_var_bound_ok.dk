@@ -1,0 +1,9 @@
+(; Every right-hand-side variable occurs in the left-hand side. ;)
+A : Type.
+a : A.
+B : Type.
+P : A -> Type.
+def k : A -> B -> A.
+[x : A, y : B] k x y --> x.
+b : B.
+thm t : P (k a b) -> P a := p : P (k a b) => p.

@@ -1,0 +1,21 @@
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor, pinned with taskset; load average: 5.16, 4.98, 4.91
+idle% over 1 s before the runs: cpu6 78 cpu7 87 cpu14 80 cpu15 88
+cpu 7: sum of 4096 u32 words, per element: GCC -O2 scalar (noipa, n unknown) 0.199 ns; GCC -O2 constprop 0.090 ns; p1 default 0.680 ns; p1 hoisted 0.211 ns; p1 reference 8.8 ns
+cpu 7: sum of 4096 u32 words, per element: GCC -O2 scalar (noipa, n unknown) 0.194 ns; GCC -O2 constprop 0.088 ns; p1 default 0.689 ns; p1 hoisted 0.209 ns; p1 reference 11.4 ns
+cpu 7: sum of 4096 u32 words, per element: GCC -O2 scalar (noipa, n unknown) 0.202 ns; GCC -O2 constprop 0.091 ns; p1 default 0.679 ns; p1 hoisted 0.203 ns; p1 reference 8.9 ns
+cpu 7: sum of 4096 u32 words, per element: GCC -O2 scalar (noipa, n unknown) 0.197 ns; GCC -O2 constprop 0.090 ns; p1 default 0.680 ns; p1 hoisted 0.214 ns; p1 reference 8.8 ns
+cpu 7: sum of 4096 u32 words, per element: GCC -O2 scalar (noipa, n unknown) 0.319 ns; GCC -O2 constprop 0.088 ns; p1 default 0.745 ns; p1 hoisted 0.327 ns; p1 reference 14.8 ns
+cpu 6: sum of 4096 u32 words, per element: GCC -O2 scalar (noipa, n unknown) 0.194 ns; GCC -O2 constprop 0.087 ns; p1 default 0.674 ns; p1 hoisted 0.219 ns; p1 reference 9.0 ns
+cpu 6: sum of 4096 u32 words, per element: GCC -O2 scalar (noipa, n unknown) 0.198 ns; GCC -O2 constprop 0.091 ns; p1 default 0.678 ns; p1 hoisted 0.206 ns; p1 reference 8.9 ns
+cpu 6: sum of 4096 u32 words, per element: GCC -O2 scalar (noipa, n unknown) 0.195 ns; GCC -O2 constprop 0.089 ns; p1 default 0.685 ns; p1 hoisted 0.215 ns; p1 reference 8.9 ns
+cpu 6: sum of 4096 u32 words, per element: GCC -O2 scalar (noipa, n unknown) 0.195 ns; GCC -O2 constprop 0.090 ns; p1 default 0.647 ns; p1 hoisted 0.211 ns; p1 reference 8.7 ns
+cpu 6: sum of 4096 u32 words, per element: GCC -O2 scalar (noipa, n unknown) 0.196 ns; GCC -O2 constprop 0.087 ns; p1 default 0.668 ns; p1 hoisted 0.212 ns; p1 reference 8.9 ns
+perf mode h:
+89918985,cycles:u
+497789210,instructions:u
+perf mode s:
+84660865,cycles:u
+410489201,instructions:u
+perf mode d:
+296551298,cycles:u
+2135909288,instructions:u

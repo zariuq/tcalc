@@ -1,0 +1,6 @@
+A : Type.
+a : A.
+b : A.
+c : A -> A -> A.
+def g : (A -> A -> A) -> A.
+[F] g (x => y => F x x) --> a.

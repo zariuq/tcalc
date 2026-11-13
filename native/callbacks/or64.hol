@@ -1,0 +1,3 @@
+(* or64: native binary callback image, 34 bytes (ENDBR64, then the 30-byte body).
+   Bytes of the artifact or64.bin, sha256 eff126e2b53dc45dcb4ecbfb8b7f2b10a320fc1e09e096392db3f2b20bcf0a93. *)
+cb_image "or64" "f30f1efa488b8700000000488b97080000004809d048898600000000b801000000c3";;

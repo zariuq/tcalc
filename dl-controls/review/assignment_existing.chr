@@ -1,0 +1,6 @@
+% expect: rc=1 status=failed detail=
+% `X is X+1` with X already bound to 1 fails.
+:- use_module(library(chr)).
+:- chr_constraint p/1,q/1.
+r @ p(X) <=> X is X+1, q(X).
+?- p(1).

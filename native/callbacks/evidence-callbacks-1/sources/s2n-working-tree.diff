@@ -1,0 +1,51 @@
+diff --git a/common/consttime.ml b/common/consttime.ml
+index 01bc486..05d2fac 100644
+--- a/common/consttime.ml
++++ b/common/consttime.ml
+@@ -387,10 +387,12 @@ let DISCHARGE_MEMACCESS_INBOUNDS_USING_ASM_TAC:tactic =
+ let DISCHARGE_MEMACCESS_INBOUNDS_TAC =
+   let cons_to_append_th =
+       MESON[APPEND]
+-        `memaccess_inbounds (CONS a b) = memaccess_inbounds (APPEND [a] b)` in
++        `memaccess_inbounds (CONS (a:(A)address_uarch_event) b) =
++         memaccess_inbounds (APPEND [a] b)` in
+   let append_nil_th =
+       MESON[APPEND]
+-        `memaccess_inbounds (APPEND [] b) = memaccess_inbounds b /\
++        `memaccess_inbounds (APPEND ([]:((A)address_uarch_event)list) b) =
++           memaccess_inbounds b /\
+          memaccess_inbounds (APPEND (APPEND [] []) b) = memaccess_inbounds b` in
+ 
+   let rec main_tac (asl,w) =
+diff --git a/common/maychange.ml b/common/maychange.ml
+index b855b5d..4d7f64a 100644
+--- a/common/maychange.ml
++++ b/common/maychange.ml
+@@ -104,11 +104,16 @@ assert
+    Memory ranges retain the backend native address type; an eight-byte result
+    is printed as `bytes64`, and other merged sizes use `bytes`. *)
+ let simplify_maychanges: term -> term =
+-  let maychange_const = `MAYCHANGE` and seq_const = `,,` in
+   let word64ty = `:(64)word` and word128ty = `:(128)word` in
+   let zero = `0` in
++  let seq_const =
++    fst(strip_comb(lhs(snd(strip_forall(concl seq))))) in
+ 
+   fun (maychanges:term) ->
++    let maychange_const =
++      if is_binary ",," maychanges then
++        fst(dest_comb(fst(dest_binary ",," maychanges)))
++      else fst(dest_comb maychanges) in
+     let maychange_regs64 = ref [] and
+         maychange_regs128 = ref [] and
+         maychange_mems = ref [] and
+@@ -217,8 +222,7 @@ let simplify_maychanges: term -> term =
+         let fcty = type_of first_comp in
+         let comps0,comps1 =
+           List.partition (fun c -> type_of c = fcty) comps in
+-        let mterm =
+-          mk_icomb (maychange_const,mk_flist (first_comp::comps0)) in
++        let mterm = mk_comb (maychange_const,mk_flist (first_comp::comps0)) in
+         if !result = zero then result := mterm
+         else result := mk_icomb(mk_icomb (seq_const,mterm),!result);
+         join_result comps1 in

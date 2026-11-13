@@ -1,0 +1,35 @@
+(cesta native-c/1 compact-c/2
+  (unit
+    (ownership (check-all)
+      (record TcPreparedStep
+        (field take (borrow read nullable))
+        (field keep (borrow read nullable))
+        (field inst (borrow read nullable))
+        (field seeds (borrow read nullable)))
+      (record TcAdmissionProfile
+        (field name (borrow read nullable))
+        (field ctx (borrow read nullable))
+        (field permit (borrow read nullable)))
+      (record TcAdmittedEvent (field profile (borrow read nullable)))
+      (function tc_event_firing (nullable 0)
+        (returns-record
+          ((take) (borrow 0))
+          ((keep) (borrow 0))
+          ((inst) (borrow 0))
+          ((seeds) (borrow 0)))))
+    (native "
+#include \"bridge/tc_cetta_bridge.h\"
+
+TcPreparedStep tc_event_firing(const TcAdmittedEvent *ev) {
+  TcPreparedStep s = {0};
+  if (!ev) return s;
+  s.rule   = ev->firing.rule;
+  s.dest   = ev->firing.dest;
+  s.nseeds = ev->firing.nseeds;
+  s.take   = ev->ntake > 0 ? ev->owned_take : NULL;
+  s.keep   = ev->nkeep > 0 ? ev->owned_keep : NULL;
+  s.inst   = ev->has_inst  ? ev->owned_inst : NULL;
+  s.seeds  = ev->firing.nseeds > 0 ? ev->owned_seeds : NULL;
+  return s;
+}
+")))

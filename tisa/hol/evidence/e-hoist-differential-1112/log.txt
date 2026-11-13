@@ -1,0 +1,84 @@
+== seed 101
+hoisting cases: the copy without checks when the region and allowance suffice; the template loop, failing at the last element after the earlier stores and payments, when one byte or unit is short
+native: 10032 programs emitted (2446671 bytes, 4118 FUND points in all); 80256 runs equal to the reference on outcome, status, ret_val, receipt and every region byte (fired 33202, refused 8294, unsupported 6809, invalid 28746, exhausted 3205)
+hoisted: 1870 of 4886 loops in 1661 programs (2970 checks moved to loop entry, 742 loops with FUND tested at entry; 2760341 bytes against 2446671); 13288 runs of images with a hoisted loop, each equal to the reference
+  not hoisted: no affine region access or FUND 2159, a loop in the body 857
+all passed
+exit 0
+== seed 102
+hoisting cases: the copy without checks when the region and allowance suffice; the template loop, failing at the last element after the earlier stores and payments, when one byte or unit is short
+native: 9948 programs emitted (2405272 bytes, 4048 FUND points in all); 79584 runs equal to the reference on outcome, status, ret_val, receipt and every region byte (fired 32912, refused 7918, unsupported 6954, invalid 28729, exhausted 3071)
+hoisted: 1858 of 4828 loops in 1661 programs (2807 checks moved to loop entry, 809 loops with FUND tested at entry; 2716347 bytes against 2405272); 13288 runs of images with a hoisted loop, each equal to the reference
+  not hoisted: no affine region access or FUND 2201, a loop in the body 769
+all passed
+exit 0
+== seed 103
+hoisting cases: the copy without checks when the region and allowance suffice; the template loop, failing at the last element after the earlier stores and payments, when one byte or unit is short
+native: 9948 programs emitted (2405272 bytes, 4048 FUND points in all); 79584 runs equal to the reference on outcome, status, ret_val, receipt and every region byte (fired 32912, refused 7918, unsupported 6954, invalid 28729, exhausted 3071)
+hoisted: 1858 of 4828 loops in 1661 programs (2807 checks moved to loop entry, 809 loops with FUND tested at entry; 2716347 bytes against 2405272); 13288 runs of images with a hoisted loop, each equal to the reference
+  not hoisted: no affine region access or FUND 2201, a loop in the body 769
+all passed
+exit 0
+== seed 104
+hoisting cases: the copy without checks when the region and allowance suffice; the template loop, failing at the last element after the earlier stores and payments, when one byte or unit is short
+native: 10000 programs emitted (2412342 bytes, 3933 FUND points in all); 80000 runs equal to the reference on outcome, status, ret_val, receipt and every region byte (fired 32503, refused 8579, unsupported 7110, invalid 28739, exhausted 3069)
+hoisted: 1837 of 4656 loops in 1652 programs (2957 checks moved to loop entry, 756 loops with FUND tested at entry; 2723758 bytes against 2412342); 13216 runs of images with a hoisted loop, each equal to the reference
+  not hoisted: a loop in the body 672, no affine region access or FUND 2147
+all passed
+exit 0
+== seed 105
+hoisting cases: the copy without checks when the region and allowance suffice; the template loop, failing at the last element after the earlier stores and payments, when one byte or unit is short
+native: 10000 programs emitted (2412342 bytes, 3933 FUND points in all); 80000 runs equal to the reference on outcome, status, ret_val, receipt and every region byte (fired 32503, refused 8579, unsupported 7110, invalid 28739, exhausted 3069)
+hoisted: 1837 of 4656 loops in 1652 programs (2957 checks moved to loop entry, 756 loops with FUND tested at entry; 2723758 bytes against 2412342); 13216 runs of images with a hoisted loop, each equal to the reference
+  not hoisted: a loop in the body 672, no affine region access or FUND 2147
+all passed
+exit 0
+== seed 106
+hoisting cases: the copy without checks when the region and allowance suffice; the template loop, failing at the last element after the earlier stores and payments, when one byte or unit is short
+native: 9997 programs emitted (2409938 bytes, 3906 FUND points in all); 79976 runs equal to the reference on outcome, status, ret_val, receipt and every region byte (fired 32641, refused 8696, unsupported 6786, invalid 28893, exhausted 2960)
+hoisted: 1872 of 4675 loops in 1666 programs (2885 checks moved to loop entry, 783 loops with FUND tested at entry; 2725523 bytes against 2409938); 13328 runs of images with a hoisted loop, each equal to the reference
+  not hoisted: a loop in the body 666, no affine region access or FUND 2137
+all passed
+exit 0
+== seed 107
+hoisting cases: the copy without checks when the region and allowance suffice; the template loop, failing at the last element after the earlier stores and payments, when one byte or unit is short
+native: 9997 programs emitted (2409938 bytes, 3906 FUND points in all); 79976 runs equal to the reference on outcome, status, ret_val, receipt and every region byte (fired 32641, refused 8696, unsupported 6786, invalid 28893, exhausted 2960)
+hoisted: 1872 of 4675 loops in 1666 programs (2885 checks moved to loop entry, 783 loops with FUND tested at entry; 2725523 bytes against 2409938); 13328 runs of images with a hoisted loop, each equal to the reference
+  not hoisted: a loop in the body 666, no affine region access or FUND 2137
+all passed
+exit 0
+== seed 108
+hoisting cases: the copy without checks when the region and allowance suffice; the template loop, failing at the last element after the earlier stores and payments, when one byte or unit is short
+native: 10013 programs emitted (2432619 bytes, 4163 FUND points in all); 80104 runs equal to the reference on outcome, status, ret_val, receipt and every region byte (fired 32407, refused 8587, unsupported 7340, invalid 28677, exhausted 3093)
+hoisted: 1902 of 4804 loops in 1683 programs (2938 checks moved to loop entry, 833 loops with FUND tested at entry; 2751289 bytes against 2432619); 13464 runs of images with a hoisted loop, each equal to the reference
+  not hoisted: a loop in the body 722, no affine region access or FUND 2180
+all passed
+exit 0
+== seed 109
+hoisting cases: the copy without checks when the region and allowance suffice; the template loop, failing at the last element after the earlier stores and payments, when one byte or unit is short
+native: 10013 programs emitted (2432619 bytes, 4163 FUND points in all); 80104 runs equal to the reference on outcome, status, ret_val, receipt and every region byte (fired 32407, refused 8587, unsupported 7340, invalid 28677, exhausted 3093)
+hoisted: 1902 of 4804 loops in 1683 programs (2938 checks moved to loop entry, 833 loops with FUND tested at entry; 2751289 bytes against 2432619); 13464 runs of images with a hoisted loop, each equal to the reference
+  not hoisted: a loop in the body 722, no affine region access or FUND 2180
+all passed
+exit 0
+== seed 110
+hoisting cases: the copy without checks when the region and allowance suffice; the template loop, failing at the last element after the earlier stores and payments, when one byte or unit is short
+native: 9990 programs emitted (2413544 bytes, 3957 FUND points in all); 79920 runs equal to the reference on outcome, status, ret_val, receipt and every region byte (fired 32578, refused 8501, unsupported 7144, invalid 28672, exhausted 3025)
+hoisted: 1798 of 4703 loops in 1607 programs (2837 checks moved to loop entry, 737 loops with FUND tested at entry; 2716750 bytes against 2413544); 12856 runs of images with a hoisted loop, each equal to the reference
+  not hoisted: a loop in the body 731, no affine region access or FUND 2174
+all passed
+exit 0
+== seed 111
+hoisting cases: the copy without checks when the region and allowance suffice; the template loop, failing at the last element after the earlier stores and payments, when one byte or unit is short
+native: 9990 programs emitted (2413544 bytes, 3957 FUND points in all); 79920 runs equal to the reference on outcome, status, ret_val, receipt and every region byte (fired 32578, refused 8501, unsupported 7144, invalid 28672, exhausted 3025)
+hoisted: 1798 of 4703 loops in 1607 programs (2837 checks moved to loop entry, 737 loops with FUND tested at entry; 2716750 bytes against 2413544); 12856 runs of images with a hoisted loop, each equal to the reference
+  not hoisted: a loop in the body 731, no affine region access or FUND 2174
+all passed
+exit 0
+== seed 112
+hoisting cases: the copy without checks when the region and allowance suffice; the template loop, failing at the last element after the earlier stores and payments, when one byte or unit is short
+native: 9929 programs emitted (2412142 bytes, 4118 FUND points in all); 79432 runs equal to the reference on outcome, status, ret_val, receipt and every region byte (fired 32483, refused 8724, unsupported 6872, invalid 28237, exhausted 3116)
+hoisted: 1850 of 4777 loops in 1636 programs (2833 checks moved to loop entry, 813 loops with FUND tested at entry; 2723014 bytes against 2412142); 13088 runs of images with a hoisted loop, each equal to the reference
+  not hoisted: a loop in the body 767, no affine region access or FUND 2160
+all passed
+exit 0

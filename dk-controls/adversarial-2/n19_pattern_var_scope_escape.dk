@@ -1,0 +1,11 @@
+(; A pattern variable that is not applied to the bound variable may only match
+   a body that does not mention that variable.  g (x => x) must stay stuck, so
+   F a is not convertible to an arbitrary w. ;)
+A : Type.
+a : A.
+eq : A -> A -> Type.
+refl : (x : A) -> eq x x.
+def g : (A -> A) -> A.
+[y] g (x => y) --> y.
+def F : A -> A := w : A => g (x : A => x).
+thm t : (w : A) -> eq w (F a) := w : A => refl w.

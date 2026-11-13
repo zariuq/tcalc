@@ -1,0 +1,5 @@
+(; The head of a rule's left-hand side must be a definable constant, not a pattern variable. ;)
+A : Type.
+a : A.
+def f : A -> A.
+[g] g a --> a.

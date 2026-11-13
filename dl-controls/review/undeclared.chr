@@ -1,0 +1,3 @@
+% expect: rc=1 status=refused detail=undeclaredQuery
+% A query of a constraint that is not declared is refused before running.
+?- undeclared(1).

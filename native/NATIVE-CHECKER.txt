@@ -1,0 +1,244 @@
+Native HOLR checker: layout, routines, proof obligations
+=======================================================
+
+The checker is a t-ISA p1 program. The logic it implements is HOL Light's,
+as Candle's `proves` ported to HOL Light (Mettapedia/hol_light/HolInHol/).
+Its rows are the native fibre's rows (tcalc/native/hol/holfibre.ml); every
+routine is proved against the fibre's step it performs, and every x86 image
+against its p1 program. C is never a specification here.
+
+1. Trust boundary
+-----------------
+Inside: the p1 program and its regions R1..R8. Assumption (named, stated in
+the interface): nothing outside the checker writes R1..R8 while it runs or
+between runs over the same state. Hardening (protection keys, a process
+boundary) is optional. Outside, and untrusted: the input bytes, every hash
+table's contents as evidence (a hit is re-checked against the rows), and
+the host that allocates regions (every length is checked on entry).
+
+2. Regions (p1 allows nine)
+---------------------------
+  R0  input      RO   the HOLR v1 stream, whole or a prefix
+  R1  control    RW   counters, state, checksum, layout of R8 (section 9)
+  R2  names      RW   name rows, 16 B: (offset, length) into R3
+  R3  bytes      RW   name byte arena
+  R4  types      RW   type rows, 16 B
+  R5  terms      RW   named term rows, 40 B
+  R6  db         RW   de Bruijn rows, 16 B (also hypothesis-list cells)
+  R7  theorems   RW   theorem rows, 16 B
+  R8  work       RW   intern tables, id maps, walk stack, memos, sort
+                      buffer, per-name theory flags; sub-ranges given in R1
+p1 checks every access against its region. Sub-ranges of R8 are checked by
+the program against the layout in R1, which entry validation checks once.
+
+3. Rows (the fibre's decoders, packed)
+--------------------------------------
+Packed key word: k0 = tag | a << 3 (tags < 8, ids < 2^60), k1 = b.
+
+  type row (tag,a,b)        0 TyVar(name a)       1 TyApp(name a, list b)
+                            2 nil                 3 cons(type a, list b)
+  db row (tag,a,b)          0 dbVar(name a, type b)   1 dbBound(index a)
+                            2 dbConst(name a, type b) 3 dbComb(a, b)
+                            4 dbAbs(type a, body b)   5 nil   6 cons(db a, list b)
+  named term row            (tag, a, b, type, image): 0 Var(name a, type b)
+                            1 Const(name a, type b) 2 Comb(a, b) 3 Abs(var a, body b);
+                            type is a type row, image a db row
+  theorem row               (hypothesis list db id, conclusion db id)
+
+Decoding is relational: fdty/fdtys, fddb/fddbs, fdtm in holfibre.ml. A row
+refers only to earlier rows, so appending preserves every decoding.
+
+4. Canonical ids
+----------------
+Names, types and db rows (including hypothesis-list cells) are interned:
+one row per distinct key. Interning is proved sound (INTERN16_SOUND: a
+returned id's row is the key; earlier rows unchanged) and complete (no
+duplicates, from the probing invariant). Consequences:
+  - equal ids <=> equal decoded objects (functionality + completeness);
+  - alpha-equivalence of terms is db id equality (HACONV_DB);
+  - hypothesis sets are sorted interned lists, so set equality is id
+    equality.
+Named term rows are not interned: one per HOLR term id. Theorem rows are
+one per HOLR theorem id.
+
+5. Id spaces
+------------
+HOLR ids are sequential per space. N and Y map through arrays in R8 to
+canonical name and type rows (a stream may define one object twice). T and
+H ids equal named-term and theorem row ids. Each space has a dropped mark:
+DROP marks an id, and any later use of it is malformed ("dropped
+reference"). Validation order follows the format: every id operand in
+encoding order, then the operation.
+
+6. Routines (each a p1 statement block with a tisa_spec)
+--------------------------------------------------------
+  intern16     find-or-make of a 16-byte key in R4 or R6           done
+  intern_bytes find-or-make of a byte string in R2/R3 (FNV hash, full compare)
+  leb128       minimal unsigned LEB128, at most 9 bytes, value < 2^62
+  checksum     FNV-1a 64 over bytes consumed, for END
+  ty_list      build a type list (cons cells) from operand ids
+  db_image     image of a new named row: Var/Const/Comb are one interning;
+               Abs is hbind (x,ty) 0 over the body's image (walk)
+  hbind        walk over a db term, replacing dbVar(x,ty) by dbBound(n),
+               n rising under dbAbs; memoized per call (generation stamps)
+  vsubst       hdbVSUBST walk (INST): dbVar rows looked up in the
+               substitution, first match wins (HREV_ASSOCD)
+  tyinst       hdbINST walk (INST_TYPE) over db terms and types
+  ty_match     CONST: find tyin with HTYPE_SUBST tyin generic = given
+  vfree        does dbVar(x,ty) occur in a db term (ABS guard), in
+               every hypothesis
+  closed       no dbVar reachable (definitions); type variables subset
+  hyps_union   merge two sorted lists (TRANS, MK_COMB, EQ_MP, DEDUCT)
+  hyps_remove  remove one id (DEDUCT_ANTISYM)
+  hyps_build   sort and dedup a buffer, then intern the cells (INST,
+               INST_TYPE images; EXPECT_ALPHA's expected hypotheses)
+  eq_build     intern dbConst "=" at HFun A (HFun A bool), then two dbComb
+Walks use an explicit stack in R8; memo entries are trusted only through
+their own per-entry predicate (entry valid for this generation => its
+value row decodes to the walk's result for its key row).
+
+7. Records (opcode: guards at the id level; fibre lemma)
+--------------------------------------------------------
+  NAME      intern bytes                                   (names region)
+  TYVAR     intern (0,n,0)                                 FIBRE_TYVAR
+  TYAPP     n declared with arity = list length; intern    FIBRE_TYAPP
+  VAR       named row (0,n,y,y,img); img = intern dbVar     FIBRE_VAR
+  CONST     ty_match against n's generic type; img         FIBRE_CONST
+  COMB      type(s) = TyApp fun [type(t); B]; img = dbComb FIBRE_COMB
+  ABS       first operand a Var row; img = dbAbs (hbind)   FIBRE_ABSN
+  REFL      eq_build(img t, img t), hyps nil               FIBRE_REFL
+  TRANS     middle ids equal; eq at th1's type; union      FIBRE_TRANS
+  MK_COMB   type checks via the "=" types; union           FIBRE_MK_COMB
+  ABS_RULE  vfree false on every hypothesis                FIBRE_ABS
+  BETA      Comb(Abs(v,b), v) with arg row = v exactly      FIBRE_BETA
+  ASSUME    type bool; hyps [img]                          FIBRE_ASSUME
+  EQ_MP     left side id = th2's conclusion id             FIBRE_EQ_MP
+  DEDUCT    remove each conclusion from the other's hyps   FIBRE_DEDUCT
+  INST_TYPE pairs (type, TyVar); tyinst; hyps_build        FIBRE_INST_TYPE
+  INST      pairs (term, Var) with equal types; vsubst     FIBRE_INST
+  NEW_TYPE / NEW_CONSTANT / NEW_AXIOM / NEW_DEFINITION / NEW_TYPEDEF
+            HOL Light's checks; theory-step lemmas (in progress, A)
+  POLICY    tighten only
+  EXPECT_ALPHA  expected hyps (hyps_build of images) and conclusion image
+            equal the row's two ids
+  EXPECT    exact names: refused as unsupported (no corpus uses it)
+  EXPECT_AXIOMS, EXPECT_REFUSED, LABEL, EMIT, DROP_*, END as in the format
+
+8. Outcomes
+-----------
+ACCEPTED (END checked, every check matched), REFUSED (record index and
+reason), MALFORMED, RESOURCE (a region or table full; never accepted).
+Strict mode only; probe mode streams are reported as unsupported.
+
+9. Control block (R1), words
+----------------------------
+  0 state   1 records committed   2 checksum (FNV-1a so far)   3 input offset
+  4..7 counts: names, bytes used, types, terms   8..9 db rows, theorems
+  10 policy   11 generation (memos)   12.. R8 layout: (offset, length) per
+  sub-range: name table, type/db tables, N map, Y map, dropped marks, stack,
+  memo, sort buffer, theory flags
+
+10. Proof plan
+--------------
+Each routine: tisa_spec from its precondition (rows decode, predicates
+hold) to the fibre step's hypotheses as facts about the new rows, proved
+with the weakest-precondition generator (tcalc/native/hol/tisa_wp.ml) and
+loop invariants. Each record handler composes routines (TISA_WP_BY_SPEC)
+and discharges its fibre lemma. The checker's loop invariant: every row
+region satisfies its predicate, counters match R1, the checksum is FNV-1a
+of the consumed prefix. The x86 image of the whole program is proved by
+the generator per image, and joined to the functional theorem as for
+intern16 (INTERN16_X86_SOUND).
+
+11. First slice
+---------------
+NAME, TYVAR, TYAPP (bootstrap types), VAR, CONST (bootstrap "="), COMB,
+REFL, TRANS, EXPECT_ALPHA, END, on hand-made streams and against CeTTa's
+verdicts, before the remaining records.
+
+12. The proof of D (native acceptance implies holr_accepts)
+-----------------------------------------------------------
+Three layers, each against the one above:
+
+  holr_step (holr_spec.ml)   records over HOL objects: names, types, terms,
+                             sequents (any derivable), context, drops, policy
+        ^ simulation (per record kind)
+  nat_step (to write)        records over decoded rows and id maps: the effect
+                             each native handler must have, stated on decoded
+                             rows (relational: "the new N/Y map entry decodes
+                             to ...", "a new theorem row with ...")
+        ^ refinement (per routine, C)
+  p1 handlers + reader       memory: R1..R8 as NATIVE-CHECKER.txt says
+
+nat_sim ns hs: the HOL state is the decoding of the native one:
+  ctx equal; names(hs) = MAP (\i. EL i nms) nmap; types(hs) decode ymap's rows
+  (fdty); terms(hs) decode the named rows one to one (fdtm, fibre_tm_ok);
+  each theorem row i is witnessed by EL i (ths hs): a derivable sequent whose
+  conclusion has the row's conclusion as image and whose hypotheses' images
+  are among the row's (fibre_thm_ok with that witness); drops equal.
+
+Per record kind: nat_step r ns ns' /\ nat_sim ns hs
+                 ==> ?hs'. holr_step hs r hs' /\ nat_sim ns' hs'.
+The fibre lemmas give the theorem rows' witnesses (FIBRE_REFL, FIBRE_TRANS,
+...); FIBRE_EXPECT_ALPHA gives EXPECT_ALPHA's claim. The bootstrap rows
+(bool, fun, "=") are invisible to HOLR ids: both runs start with empty maps.
+With the reader's theorem (accepted bytes = holr_stream pol 0 recs, and the
+handlers ran on recs in order), the runs give holr_accepts bytes.
+
+13. Composition: a plan-interpreting x86 driver (agreed with t-ISA's owner)
+-------------------------------------------------------------------------
+Leaves: standalone p1 programs (intern16, intern_bytes, leb128, fnv, walks,
+merges, checks), each with an explicit interface: the regions it binds,
+its args (frame words 22..), its result (frame word 19, status 18) and its
+failure contract, proved once (x86 image + functional spec).
+
+Driver: one small x86 routine, proved once with s2n-bignum's subroutine
+composition against the linked bytes. It interprets call plans:
+  plan step = (leaf, region bindings, arg sources, result destination,
+               outcome handling)
+Data flows between steps through control words (R1): a step's args are
+read from control words into the child's 192-byte frame, its result is
+stored to a control word, and a non-FIRED outcome ends the record with the
+plan's verdict. A record kind's handler is a plan: data, not code.
+
+Proof structure:
+  - the driver's theorem, once: running a plan calls its leaves in order
+    with the frames the plan describes, and every outcome ends as the plan
+    says (co-vibeitp's checklist: call/return targets, stack slots, saved
+    and clobbered registers, argument and result transport, disjointness,
+    footprints, shared invariants, every refusal/invalid/resource outcome
+    and completed-prefix effects);
+  - each plan's theorem, per record kind, in HOL only: composing the leaves'
+    specifications along the plan gives the record's nat_step clause
+    (TISA_WP_BY_SPEC-style composition at the frame level);
+  - publication: a plan's last step writes the published counts (one
+    admitted commit); rows written before it are invisible to the
+    per-row predicates until then.
+Per record kind the cost is then a plan and a spec composition, not new
+assembly. One intern16 image serves type rows, de Bruijn rows and list
+cells through bindings.
+Driver checklist additions (co-vibeitp's ABI review, 11/12):
+  - read each leaf's outcome from its proved contract: the status is frame
+    word 18 in the child's frame, the payload frame word 19 (RAX). Never
+    infer FIRED from a nonzero RAX: a legacy emitter path folded the payload
+    into the status, though the images proved here come from tisa_x86.c;
+  - prove each child frame's entry validity in the driver, including aliases
+    between the frame, the stack and the regions: a raw CALL skips the C
+    runner's prevalidation;
+  - carry the shared fuel receipt (frame words 20, 21) through every
+    outcome.
+Driver profile assumption (co-vibeitp's review, 11/12): driver.S calls through
+"call enter; enter: push r15; ret", which avoids s2n-bignum's mis-modelled
+indirect call. Under CET shadow stacks (SHSTK) that ret faults, so SHSTK-off is
+an explicit supported-profile assumption, recorded in the driver's header and
+provenance. Once the model's absolute-indirect fix lands (our s2n-bignum fork),
+revisit with a real indirect call; IBT would then also need ENDBR64 at leaf
+entries. Keep distinct REFUSED and EXHAUSTED outcome controls in the harness.
+Plan as one transform step (co-vibeitp, 11/12): drv_sem composes calls in
+sequence. To treat a multi-leaf plan as one admitted step, D needs the
+preparation/stuttering/publication argument: the steps before the commit point
+are invisible (rows above the published counts), the commit is the plan's last
+step, and on refusal every protected region is unchanged (stuttering). The
+generality target is one universal theorem, "every admitted rule table compiled
+to plans is sound", instantiated for HOL and for Dedukti. Two examples alone
+are not that theorem.

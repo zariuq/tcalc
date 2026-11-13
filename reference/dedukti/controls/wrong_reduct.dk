@@ -1,0 +1,8 @@
+(; expect 1 ;)
+(; Negative control: the solution is q, so asserting the reduct is the constant ok is false. ;)
+A : Type.
+ok : A.
+c : A -> A -> A.
+def g : (A -> A) -> A.
+[F] g (x => c F F) --> F.
+#ASSERT (q : A => g (u => c q q)) == (q : A => ok).

@@ -1,0 +1,5 @@
+% expect: rc=0 status=completed detail=[q(9223372036854775808)]
+% Integers do not wrap at 64 bits.
+:- chr_constraint p/1,q/1.
+r @ p(X) <=> Y is X+1, q(Y).
+?- p(9223372036854775807).

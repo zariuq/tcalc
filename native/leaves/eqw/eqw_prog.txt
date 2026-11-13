@@ -1,0 +1,1 @@
+(TProg [] [] (TSeq (TInstr (TLoadFrame TyU64 1 22)) (TSeq (TInstr (TLoadFrame TyU64 2 23)) (TSeq (TInstr (TCmp CondEq TyU64 3 1 (OpReg 2))) (TSeq (TIf 3 (TReturn 1 1) TSkip) (TReturn 0 3))))))

@@ -1,0 +1,4 @@
+fresh HOL Light process: tisa_symex.ml + intern16.ml, 2026-11-12 14:36
+errors: 0
+# AUDIT INTERN16_SOUND: 0 hyps; axioms: exists f. ONE_ONE f /\ ~ONTO f, forall P x. P x ==> P ((@) P), forall t. (\x. t x) = t
+# AUDIT INTERN16_TERM: 0 hyps; axioms: exists f. ONE_ONE f /\ ~ONTO f, forall P x. P x ==> P ((@) P), forall t. (\x. t x) = t

@@ -1,0 +1,8 @@
+% expect: rc=0 status=completed detail=[b]
+% A rule body runs in order: `a` is activated (and erased) before `b` is told.
+:- use_module(library(chr)).
+:- chr_constraint start/0,a/0,b/0,done/0.
+start_rule @ start <=> a,b.
+pair @ a,b <=> done.
+erase @ a <=> true.
+?- start.

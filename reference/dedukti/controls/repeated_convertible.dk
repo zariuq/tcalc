@@ -1,0 +1,13 @@
+(; expect 0 ;)
+(; The two instances of a repeated pattern variable are convertible but not the same term: the
+   match holds by a conversion fact between the two solutions. ;)
+A : Type.
+ok : A.
+c : A -> A -> A.
+def id : A -> A.
+[x] id x --> x.
+def g : (A -> A) -> A.
+[F] g (x => c F F) --> ok.
+#ASSERT (q : A => g (u => c q (id q))) == (q : A => ok).
+#ASSERT (q : A => g (u => c (id (id q)) q)) == (q : A => ok).
+#ASSERTNOT (q : A => r : A => g (u => c q (id r))) == (q : A => r : A => ok).

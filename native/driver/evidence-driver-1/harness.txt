@@ -1,0 +1,10 @@
+$ ./build/test_driver ../intern/intern16b_prog.txt build/driver.bin 20000   (2026-11-12 22:39)
+leaf: the linked intern16 image (1078 bytes) equals the emitted image (1078 bytes)
+driver: the linked tisa_drive holds build/driver.bin (522 bytes)
+composition: status 1 (reference 1), ids 0 1, count 2, rows (7919,3) (104729,1)
+random: 20000 plans; reference outcomes FIRED 7469 REFUSED 0 UNSUPPORTED 7520 INVALID 5011 EXHAUSTED 0
+checks 100006, failures 0
+exit 0
+e65e75175c8b9a90d731f695407af2a33710e5f4e379d2ae3413578c76efcd0a  driver.S
+aca5b85ae0699e38ec8be56bd870f37940ca3a49e42db11d9a07fd74f9b41e3f  build/driver.o
+88d518174e17ca5cfb3eff33fe2d9e804f929495dba6e517e4481f9c08ec1c7f  build/driver.bin

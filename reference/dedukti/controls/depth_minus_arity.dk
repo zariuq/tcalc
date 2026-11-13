@@ -1,0 +1,12 @@
+(; expect 0 ;)
+(; A pattern variable applied to one of two pattern binders (depth 2, arity 1): its solution
+   abstracts that binder, and the outer variable q moves by depth - arity = 1. ;)
+A : Type.
+ok : A.
+c : A -> A -> A.
+def h : (A -> A -> A) -> A.
+[F] h (x => y => c (F x) (F x)) --> F ok.
+#ASSERT (q : A => h (u => v => c (c q u) (c q u))) == (q : A => c q ok).
+#ASSERTNOT (q : A => h (u => v => c (c q u) (c q u))) == (q : A => c ok ok).
+(; v is not an argument of F: no match, the redex stays ;)
+#ASSERTNOT (q : A => h (u => v => c (c q v) (c q v))) == (q : A => c q ok).

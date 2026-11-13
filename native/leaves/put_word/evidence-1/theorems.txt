@@ -1,0 +1,6 @@
+THEOREM put_word_post: |- forall k u t.
+THEOREM PUT_WORD_RUN: |- forall t k u.
+THEOREM PUT_WORD_DECLS: |- tisa_decls put_word = [2,0,8; 1,8,8]
+THEOREM PUT_WORD_LEAF_WF: |- tisa_leaf_wf put_word
+THEOREM PUT_WORD_X86: |- tisa_entry_ok put_word t /\
+THEOREM PUT_WORD_LEAF_SPEC: |- forall pc. tisa_leaf_spec put_word put_word_mc pc

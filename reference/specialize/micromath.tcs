@@ -1,0 +1,55 @@
+# Micromath's six rules as firing schemas (and one more, to forget a theorem).
+# A theorem out(A,B) = f(x(A,B), y(A,B)) is the fact thm(out, f, x, y).  A symbol is a minted
+# name, or the structural code of its number when it was never minted.  X is name 0, Y name 1.
+# The side conditions of the substitutions are repeated locals in their premises.
+theory micromath
+
+rule proj1          # x = X(x, y)
+  params X Y
+  make thm(X, @0, X, Y)
+end
+
+rule proj2          # y = Y(x, y)
+  params X Y
+  make thm(Y, @1, X, Y)
+end
+
+rule refl           # a = a(X, Y)
+  params A
+  make thm(A, A, @0, @1)
+end
+
+rule opaque         # a new symbol
+  fresh 1
+end
+
+rule def            # a new symbol n with n = f(x, y); f, x and y must be minted names
+  params F X Y
+  fresh 1
+  make thm(#0, F, X, Y)
+end
+
+rule substitute1    # x = t(u, w), u1 = u(a, b), w1 = w(a, b), x1 = x(a, b)  |-  x1 = t(u1, w1)
+  read thm(X, T, U, W)
+  read thm(U1, U, A, B)
+  read thm(W1, W, A, B)
+  read thm(X1, X, A, B)
+  make thm(X1, T, U1, W1)
+end
+
+rule substitute2    # x = t(u, w), u1 = u(a, b), w1 = w(a, b), x1 = t(u1, w1)  |-  x1 = x(a, b)
+  read thm(X, T, U, W)
+  read thm(U1, U, A, B)
+  read thm(W1, W, A, B)
+  read thm(X1, T, U1, W1)
+  make thm(X1, X, A, B)
+end
+
+rule retire         # forget a theorem that no slot refers to any more
+  take thm(_, _, _, _)
+end
+
+rule axiom          # the kernel's unsafe door _set_thm: any theorem; tests use it to set fixtures
+  params O F X Y
+  make thm(O, F, X, Y)
+end

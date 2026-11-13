@@ -1,0 +1,13 @@
+(; expect dk=1 complete=0 ;)
+(; `(x => F x)` twice under a binder, instance `x => d q x` open in q: Dedukti does not
+   match, nor does --dk-matching; by default dk_tcalc matches. ;)
+
+A : Type.
+ok : A.
+c : (A -> A) -> (A -> A) -> A.
+d : A -> A -> A.
+def g : (A -> A) -> A.
+
+[F] g (y => c (x => F x) (x => F x)) --> ok.
+
+#ASSERT (q : A => g (y => c (x => d q x) (x => d q x))) == (q : A => ok).

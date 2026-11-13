@@ -1,0 +1,6 @@
+THEOREM row_word_post: |- forall u t k.
+THEOREM ROW_WORD_RUN: |- forall t k u.
+THEOREM ROW_WORD_DECLS: |- tisa_decls row_word = [1,0,8; 1,8,8]
+THEOREM ROW_WORD_LEAF_WF: |- tisa_leaf_wf row_word
+THEOREM ROW_WORD_X86: |- tisa_entry_ok row_word t /\
+THEOREM ROW_WORD_LEAF_SPEC: |- forall pc. tisa_leaf_spec row_word row_word_mc pc

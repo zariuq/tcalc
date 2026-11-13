@@ -1,0 +1,13 @@
+(; expect dk=1 complete=0 ;)
+(; F occurs once outside the pattern's binders and twice under them, with the open instance
+   `d q`: two occurrences under binders are enough for Dedukti not to match, whatever their
+   order.  --dk-matching refuses too; by default dk_tcalc matches. ;)
+
+A : Type.
+ok : A.
+d : A -> A.
+def k3 : A -> (A -> A) -> (A -> A) -> A.
+
+[F] k3 F (x => F) (x => F) --> ok.
+
+#ASSERT (q : A => k3 (d q) (u => d q) (u => d q)) == (q : A => ok).

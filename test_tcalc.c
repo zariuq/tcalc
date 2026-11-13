@@ -5,6 +5,12 @@
 
 static int checks;
 #define CHECK(c) do { if (!(c)) { fprintf(stderr, "FAIL line %d: %s\n", __LINE__, #c); exit(1); } checks++; } while (0)
+#ifdef TC_ORDINARY_FLAT_TEST_HOOKS
+extern uint64_t tc_test_ordinary_flat_leaf_calls;
+extern uint64_t tc_test_ordinary_flat_leaf_fired;
+extern uint64_t tc_test_ordinary_flat_refusals;
+extern uint64_t tc_test_ordinary_flat_slow_calls;
+#endif
 
 static int WFF, VAR, IM, AL, P, Q, PX;
 static Term im(Term a, Term b) { Term x[2] = { a, b }; return tc_app(IM, x); }
@@ -995,6 +1001,140 @@ int main(void) {
     /* Second step on exhausted cursor returns 0 with empty receipt */
     CHECK(tc_step_cursor(&cur, &rec) == 0 && !rec.admitted);
   }
+
+#ifdef TC_ORDINARY_FLAT_TEST_HOOKS
+  /* Exact ordinary-leaf routing, refusal atomicity, aliasing, prepared output, and wide fallback. */
+  {
+    CHECK(tc_init(1u << 12, 8));
+    int S = tc_sort(0);
+    Binder bv = { (uint16_t)S, 0, 0 };
+    Binder bv2[2] = { bv, bv }, bv5[5] = { bv, bv, bv, bv, bv };
+    int PAIR = tc_con((uint16_t)S, 0, 2, bv2);
+    int WIDE = tc_con((uint16_t)S, 0, 5, bv5);
+    int CA = tc_con((uint16_t)S, 0, 0, NULL);
+    int CB = tc_con((uint16_t)S, 0, 0, NULL);
+    Term ta = c0(CA), tb = c0(CB);
+    CHECK(tc_ctx(2, bv2));
+    Term vx = tc_v(0);
+    Rule ordinary = {
+      .nkeep = 1, .keep = { { tc_app(PAIR, (Term[2]){ vx, ta }), 0 } },
+      .make = { tc_app(PAIR, (Term[2]){ vx, tb }), 0 }, .fresh = -1
+    };
+    int ir = tc_rule(&ordinary);
+    Rule wide_result = {
+      .nkeep = 1, .keep = { { tc_app(PAIR, (Term[2]){ vx, ta }), 0 } },
+      .make = { tc_app(WIDE, (Term[5]){ vx, vx, ta, tb, vx }), 0 }, .fresh = -1
+    };
+    int iwr = tc_rule(&wide_result);
+    CHECK(tc_ctx(5, bv5));
+    Term wide_args[5] = { tc_v(0), tc_v(1), tc_v(2), tc_v(3), tc_v(4) };
+    Rule wide = {
+      .nkeep = 1, .keep = { { tc_app(WIDE, wide_args), 0 } },
+      .make = { tc_app(PAIR, (Term[2]){ wide_args[0], ta }), 0 }, .fresh = -1
+    };
+    int iwide = tc_rule(&wide);
+    CHECK(ir >= 0 && iwr >= 0 && iwide >= 0);
+    CHECK((tc_rule_fibre(ir) & FIBRE_FLAT) &&
+          (tc_rule_fibre(iwr) & FIBRE_FLAT) &&
+          (tc_rule_fibre(iwide) & FIBRE_FLAT));
+
+    uint64_t leaf0 = tc_test_ordinary_flat_leaf_calls;
+    uint64_t fired0 = tc_test_ordinary_flat_leaf_fired;
+    uint64_t refused0 = tc_test_ordinary_flat_refusals;
+    uint64_t slow0 = tc_test_ordinary_flat_slow_calls;
+    Term want_ab = tc_app(PAIR, (Term[2]){ ta, tb });
+    Term want_bb = tc_app(PAIR, (Term[2]){ tb, tb });
+    Occ good = tc_flat_put(0, 0, PAIR, (Term[2]){ ta, ta });
+    Occ out = tc_flat_fire(ir, &good, NULL, 0);
+    CHECK(good && out && tc_term(out) == want_ab);
+    CHECK(tc_test_ordinary_flat_leaf_calls == leaf0 + 1 &&
+          tc_test_ordinary_flat_leaf_fired == fired0 + 1 &&
+          tc_test_ordinary_flat_slow_calls == slow0);
+
+    Occ aliased = tc_flat_fire(ir, &good, NULL, good);
+    CHECK(aliased == good && tc_term(good) == want_ab);
+    CHECK(tc_test_ordinary_flat_leaf_calls == leaf0 + 2 &&
+          tc_test_ordinary_flat_leaf_fired == fired0 + 2 &&
+          tc_test_ordinary_flat_slow_calls == slow0);
+
+    Occ blocked = tc_flat_put(0, 0, PAIR, (Term[2]){ tb, tb });
+    Term blocked_term = tc_term(blocked);
+    CHECK(blocked && !tc_flat_fire(ir, &good, NULL, blocked));
+    CHECK(tc_alive(blocked) && tc_term(blocked) == blocked_term);
+    CHECK(tc_test_ordinary_flat_leaf_calls == leaf0 + 3 &&
+          tc_test_ordinary_flat_leaf_fired == fired0 + 2 &&
+          tc_test_ordinary_flat_refusals == refused0 + 1 &&
+          tc_test_ordinary_flat_slow_calls == slow0);
+
+    Occ wrong_tag = tc_flat_put(0, 0, CA, NULL);
+    CHECK(wrong_tag && !tc_flat_fire(ir, &wrong_tag, NULL, 0));
+    CHECK(tc_test_ordinary_flat_leaf_calls == leaf0 + 3 &&
+          tc_test_ordinary_flat_refusals == refused0 + 2 &&
+          tc_test_ordinary_flat_slow_calls == slow0);
+
+    Occ prepared_src = tc_flat_put(0, 0, PAIR, (Term[2]){ tb, ta });
+    Occ prepared_dst = tc_flat_put(0, 0, PAIR, (Term[2]){ ta, ta });
+    TcPreparedStep prepared = { .rule = ir, .keep = &prepared_src, .dest = prepared_dst };
+    TcAdmissionReceipt receipt;
+    CHECK(tc_commit_prepared(&prepared, &receipt));
+    CHECK(receipt.admitted && receipt.out && receipt.out_term == want_bb);
+    CHECK(tc_test_ordinary_flat_leaf_calls == leaf0 + 4 &&
+          tc_test_ordinary_flat_leaf_fired == fired0 + 3 &&
+          tc_test_ordinary_flat_slow_calls == slow0);
+
+    Occ wide_result_src = tc_flat_put(0, 0, PAIR, (Term[2]){ tb, ta });
+    Occ wide_result_out = tc_flat_fire(iwr, &wide_result_src, NULL, 0);
+    CHECK(wide_result_src && wide_result_out &&
+          tc_term(wide_result_out) ==
+            tc_app(WIDE, (Term[5]){ tb, tb, ta, tb, tb }));
+    CHECK(tc_test_ordinary_flat_leaf_calls == leaf0 + 4 &&
+          tc_test_ordinary_flat_slow_calls == slow0 + 1);
+
+    Occ wide_src = tc_flat_put(0, 0, WIDE,
+      (Term[5]){ ta, tb, ta, tb, ta });
+    Occ wide_out = tc_flat_fire(iwide, &wide_src, NULL, 0);
+    CHECK(wide_src && wide_out &&
+          tc_term(wide_out) == tc_app(PAIR, (Term[2]){ ta, ta }));
+    CHECK(tc_test_ordinary_flat_leaf_calls == leaf0 + 4 &&
+          tc_test_ordinary_flat_slow_calls == slow0 + 2);
+
+    Occ ordinary_src = tc_flat_put(0, 0, PAIR, (Term[2]){ tb, ta });
+    Occ ordinary_out = tc_flat_fire(ir, &ordinary_src, NULL, 0);
+    CHECK(ordinary_src && ordinary_out && tc_term(ordinary_out) == want_bb);
+    CHECK(tc_test_ordinary_flat_leaf_calls == leaf0 + 5 &&
+          tc_test_ordinary_flat_leaf_fired == fired0 + 4 &&
+          tc_test_ordinary_flat_slow_calls == slow0 + 2);
+  }
+
+  /* Slot-mode out-of-range occurrences denote the normalized default row. */
+  {
+    CHECK(tc_init(1u << 12, 16));
+    int S = tc_sort(0);
+    Binder bv = { (uint16_t)S, 0, 0 }, bv2[2] = { bv, bv };
+    int PAIR = tc_con((uint16_t)S, 0, 2, bv2);
+    int CA = tc_con((uint16_t)S, 0, 0, NULL);
+    int CB = tc_con((uint16_t)S, 0, 0, NULL);
+    Term ta = c0(CA), tb = c0(CB);
+    CHECK(tc_ctx(2, bv2));
+    Rule swap = {
+      .nkeep = 1,
+      .keep = { { tc_app(PAIR, (Term[2]){ tc_v(0), tc_v(1) }), 0 } },
+      .make = { tc_app(PAIR, (Term[2]){ tc_v(1), tc_v(0) }), 0 }, .fresh = -1
+    };
+    int ir = tc_rule(&swap);
+    Occ initial = tc_flat_put(0, 0, PAIR, (Term[2]){ ta, tb });
+    CHECK(ir >= 0 && initial);
+    tc_unset(initial);
+    Occ dst = tc_flat_put(0, 0, PAIR, (Term[2]){ ta, ta });
+    Occ unset = 9999;
+    uint64_t leaves = tc_test_ordinary_flat_leaf_calls;
+    uint64_t slow = tc_test_ordinary_flat_slow_calls;
+    Occ out = tc_flat_fire(ir, &unset, NULL, dst);
+    CHECK(dst && out == dst && tc_term(out) == tc_app(PAIR, (Term[2]){ tb, ta }));
+    CHECK(tc_test_ordinary_flat_leaf_calls == leaves + 1 &&
+          tc_test_ordinary_flat_slow_calls == slow);
+  }
+#endif
 
   printf("tcalc unit tests: %d checks passed\n", checks);
   return 0;

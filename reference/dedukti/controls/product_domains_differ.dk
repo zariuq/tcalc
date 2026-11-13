@@ -1,0 +1,9 @@
+(; expect 1 ;)
+(; Negative control: two products with the same codomain and different domains are not
+   convertible, so g does not have the type f expects. ;)
+A : Type.
+B : Type.
+C : Type.
+f : (A -> C) -> C.
+g : B -> C.
+def x : C := f g.

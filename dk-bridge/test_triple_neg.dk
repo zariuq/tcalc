@@ -1,0 +1,42 @@
+Prop : Type.
+def Prf : (Prop -> Type).
+false : Prop.
+[] Prf false --> (r : Prop -> (Prf r)).
+def not : (Prop -> Prop).
+[p] Prf (not p) --> ((Prf p) -> (Prf false)).
+
+Set : Type.
+injective El : (Set -> Type).
+
+def red : Set -> Set -> Prop.
+n3 : Set.
+
+prop_clause : Type.
+ec : prop_clause.
+cons : (Prop -> (prop_clause -> prop_clause)).
+
+clause : Type.
+cl : (prop_clause -> clause).
+
+def Prf_prop_clause : (prop_clause -> Type).
+[] Prf_prop_clause ec --> (Prf false).
+[p, c] Prf_prop_clause (cons p c) --> ((Prf p -> Prf false) -> (Prf_prop_clause c)).
+
+def Prf_clause : (clause -> Type).
+[c] Prf_clause (cl c) --> (Prf_prop_clause c).
+
+deduction46 : (v0 : Set) -> (v1 : Set) -> (v2 : Set) ->
+  Prf_clause (cl (cons (not (red v1 v2)) (cons (not (red v0 v2)) (cons (not (red v0 v1)) ec)))).
+
+deduction21 : (v0 : Set) -> Prf_clause (cl (cons (red v0 n3) ec)).
+
+def deduction125 : (v0 : Set) ->
+  Prf_clause (cl (cons (not (red v0 n3)) (cons (not (red v0 v0)) ec))) :=
+  v0 : Set =>
+  h1 : (Prf (not (red v0 n3)) -> Prf false) =>
+  h2 : (Prf (not (red v0 v0)) -> Prf false) =>
+    deduction46 v0 v0 n3
+      (tnp : Prf (not (red v0 n3)) =>
+         deduction21 v0 (tp : Prf (red v0 n3) => tnp tp))
+      h1
+      h2.

@@ -1,0 +1,6 @@
+% expect: rc=1 status=fault detail=divisionByZero
+% The head is consumed when the rule fires; the division by zero in the body is a fault.
+:- use_module(library(chr)).
+:- chr_constraint p/1,q/1.
+r @ p(X) <=> Y is X mod 0, q(Y).
+?- p(1).

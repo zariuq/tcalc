@@ -1,0 +1,6 @@
+(; A thm is opaque: its body does not unfold in conversion. ;)
+A : Type.
+a : A.
+P : A -> Type.
+thm b : A := a.
+thm t : P a -> P b := p : P a => p.

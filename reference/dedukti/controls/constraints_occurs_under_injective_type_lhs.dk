@@ -1,0 +1,20 @@
+(; expect 0 --type-lhs ;)
+(; Positive control under --type-lhs: the typing constraint g n == n mentions n under g, declared
+   injective but definable (it is the identity on numerals).  n := zero solves it in normal forms
+   (g zero --> zero), so the left-hand side has a typable instance and the rule fires on it: an
+   occurs check through a declared-injective symbol is no refutation.  Dedukti refuses it under
+   --type-lhs (error 108) and admits it without the flag. ;)
+N : Type.
+zero : N.
+S : N -> N.
+injective g : N -> N.
+[] g zero --> zero.
+[n] g (S n) --> S (g n).
+B : N -> Type.
+mk : n : N -> B (g n).
+
+def h : n : N -> B n -> Type.
+[n] h n (mk n) --> N.
+
+#ASSERT h zero (mk zero) : Type.
+#ASSERT h zero (mk zero) == N.

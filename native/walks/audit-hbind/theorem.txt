@@ -1,0 +1,13 @@
+THEOREM BIND_WALK_HBIND: |- forall st st'.
+       tisa_entry_ok bind_walk st /\ tisa_run bind_walk st = TStop 1 st'
+       ==> (forall nms tys TY X.
+                val (tisa_fword st 22) < LENGTH nms /\
+                fdty nms tys (val (tisa_fword st 23)) TY /\
+                (forall a.
+                     a < LENGTH nms /\
+                     EL a nms = EL (val (tisa_fword st 22)) nms
+                     ==> a = val (tisa_fword st 22)) /\
+                (forall b. fdty nms tys b TY ==> b = val (tisa_fword st 23)) /\
+                fddb nms tys (bw_rows st (val (intern_count st)))
+                (val (tregs st 1))
+                X

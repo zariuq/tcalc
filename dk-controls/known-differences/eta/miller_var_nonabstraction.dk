@@ -1,0 +1,13 @@
+(; expect dk=1 complete=0 ;)
+(; Checked with --eta.  `(x => F x)` against `c`, which is not an abstraction: Dedukti does
+   not match it and refuses, as does --dk-matching; by default dk_tcalc matches it modulo eta
+   and accepts. ;)
+
+A : Type.
+a : A.
+c : A -> A.
+def g : (A -> A) -> A.
+
+[F] g (x => F x) --> F a.
+
+#ASSERT g c == c a.

@@ -1,0 +1,8 @@
+(; The pattern (x => F x) matches an abstraction and binds F to it. ;)
+A : Type.
+a : A.
+f : A -> A.
+P : A -> Type.
+def g : (A -> A) -> A.
+[F] g (x => F x) --> F a.
+thm t : P (g (x : A => f (f x))) -> P (f (f a)) := p : P (g (x : A => f (f x))) => p.

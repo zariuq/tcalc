@@ -1,0 +1,9 @@
+(; Without eta, the pattern (x => F x) matches only a lambda.  g f, with f a
+   constant, must stay stuck. ;)
+A : Type.
+a : A.
+f : A -> A.
+P : A -> Type.
+def g : (A -> A) -> A.
+[F] g (x => F x) --> F a.
+thm t : P (g f) -> P (f a) := p : P (g f) => p.

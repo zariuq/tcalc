@@ -1,0 +1,14 @@
+(; expect 1 --type-lhs ;)
+(; Negative control under --type-lhs: the typing constraint lives under the pattern's binders,
+   x, y |- T (t y) == T (b x a), i.e. y == b x a with b definable.  The bound variable y is in
+   every reduct of the left side, and no instance of b x a can ever mention it (an instance of the
+   pattern variables never does, and reduction adds no free variable): no solution, a fact made by
+   firings (the abstracted hypothesis, taken under both binders), whatever rules b gets later. ;)
+A : Type.
+T : A -> Type.
+t : a : A -> T a.
+a : A.
+def b : A -> A -> A.
+
+def d : X : (A -> A -> A) -> (x : A -> y : A -> T (b x a)) -> Type.
+[X] d (x => y => X x y) (x => y => t y) --> A.

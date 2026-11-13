@@ -1,0 +1,6 @@
+A : Type.
+a : A.
+c : A -> A.
+def f : (A -> A) -> A.
+[] f (x => c x) --> a.
+#ASSERTNOT f (y => c y) == a.

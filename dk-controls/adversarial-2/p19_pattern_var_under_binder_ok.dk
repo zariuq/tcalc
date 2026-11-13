@@ -1,0 +1,7 @@
+(; A pattern variable under a binder matches a body that does not mention the bound variable. ;)
+A : Type.
+a : A.
+P : A -> Type.
+def g : (A -> A) -> A.
+[y] g (x => y) --> y.
+thm t : P (g (x : A => a)) -> P a := p : P (g (x : A => a)) => p.

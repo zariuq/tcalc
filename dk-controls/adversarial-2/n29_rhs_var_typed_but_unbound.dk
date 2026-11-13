@@ -1,0 +1,10 @@
+(; A right-hand-side variable must occur in the left-hand side, even when the
+   rule's context gives it a type. ;)
+A : Type.
+a : A.
+b : A.
+B : Type.
+P : B -> Type.
+def f : A -> B.
+[x : A, y : B] f x --> y.
+thm t : P (f a) -> P (f b) := p : P (f a) => p.

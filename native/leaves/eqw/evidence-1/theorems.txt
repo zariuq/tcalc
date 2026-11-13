@@ -1,0 +1,6 @@
+THEOREM eqw_post: |- forall u t k.
+THEOREM EQW_RUN: |- forall t k u.
+THEOREM EQW_DECLS: |- tisa_decls eqw = []
+THEOREM EQW_LEAF_WF: |- tisa_leaf_wf eqw
+THEOREM EQW_X86: |- tisa_entry_ok eqw t /\
+THEOREM EQW_LEAF_SPEC: |- forall pc. tisa_leaf_spec eqw eqw_mc pc

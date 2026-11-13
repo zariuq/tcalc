@@ -1,0 +1,12 @@
+(; expect 0 ;)
+(; Positive control: a rule whose typing constraint has no solution at all is sound, vacuously.  The
+   left-hand side g b (mkB a) needs B a == C b, two distinct static heads: no instance is typable
+   (confluence), so the rule never fires on a typable term.  Its right-hand side is typed by that
+   constraint.  Dedukti refuses the rule (it cannot use a constraint it found unsatisfiable). ;)
+A : Type.
+B : A -> Type.
+C : A -> Type.
+mkB : a : A -> B a.
+
+def g : b : A -> C b -> C b.
+[a, b] g b (mkB a) --> mkB a.

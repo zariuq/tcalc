@@ -1,0 +1,7 @@
+(; expect 1 ;)
+(; Negative control: without --eta, f and x => f x are not convertible. ;)
+A : Type.
+f : A -> A.
+P : (A -> A) -> Type.
+p : P f.
+def q : P (x => f x) := p.

@@ -1,0 +1,9 @@
+# Differences from the fixed candidate that are classified (a run fails on any other).
+# Format: the file's name, the class, the reason.
+#
+# Deliberate profile differences
+arity.dk         deliberate: Dedukti refuses a rule whose right-hand side uses a higher-order pattern
+                 variable with fewer arguments than in the left-hand side (error 506, an implementation
+                 restriction); dk_ref admits it: the variable stands for its abstraction, and the rule is
+                 typed and sound ("never stricter than theoretically necessary")
+eta_arity.dk     deliberate: the same restriction, under --eta

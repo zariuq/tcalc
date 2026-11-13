@@ -1,0 +1,4 @@
+(; #ASSERT type-checks both sides before comparing them. ;)
+A : Type.
+a : A.
+#ASSERT a a == a a.

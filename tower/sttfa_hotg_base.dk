@@ -1,0 +1,39 @@
+(; ============================================================================
+   The 4-Level Tower Base Signature: STTforall + HOTG in Strict Lambda-Pi Modulo
+   (--pts lf)
+   Cross-checked against:
+     - repos/dedukti/libraries/theories/sttforall.dk
+     - repos/dedukti/libraries/meta/sttfa_cts.dk
+   ============================================================================ ;)
+
+type : Type.
+arr : type -> type -> type.
+bool : type.
+set : type.
+
+def eta : type -> Type.
+ptype : Type.
+p : type -> ptype.
+def etap : ptype -> Type.
+forallK : (type -> ptype) -> ptype.
+
+def eps : eta bool -> Type.
+impl : eta bool -> eta bool -> eta bool.
+forall : t : type -> (eta t -> eta bool) -> eta bool.
+forallP : (type -> eta bool) -> eta bool.
+
+[] eta --> t : type => etap (p t).
+[l : type, r : type] etap (p (arr l r)) --> eta l -> eta r.
+[f : type -> ptype] etap (forallK f) --> x : type -> etap (f x).
+[t : type, f : eta t -> eta bool] eps (forall t f) --> x : eta t -> eps (f x).
+[l : eta bool, r : eta bool] eps (impl l r) --> eps l -> eps r.
+[f : type -> eta bool] eps (forallP f) --> x : type -> eps (f x).
+
+(; Egal HOTG 7 Primitive Constants (Choice, In, Empty, Union, Power, Repl, UnivOf) ;)
+prim_0 : etap (forallK (a0 : type => (p (arr (arr a0 bool) a0)))).
+prim_1 : etap (p (arr set (arr set bool))).
+prim_2 : etap (p set).
+prim_3 : etap (p (arr set set)).
+prim_4 : etap (p (arr set set)).
+prim_5 : etap (p (arr set (arr (arr set set) set))).
+prim_6 : etap (p (arr set set)).

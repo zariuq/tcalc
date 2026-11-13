@@ -1,0 +1,17 @@
+(; expect dk=0 complete=0 ;)
+(; What Dedukti looks at is the normal form of the instance.  F occurs twice under a binder;
+   each instance `d ((y : A => a) q)` mentions q, but its normal form `d a` does not, and the
+   second assertion's instances `(y : A => a) q` and `a` both normalize to `a`.  Dedukti
+   matches both, and so does dk_tcalc in either profile. ;)
+
+A : Type.
+a : A.
+ok : A.
+k : A -> A -> A.
+d : A -> A.
+def g1 : (A -> A) -> A.
+
+[F] g1 (x => k F F) --> ok.
+
+#ASSERT (q : A => g1 (u => k (d ((y : A => a) q)) (d ((y : A => a) q)))) == (q : A => ok).
+#ASSERT (q : A => g1 (u => k ((y : A => a) q) a)) == (q : A => ok).

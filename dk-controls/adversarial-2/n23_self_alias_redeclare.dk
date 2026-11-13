@@ -1,0 +1,4 @@
+(; Redeclaring a declared symbol is refused even when the body is the symbol itself. ;)
+A : Type.
+a : A.
+def a : A := a.

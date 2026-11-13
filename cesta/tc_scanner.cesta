@@ -1,0 +1,133 @@
+(cesta checked-c/1
+  (module tc_scanner)
+  (word-bits 64)
+  (failure tc_scanner_failure)
+
+  (fn is_ws
+    (params (b u8))
+    (returns bool)
+    (effects)
+    (body
+      (return
+        (or (eq b (u8 32))
+          (or (eq b (u8 10))
+            (or (eq b (u8 13))
+              (or (eq b (u8 9))
+                (or (eq b (u8 11))
+                  (eq b (u8 12))))))))))
+
+  (fn fnv1a32
+    (params (bytes read))
+    (returns u32)
+    (effects)
+    (body
+      (var h u32 (u32 2166136261))
+      (for index bytes
+        (body
+          (set h (bit-xor h (as u32 (at bytes index))))
+          (set h (wrap-mul h (u32 16777619)))))
+      (if (eq h (u32 0))
+        (then (return (u32 1)))
+        (else (return h)))))
+
+  (fn skip_sexpr_ws
+    (params (bytes read) (start usize))
+    (returns usize)
+    (effects)
+    (body
+      (var pos usize start)
+      (let n usize (len bytes))
+      (while (lt pos n)
+        (body
+          (let b u8 (at bytes pos))
+          (let ws bool (call is_ws b))
+          (if ws
+            (then
+              (set pos (add pos (usize 1)))
+              (continue))
+            (else))
+          (if (eq b (u8 59))
+            (then
+              (while (and (lt pos n) (ne (at bytes pos) (u8 10)))
+                (body (set pos (add pos (usize 1)))))
+              (continue))
+            (else))
+          (break)))
+      (return pos)))
+
+  (fn scan_sexpr_atom_len
+    (params (bytes read) (start usize))
+    (returns usize)
+    (effects)
+    (body
+      (var pos usize start)
+      (let n usize (len bytes))
+      (while (lt pos n)
+        (body
+          (let b u8 (at bytes pos))
+          (let ws bool (call is_ws b))
+          (if (or ws (or (eq b (u8 40)) (or (eq b (u8 41)) (eq b (u8 34)))))
+            (then (break))
+            (else (set pos (add pos (usize 1)))))))
+      (return (sub pos start))))
+
+  (fn skip_dk_ws_comments
+    (params (bytes read) (start usize))
+    (returns usize)
+    (effects)
+    (body
+      (var pos usize start)
+      (let n usize (len bytes))
+      (while (lt pos n)
+        (body
+          (let b u8 (at bytes pos))
+          (let ws bool (call is_ws b))
+          (if ws
+            (then
+              (set pos (add pos (usize 1)))
+              (continue))
+            (else))
+          (if (and (lt (add pos (usize 1)) n)
+                   (and (eq b (u8 40)) (eq (at bytes (add pos (usize 1))) (u8 59))))
+            (then
+              (set pos (add pos (usize 2)))
+              (var depth usize (usize 1))
+              (while (and (lt pos n) (gt depth (usize 0)))
+                (body
+                  (if (and (lt (add pos (usize 1)) n)
+                           (and (eq (at bytes pos) (u8 40))
+                                (eq (at bytes (add pos (usize 1))) (u8 59))))
+                    (then
+                      (set depth (add depth (usize 1)))
+                      (set pos (add pos (usize 2))))
+                    (else
+                      (if (and (lt (add pos (usize 1)) n)
+                               (and (eq (at bytes pos) (u8 59))
+                                    (eq (at bytes (add pos (usize 1))) (u8 41))))
+                        (then
+                          (set depth (sub depth (usize 1)))
+                          (set pos (add pos (usize 2))))
+                        (else
+                          (set pos (add pos (usize 1)))))))))
+              (continue))
+            (else))
+          (break)))
+      (return pos)))
+
+  (fn count_newlines_range
+    (params (bytes read) (start usize) (end_pos usize))
+    (returns u32)
+    (effects)
+    (body
+      (require (le start end_pos))
+      (require (le end_pos (len bytes)))
+      (var pos usize start)
+      (var lines u32 (u32 0))
+      (while (lt pos end_pos)
+        (body
+          (if (eq (at bytes pos) (u8 10))
+            (then (set lines (wrap-add lines (u32 1))))
+            (else))
+          (set pos (add pos (usize 1)))))
+      (return lines)))
+)

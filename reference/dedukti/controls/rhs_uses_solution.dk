@@ -1,0 +1,11 @@
+(; expect 0 ;)
+(; The right-hand side uses the solution of a pattern variable repeated under a binder, so the
+   variable bound outside the redex must come out of the match as itself: q, not the binder. ;)
+A : Type.
+ok : A.
+c : A -> A -> A.
+def g : (A -> A) -> A.
+[F] g (x => c F F) --> F.
+#ASSERT (q : A => g (u => c q q)) == (q : A => q).
+#ASSERT (q : A => r : A => g (u => c r r)) == (q : A => r : A => r).
+#ASSERTNOT (q : A => r : A => g (u => c r r)) == (q : A => r : A => q).

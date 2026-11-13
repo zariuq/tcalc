@@ -1,0 +1,7 @@
+(; expect 1 ;)
+(; Negative control: an argument of type A where B is expected. ;)
+A : Type.
+B : Type.
+a : A.
+f : B -> B.
+def x : B := f a.

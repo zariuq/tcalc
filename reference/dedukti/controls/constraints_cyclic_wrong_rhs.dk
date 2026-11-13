@@ -1,0 +1,18 @@
+(; expect 1 ;)
+(; Negative control: the right-hand side cons a c has type B (f a c), which the constraints
+   a == f b d and b == f a c do not make B a.  Under the fixpoint w the redex has type B w and the
+   reduct cons w cw has type B (f w cw), not convertible to it, so admitting the rule would break
+   subject reduction.  It must not be accepted; this checker gives no verdict (it does not derive
+   non-convertibility under hypotheses), Dedukti stops (error 207). ;)
+A : Type.
+B : A -> Type.
+f : a : A -> B a -> A.
+cons : a : A -> b : B a -> B (f a b).
+
+def w : A.
+cw : B w.
+dw : B (f w cw).
+[] w --> f (f w cw) dw.
+
+def calc : a : A -> b : A -> B a -> B b -> B a.
+[a, b, c, d] calc a b (cons b d) (cons a c) --> cons a c.

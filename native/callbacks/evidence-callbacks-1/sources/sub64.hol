@@ -1,0 +1,3 @@
+(* sub64: native binary callback image, 34 bytes (ENDBR64, then the 30-byte body).
+   Bytes of the artifact sub64.bin, sha256 e2cfe0775fa459842ea3140031fb64f17d40eaf806cf5e615907f2dd96dca279. *)
+cb_image "sub64" "f30f1efa488b8700000000488b97080000004829d048898600000000b801000000c3";;

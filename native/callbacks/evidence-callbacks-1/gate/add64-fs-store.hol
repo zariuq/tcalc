@@ -1,0 +1,2 @@
+(* control: add64 with an FS prefix on the store; must fail the gate *)
+cb_image "add64_fs" "f30f1efa488b8700000000488b97080000004801d06448898600000000b801000000c3";;

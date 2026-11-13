@@ -1,0 +1,6 @@
+THEOREM live_post: |- forall u t k.
+THEOREM LIVE_RUN: |- forall t k u.
+THEOREM LIVE_DECLS: |- tisa_decls live = [1,8,8; 1,0,8]
+THEOREM LIVE_LEAF_WF: |- tisa_leaf_wf live
+THEOREM LIVE_X86: |- tisa_entry_ok live t /\
+THEOREM LIVE_LEAF_SPEC: |- forall pc. tisa_leaf_spec live live_mc pc

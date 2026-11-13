@@ -1,0 +1,21 @@
+# The CHR prime sieve of tcalc_ref's bench.c, as rules:
+#   candidate(N) <=> N > 1 | prime(N), candidate(N - 1)
+#   prime(Y) \ prime(X) <=> X mod Y = 0 | true
+# Arithmetic guards are host predicates (gt1, pred, divides); the control layer computes N - 1 and
+# the guard pred checks it.
+theory sieve
+
+rule candidate
+  params M
+  take candidate(N)
+  host gt1(N)
+  host pred(N, M)
+  make prime(N)
+  make candidate(M)
+end
+
+rule absorb
+  take prime(X)
+  read prime(Y)
+  host divides(Y, X)
+end

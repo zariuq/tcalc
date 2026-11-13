@@ -1,0 +1,12 @@
+(; expect dk=1 complete=0 ;)
+(; F occurs under one binder and under two, and its instance `d q` is open: Dedukti does not
+   match, nor does --dk-matching; by default dk_tcalc matches. ;)
+
+A : Type.
+ok : A.
+d : A -> A.
+def k : (A -> A) -> (A -> A -> A) -> A.
+
+[F] k (x => F) (x => y => F) --> ok.
+
+#ASSERT (q : A => k (u => d q) (u => v => d q)) == (q : A => ok).

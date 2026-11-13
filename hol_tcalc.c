@@ -8,6 +8,7 @@
    INST_TYPE, INST), and the conservative/axiom theory extensions
    (NEW_AXIOM, NEW_DEFINITION, NEW_TYPEDEF). */
 #define _POSIX_C_SOURCE 200809L
+#define _XOPEN_SOURCE 700
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -16,6 +17,7 @@
 #include <string.h>
 #include <time.h>
 #include "tcalc.h"
+#include "tc_stack_guard.h"
 
 static double now_ms(void) {
   struct timespec ts;
@@ -1841,14 +1843,19 @@ static void hol_ctx(int nvars, const int *vsorts) {
   tc_ctx(nvars, nvars ? b : NULL);
 }
 
-static int hol_rule(int nkeep, const Pat *keep, Term make_t, uint8_t make_sp) {
+/* inputs: the made holes the stream supplies (Rule.inputs) */
+static int hol_rule_in(int nkeep, const Pat *keep, Term make_t, uint8_t make_sp, uint64_t inputs) {
   Rule r;
   memset(&r, 0, sizeof(r));
   r.fresh = -1;
   r.nkeep = (uint8_t)nkeep;
   for (int i = 0; i < nkeep; i++) r.keep[i] = keep[i];
   r.make = (Pat){ make_t, make_sp };
+  r.inputs = inputs;
   return tc_rule(&r);
+}
+static int hol_rule(int nkeep, const Pat *keep, Term make_t, uint8_t make_sp) {
+  return hol_rule_in(nkeep, keep, make_t, make_sp, 0);
 }
 
 static void hol_tc_init(void) {
@@ -1931,7 +1938,7 @@ static void hol_tc_init(void) {
     int vs[2] = { S_TYPE, S_NAME }; hol_ctx(2, vs);
     Term A = tc_v(0), n = tc_v(1);
     Term va[2] = { A, n };
-    R_WT_VAR = hol_rule(0, NULL, mk_wt_pat(A, tc_app(C_VAR, va)), SPACE_WT);
+    R_WT_VAR = hol_rule_in(0, NULL, mk_wt_pat(A, tc_app(C_VAR, va)), SPACE_WT, 0x3);   /* A, n */
     Term ca[2] = { A, n };
     Pat p[1] = { { tc_app(C_CONST_INST, ca), SPACE_REL } };
     R_WT_CONST = hol_rule(1, p, mk_wt_pat(A, tc_app(C_CONST, ca)), SPACE_WT);
@@ -1957,7 +1964,7 @@ static void hol_tc_init(void) {
   {
     int vs[2] = { S_TYPE, S_TERM }; hol_ctx(2, vs);
     Term A = tc_v(0), t = tc_v(1);
-    R_REFL = hol_rule(0, NULL, mk_thm_pat(T_HNIL, mk_eq_pat(A, t, t), T_DNIL), SPACE_THM);
+    R_REFL = hol_rule_in(0, NULL, mk_thm_pat(T_HNIL, mk_eq_pat(A, t, t), T_DNIL), SPACE_THM, 0x3);   /* A, t */
   }
   {
     int vs[4] = { S_TYPE, S_TYPE, S_NAME, S_TERM }; hol_ctx(4, vs);
@@ -1966,7 +1973,7 @@ static void hol_tc_init(void) {
     Term fa[2] = { A, B }, fab = tc_app(C_FUN, fa);
     Term aa[3] = { fab, v, bod }, lam = tc_app(C_ABS, aa);
     Term ca[3] = { B, lam, v }, red = tc_app(C_COMB, ca);
-    R_BETA = hol_rule(0, NULL, mk_thm_pat(T_HNIL, mk_eq_pat(B, red, bod), T_DNIL), SPACE_THM);
+    R_BETA = hol_rule_in(0, NULL, mk_thm_pat(T_HNIL, mk_eq_pat(B, red, bod), T_DNIL), SPACE_THM, 0xF);   /* A, B, n, bod */
   }
   {
     int vs[1] = { S_TERM }; hol_ctx(1, vs);
@@ -2033,8 +2040,8 @@ static void hol_tc_init(void) {
     Term fa[2] = { A, B }, fab = tc_app(C_FUN, fa);
     Term al[3] = { fab, v, l }, ar[3] = { fab, v, r };
     Pat pr[1] = { { mk_thm_pat(T_HNIL, mk_eq_pat(B, l, r), T_DNIL), SPACE_THM } };
-    R_ABS_FAST = hol_rule(1, pr,
-      mk_thm_pat(T_HNIL, mk_eq_pat(fab, tc_app(C_ABS, al), tc_app(C_ABS, ar)), T_DNIL), SPACE_THM);
+    R_ABS_FAST = hol_rule_in(1, pr,
+      mk_thm_pat(T_HNIL, mk_eq_pat(fab, tc_app(C_ABS, al), tc_app(C_ABS, ar)), T_DNIL), SPACE_THM, 0x3);   /* A, n */
   }
   {
     int vs[7] = { S_TYPE, S_NAME, S_TYPE, S_TERM, S_TERM, S_HYPS, S_DEPS }; hol_ctx(7, vs);
@@ -2239,6 +2246,8 @@ static void idspace_put(IdSpace *s, uint32_t v, uint8_t st) {
 
 typedef struct {
   uint32_t env, records, n_emits, cap_emits;
+  uint32_t failed;  /* probe mode: records refused, depending on a refused record, or stating a false expectation */
+  uint8_t policy;   /* the policy the stream ran under: the tighter of its header and the caller's floor */
   uint32_t *emits;
   HolName *emit_labels;
 } ReplayOut;
@@ -2392,7 +2401,9 @@ static int check_ref_space(const IdSpace *sp, char kind, uint64_t id) {
   return 3;
 }
 
-static bool hol_replay_bytes(const unsigned char *bytes, size_t len, ReplayOut *out) {
+/* host_policy is the caller's floor.  A stream may tighten the axiom policy in its
+ * header or with a POLICY record; it can never run under a looser one than the caller asked for. */
+static bool hol_replay_bytes(const unsigned char *bytes, size_t len, uint8_t host_policy, ReplayOut *out) {
   memset(out, 0, sizeof(*out));
   BCur hdr = { bytes, bytes + len, false };
   const uint8_t *m = cur_bytes(&hdr, 8);
@@ -2407,6 +2418,7 @@ static bool hol_replay_bytes(const unsigned char *bytes, size_t len, ReplayOut *
     return false;
   bool probe = (flags & 1ULL) != 0;
   uint32_t env = D_EQ;
+  if (policy < host_policy) policy = host_policy;
   if (policy > POL_OPEN) {
     env = env_set_policy(env, (uint8_t)policy);
     if (!env) return false;
@@ -2691,6 +2703,7 @@ static bool hol_replay_bytes(const unsigned char *bytes, size_t len, ReplayOut *
     }
 
     last_refused = (estat == 1 || estat == 2);
+    if (estat != 0 && rc.op != HOLR_NAME) out->failed++;
     fnv = fnv1a(bytes + pos, rec_len, fnv);
     pos += rec_len;
     out->records++;
@@ -2698,6 +2711,7 @@ static bool hol_replay_bytes(const unsigned char *bytes, size_t len, ReplayOut *
 
   if (accepted) {
     out->env = env;
+    out->policy = decls[env].policy;
     out->n_emits = (uint32_t)nemit_slots;
     out->emits = (uint32_t *)calloc(nemit_slots ? (size_t)nemit_slots : 1, sizeof(uint32_t));
     out->emit_labels = (HolName *)calloc(nemit_slots ? (size_t)nemit_slots : 1, sizeof(HolName));
@@ -2903,19 +2917,63 @@ static int run_self_tests(void) {
   return fail == 0 ? 0 : 1;
 }
 
+static const char *policy_name(uint8_t p) {
+  return p == POL_OPEN ? "open" : p == POL_STANDARD ? "standard" : "sealed";
+}
+
+/* Count the distinct axioms the emitted theorems depend on: the three standard ones
+ * (eta, select, infinity) and those a stream introduced itself. */
+static void emit_axiom_counts(const ReplayOut *r, uint32_t *n_std, uint32_t *n_user) {
+  uint32_t *seen = NULL, nseen = 0, capseen = 0;
+  *n_std = *n_user = 0;
+  for (uint32_t i = 0; i < r->n_emits; i++) {
+    const ThmRec *th = &thms[r->emits[i]];
+    for (uint32_t j = 0; j < th->ndeps; j++) {
+      uint32_t d = th->deps[j];
+      bool dup = false;
+      for (uint32_t k = 0; k < nseen && !dup; k++) dup = (seen[k] == d);
+      if (dup) continue;
+      if (nseen == capseen) {
+        capseen = capseen ? capseen * 2 : 16;
+        seen = (uint32_t *)realloc(seen, (size_t)capseen * sizeof(uint32_t));
+      }
+      seen[nseen++] = d;
+      if (decls[d].auth == AUTH_USER_AX) (*n_user)++; else (*n_std)++;
+    }
+  }
+  free(seen);
+}
+
+#define HOL_USAGE "usage: hol_tcalc [--test] [--policy open|standard|sealed] [--spec FILE] [--print-emits] STREAM.holr\n"
+
 int main(int argc, char **argv) {
+  tc_stack_guard(argv);
   const char *stream_path = NULL, *spec_path = NULL;
   bool print_emits = false, self_test = false;
+  /* The caller's floor for the axiom policy.  Under `standard` a stream cannot
+   * introduce an axiom of its own; `open` has to be asked for. */
+  uint8_t host_policy = POL_STANDARD;
   for (int i = 1; i < argc; i++) {
     if (strcmp(argv[i], "--spec") == 0 && i + 1 < argc) spec_path = argv[++i];
+    else if (strcmp(argv[i], "--policy") == 0 && i + 1 < argc) {
+      const char *p = argv[++i];
+      if (strcmp(p, "open") == 0) host_policy = POL_OPEN;
+      else if (strcmp(p, "standard") == 0) host_policy = POL_STANDARD;
+      else if (strcmp(p, "sealed") == 0) host_policy = POL_SEALED;
+      else { fprintf(stderr, "hol_tcalc: unknown policy '%s'\n" HOL_USAGE, p); return 2; }
+    }
     else if (strcmp(argv[i], "--print-emits") == 0) print_emits = true;
     else if (strcmp(argv[i], "--test") == 0) self_test = true;
+    else if (argv[i][0] == '-' && argv[i][1] == '-') {
+      fprintf(stderr, "hol_tcalc: unknown option '%s'\n" HOL_USAGE, argv[i]);
+      return 2;
+    }
     else if (!stream_path) stream_path = argv[i];
-    else { fprintf(stderr, "usage: hol_tcalc [--test] [--spec FILE] [--print-emits] [STREAM.holr]\n"); return 2; }
+    else { fprintf(stderr, HOL_USAGE); return 2; }
   }
   if (self_test) return run_self_tests();
   if (!stream_path) {
-    fprintf(stderr, "usage: hol_tcalc [--spec FILE] [--print-emits] STREAM.holr\n");
+    fprintf(stderr, HOL_USAGE);
     return 2;
   }
   size_t len = 0;
@@ -2925,8 +2983,16 @@ int main(int argc, char **argv) {
   double t0 = now_ms();
   hol_tc_init();
   ReplayOut r;
-  if (!hol_replay_bytes(bytes, len, &r)) {
+  if (!hol_replay_bytes(bytes, len, host_policy, &r)) {
     fprintf(stderr, "hol_tcalc: REJECT %s at record %" PRIu32 "\n", stream_path, r.records);
+    free(bytes);
+    return 1;
+  }
+  if (r.failed) {
+    /* A probe stream runs to its END past refused records.  It is a diagnostic
+     * run, never an accepted replay. */
+    fprintf(stderr, "hol_tcalc: REJECT %s: probe stream contains %" PRIu32 " refused records or false expectations\n",
+            stream_path, r.failed);
     free(bytes);
     return 1;
   }
@@ -2946,8 +3012,13 @@ int main(int argc, char **argv) {
       free(s);
     }
   }
-  printf("OK %s: records=%" PRIu32 " theorems=%" PRIu32 " emits=%" PRIu32 " tcalc_steps=%" PRIu64 " time=%.1fms\n",
-         stream_path, r.records, nthms, r.n_emits, tc_steps(), dt);
+  uint32_t ax_std = 0, ax_user = 0;
+  emit_axiom_counts(&r, &ax_std, &ax_user);
+  printf("OK %s: records=%" PRIu32 " theorems=%" PRIu32 " emits=%" PRIu32
+         " policy=%s standard_axioms=%" PRIu32 " user_axioms=%" PRIu32
+         " tcalc_steps=%" PRIu64 " time=%.1fms\n",
+         stream_path, r.records, nthms, r.n_emits,
+         policy_name(r.policy), ax_std, ax_user, tc_steps(), dt);
   free(bytes);
   return 0;
 }

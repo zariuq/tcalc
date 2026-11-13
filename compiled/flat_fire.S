@@ -35,10 +35,9 @@ flat_fire:
     mov (%rsi,%r14,4), %ebx
     add %eax, %ebx
     mov (%rdi,%r15,4), %eax
+    mov $1, %ebp
     cmp (%rdi,%rbx,4), %eax
-    setne %al
-    movzbl %al, %eax
-    or %eax, %r11d
+    cmovne %ebp, %r11d
     inc %r10
     cmp %rcx, %r10
     jne .Lguard_loop

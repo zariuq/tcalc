@@ -1,0 +1,3 @@
+(* and64: native binary callback image, 34 bytes (ENDBR64, then the 30-byte body).
+   Bytes of the artifact and64.bin, sha256 2a22ecb14ea43bc7e9810ca532682a4837ae7b5d09613d6bb9a7b388c25da71e. *)
+cb_image "and64" "f30f1efa488b8700000000488b97080000004821d048898600000000b801000000c3";;

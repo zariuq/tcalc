@@ -1,0 +1,6 @@
+THEOREM pack_post: |- forall u t k.
+THEOREM PACK_RUN: |- forall t k u.
+THEOREM PACK_DECLS: |- tisa_decls pack = []
+THEOREM PACK_LEAF_WF: |- tisa_leaf_wf pack
+THEOREM PACK_X86: |- tisa_entry_ok pack t /\
+THEOREM PACK_LEAF_SPEC: |- forall pc. tisa_leaf_spec pack pack_mc pc

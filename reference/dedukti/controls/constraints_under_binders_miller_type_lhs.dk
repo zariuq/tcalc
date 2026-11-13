@@ -1,0 +1,13 @@
+(; expect 1 --type-lhs ;)
+(; Negative control under --type-lhs: under the binders x, y the constraints are Y x == c (c a x) a
+   and Y y == c a y (Y a pattern variable, c static).  The first holds for every x, so its instance
+   at y, Y y == c (c a y) a, follows (abstraction, weakening, application, beta: firings); with the
+   second, c (c a y) a == c a y, whose decomposition equates a and y: no solution. ;)
+A : Type.
+T : A -> Type.
+t : a : A -> T a.
+a : A.
+c : A -> A -> A.
+
+def d : X : (A -> A -> A) -> Y : (A -> A) -> (x : A -> y : A -> T (c (c (c a x) a) (c a y))) -> Type.
+[X, Y] d (x => y => X x y) (y => Y y) (x => y => t (c (Y x) (Y y))) --> A.

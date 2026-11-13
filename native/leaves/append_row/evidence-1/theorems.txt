@@ -1,0 +1,6 @@
+THEOREM append_row_post: |- forall k u t.
+THEOREM APPEND_ROW_RUN: |- forall t k u.
+THEOREM APPEND_ROW_DECLS: |- tisa_decls append_row = [2,0,8; 2,8,8]
+THEOREM APPEND_ROW_LEAF_WF: |- tisa_leaf_wf append_row
+THEOREM APPEND_ROW_X86: |- tisa_entry_ok append_row t /\
+THEOREM APPEND_ROW_LEAF_SPEC: |- forall pc. tisa_leaf_spec append_row append_row_mc pc

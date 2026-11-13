@@ -1,0 +1,7 @@
+A : Type.
+a : A.
+b : A.
+c : A -> A -> A.
+def g : (A -> A -> A) -> A.
+[F] g (x => y => F y x) --> F a b.
+#ASSERT (z : A => g (x => y => c (c z x) y)) == (z : A => c (c z b) a).

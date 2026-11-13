@@ -1,0 +1,8 @@
+(; The stated type of x is convertible with the one the left-hand side gives it. ;)
+A : Type.
+def A' : Type := A.
+a0 : A.
+def f : A -> A.
+[x : A'] f x --> x.
+P : A -> Type.
+thm t : P (f a0) -> P a0 := p : P (f a0) => p.
