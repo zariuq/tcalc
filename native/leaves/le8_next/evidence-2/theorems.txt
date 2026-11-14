@@ -1,0 +1,6 @@
+THEOREM le8_next_post: |- forall u t k.
+THEOREM LE8_NEXT_RUN: |- forall t k u.
+THEOREM LE8_NEXT_DECLS: |- tisa_decls le8_next = [1,0,1; 2,16,8]
+THEOREM LE8_NEXT_LEAF_WF: |- tisa_leaf_wf le8_next
+THEOREM LE8_NEXT_X86: |- tisa_entry_ok le8_next t /\
+THEOREM LE8_NEXT_LEAF_SPEC: |- forall pc. tisa_leaf_spec le8_next le8_next_mc pc

@@ -19,7 +19,7 @@ out=${2:?usage: evidence.sh LEAF OUTDIR}
 out=$(realpath "$out")
 {
   echo "leaf: $leaf"
-  grep -a -o 'JOIN [a-z_]*: .*' "$out/hol.log" || true
+  grep -a -o 'JOIN [a-z_0-9]*: .*' "$out/hol.log" || true
   grep -a -o 'AUDIT [A-Za-z_0-9]*: [0-9]* hyps' "$out/hol.log" || true
   grep -a -o 'AUDIT theorems .*' "$out/hol.log" || true
   grep -a -A4 -o 'AXIOMS .*' "$out/hol.log" | head -5 || true

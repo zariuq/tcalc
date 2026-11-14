@@ -1,0 +1,6 @@
+THEOREM at_end_post: |- forall u k t.
+THEOREM AT_END_RUN: |- forall t k u.
+THEOREM AT_END_DECLS: |- tisa_decls at_end = [1,0,1; 1,16,8]
+THEOREM AT_END_LEAF_WF: |- tisa_leaf_wf at_end
+THEOREM AT_END_X86: |- tisa_entry_ok at_end t /\
+THEOREM AT_END_LEAF_SPEC: |- forall pc. tisa_leaf_spec at_end at_end_mc pc

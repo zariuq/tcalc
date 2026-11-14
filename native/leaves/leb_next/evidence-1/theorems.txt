@@ -1,0 +1,6 @@
+THEOREM leb_next_post: |- forall k s st.
+THEOREM LEB_NEXT_RUN: |- forall st k st'.
+THEOREM LEB_NEXT_DECLS: |- tisa_decls leb_next = [1,0,1; 2,16,8]
+THEOREM LEB_NEXT_LEAF_WF: |- tisa_leaf_wf leb_next
+THEOREM LEB_NEXT_X86: |- tisa_entry_ok leb_next t /\
+THEOREM LEB_NEXT_LEAF_SPEC: |- forall pc. tisa_leaf_spec leb_next leb_next_mc pc

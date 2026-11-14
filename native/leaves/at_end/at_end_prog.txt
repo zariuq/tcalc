@@ -1,0 +1,1 @@
+(TProg [(1,0,1); (1,16,8)] [] (TSeq (TInstr (TLoadFrame TyPtr 1 2)) (TSeq (TInstr (TLoad TyU64 8 1 2 1 (&0:int))) (TSeq (TInstr (TLoadFrame TyU64 3 1)) (TSeq (TInstr (TCmp CondEq TyU64 4 2 (OpReg 3))) (TSeq (TIf 4 (TReturn 1 4) TSkip) (TReturn 0 4)))))))

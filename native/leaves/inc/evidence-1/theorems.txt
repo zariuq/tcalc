@@ -1,0 +1,6 @@
+THEOREM inc_post: |- forall u t k.
+THEOREM INC_RUN: |- forall t k u.
+THEOREM INC_DECLS: |- tisa_decls inc = []
+THEOREM INC_LEAF_WF: |- tisa_leaf_wf inc
+THEOREM INC_X86: |- tisa_entry_ok inc t /\
+THEOREM INC_LEAF_SPEC: |- forall pc. tisa_leaf_spec inc inc_mc pc

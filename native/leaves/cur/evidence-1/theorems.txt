@@ -1,0 +1,6 @@
+THEOREM cur_post: |- forall k u t.
+THEOREM CUR_RUN: |- forall t k u.
+THEOREM CUR_DECLS: |- tisa_decls cur = [1,0,1; 1,16,8]
+THEOREM CUR_LEAF_WF: |- tisa_leaf_wf cur
+THEOREM CUR_X86: |- tisa_entry_ok cur t /\
+THEOREM CUR_LEAF_SPEC: |- forall pc. tisa_leaf_spec cur cur_mc pc

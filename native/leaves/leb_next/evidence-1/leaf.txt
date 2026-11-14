@@ -1,0 +1,40 @@
+leaf: leb_next
+JOIN : thm =
+JOIN : thm =
+JOIN : thm =
+JOIN leb_next: the proved program is the image's program
+AUDIT LEAF_ENTRY_FRAME: 0 hyps
+AUDIT LEAF_RUN_BY_WP: 0 hyps
+AUDIT LEAF_WORD_ADD_1: 0 hyps
+AUDIT LEAF_DIV8_LT: 0 hyps
+AUDIT LEAF_VAL_MUL_EXACT: 0 hyps
+AUDIT LEAF_VAL_SHL_EXACT: 0 hyps
+AUDIT LEAF_HALVES: 0 hyps
+AUDIT LEAF_PRODUCT_WITHIN: 0 hyps
+AUDIT LEAF_PRODUCT_GUARD: 0 hyps
+AUDIT LEAF_ROW_INDEX: 0 hyps
+AUDIT LEAF_FRAME_WORDS: 0 hyps
+AUDIT LEB_NEXT_TERM: 0 hyps
+AUDIT leb_next_bytes: 0 hyps
+AUDIT leb_next_state: 0 hyps
+AUDIT leb_next_post: 0 hyps
+AUDIT leb_next_inv: 0 hyps
+AUDIT LEB_NEXT_ENTRY: 0 hyps
+AUDIT LEB_NEXT_CURSOR_ADD: 0 hyps
+AUDIT LEB_NEXT_CURSOR_STEP: 0 hyps
+AUDIT LEB_NEXT_BODY_WP: 0 hyps
+AUDIT LEB_NEXT_PROLOGUE_WP: 0 hyps
+AUDIT LEB_NEXT_ROOT_WP: 0 hyps
+AUDIT LEB_NEXT_RUN: 0 hyps
+AUDIT LEB_NEXT_SOUND: 0 hyps
+AUDIT LEB_NEXT_COMPLETE: 0 hyps
+AUDIT LEB_NEXT_SHORT: 0 hyps
+AUDIT LEB_NEXT_MALFORMED: 0 hyps
+AUDIT LEB_NEXT_DECLS: 0 hyps
+AUDIT LEB_NEXT_LEAF_WF: 0 hyps
+AUDIT LEB_NEXT_X86: 0 hyps
+AUDIT LEB_NEXT_LEAF_SPEC: 0 hyps
+AUDIT theorems 31, with hypotheses 0
+...AXIO[+5]
+new_axiom, mk_thm, CHEAT_TAC in the leaf's sources: 0
+evidence check: ok; EVIDENCE-CHECK files 112, stale or missing 0

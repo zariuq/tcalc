@@ -1,0 +1,6 @@
+THEOREM skip_post: |- forall t u k.
+THEOREM SKIP_RUN: |- forall t k u.
+THEOREM SKIP_DECLS: |- tisa_decls skip = [1,0,1; 2,16,8]
+THEOREM SKIP_LEAF_WF: |- tisa_leaf_wf skip
+THEOREM SKIP_X86: |- tisa_entry_ok skip t /\
+THEOREM SKIP_LEAF_SPEC: |- forall pc. tisa_leaf_spec skip skip_mc pc
