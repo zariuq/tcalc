@@ -1,0 +1,188 @@
+import "ByteScalars.module" as scalars
+Module NativeInterface {
+  Theory Signature(v: scalars.Values) {
+    v Exports { ABITable; ABIEntries; ABIEntry; ABIName; ABIRecord; } Terms {
+      NativeInterface . ABITable ::= "native_interface";
+      ABITable . ABITable ::= "abi" "(" ABIEntries ")";
+      ABINil . ABIEntries ::= "no_fields";
+      ABICons . ABIEntries ::= "fields" "(" ABIEntry "," ABIEntries ")";
+      ABIConstant . ABIEntry ::= "constant" "(" ABIName "," Nat ")";
+      ABIField . ABIEntry ::= "field" "(" ABIRecord "," ABIName "," Nat ")";
+      Name_CFrameAlignment . ABIName ::= "CFrameAlignment";
+      Name_CallArgumentCount . ABIName ::= "CallArgumentCount";
+      Name_CallRequestBytes . ABIName ::= "CallRequestBytes";
+      Name_CallRequestWords . ABIName ::= "CallRequestWords";
+      Name_DriveWords . ABIName ::= "DriveWords";
+      Name_DriverCodeBytes . ABIName ::= "DriverCodeBytes";
+      Name_DriverFrameDistance . ABIName ::= "DriverFrameDistance";
+      Name_DriverWorkBytes . ABIName ::= "DriverWorkBytes";
+      Name_FrameBytes . ABIName ::= "FrameBytes";
+      Name_FrameWords . ABIName ::= "FrameWords";
+      Name_LeafStackSaveBytes . ABIName ::= "LeafStackSaveBytes";
+      Name_MaxRegions . ABIName ::= "MaxRegions";
+      Name_StepBytes . ABIName ::= "StepBytes";
+      Name_StepWords . ABIName ::= "StepWords";
+      Name_WordBytes . ABIName ::= "WordBytes";
+      Name_arg0 . ABIName ::= "arg0";
+      Name_arg1 . ABIName ::= "arg1";
+      Name_arg2 . ABIName ::= "arg2";
+      Name_arg3 . ABIName ::= "arg3";
+      Name_arg4 . ABIName ::= "arg4";
+      Name_arg5 . ABIName ::= "arg5";
+      Name_arg6 . ABIName ::= "arg6";
+      Name_at . ABIName ::= "at";
+      Name_bind . ABIName ::= "bind";
+      Name_budget . ABIName ::= "budget";
+      Name_count . ABIName ::= "count";
+      Name_ctl . ABIName ::= "ctl";
+      Name_dst . ABIName ::= "dst";
+      Name_end . ABIName ::= "end";
+      Name_fnv . ABIName ::= "fnv";
+      Name_fuel_budget . ABIName ::= "fuel_budget";
+      Name_fuel_used . ABIName ::= "fuel_used";
+      Name_header . ABIName ::= "header";
+      Name_hot_1 . ABIName ::= "hot_1";
+      Name_hot_2 . ABIName ::= "hot_2";
+      Name_hot_3 . ABIName ::= "hot_3";
+      Name_hot_4 . ABIName ::= "hot_4";
+      Name_hot_5 . ABIName ::= "hot_5";
+      Name_leaf . ABIName ::= "leaf";
+      Name_leaves . ABIName ::= "leaves";
+      Name_plan . ABIName ::= "plan";
+      Name_plan_end . ABIName ::= "plan_end";
+      Name_policy . ABIName ::= "policy";
+      Name_region_0 . ABIName ::= "region_0";
+      Name_region_1 . ABIName ::= "region_1";
+      Name_region_2 . ABIName ::= "region_2";
+      Name_region_3 . ABIName ::= "region_3";
+      Name_region_4 . ABIName ::= "region_4";
+      Name_region_5 . ABIName ::= "region_5";
+      Name_region_6 . ABIName ::= "region_6";
+      Name_region_7 . ABIName ::= "region_7";
+      Name_region_8 . ABIName ::= "region_8";
+      Name_result . ABIName ::= "result";
+      Name_ret_val . ABIName ::= "ret_val";
+      Name_s0_len . ABIName ::= "s0_len";
+      Name_s0_ptr . ABIName ::= "s0_ptr";
+      Name_s1_len . ABIName ::= "s1_len";
+      Name_s1_ptr . ABIName ::= "s1_ptr";
+      Name_s2_len . ABIName ::= "s2_len";
+      Name_s2_ptr . ABIName ::= "s2_ptr";
+      Name_s3_len . ABIName ::= "s3_len";
+      Name_s3_ptr . ABIName ::= "s3_ptr";
+      Name_s4_len . ABIName ::= "s4_len";
+      Name_s4_ptr . ABIName ::= "s4_ptr";
+      Name_s5_len . ABIName ::= "s5_len";
+      Name_s5_ptr . ABIName ::= "s5_ptr";
+      Name_s6_len . ABIName ::= "s6_len";
+      Name_s6_ptr . ABIName ::= "s6_ptr";
+      Name_s7_len . ABIName ::= "s7_len";
+      Name_s7_ptr . ABIName ::= "s7_ptr";
+      Name_s8_len . ABIName ::= "s8_len";
+      Name_s8_ptr . ABIName ::= "s8_ptr";
+      Name_status . ABIName ::= "status";
+      Name_target . ABIName ::= "target";
+      Name_used . ABIName ::= "used";
+      Name_opcode . ABIName ::= "opcode";
+      Name_reader_state . ABIName ::= "reader_state";
+      Record_RuntimeFrame . ABIRecord ::= "RuntimeFrame";
+      Record_DriveDescriptor . ABIRecord ::= "DriveDescriptor";
+      Record_DriveStep . ABIRecord ::= "DriveStep";
+      Record_CallRequest . ABIRecord ::= "CallRequest";
+      Record_CoreControls . ABIRecord ::= "CoreControls";
+      Record_ProcedureControls . ABIRecord ::= "ProcedureControls";
+    }
+  }
+  Theory Data(v: scalars.Values) {
+    Signature(v) Rewrites {
+      NativeABI: (NativeInterface) ~> (ABITable (ABICons (ABIField (Record_CoreControls) (Name_opcode) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))))) (ABICons (ABIField (Record_CoreControls) (Name_reader_state) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))))) (ABICons (ABIConstant (Name_WordBytes) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIConstant (Name_MaxRegions) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIConstant (Name_FrameWords) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit1) (NatZero)))))))
+          (ABICons (ABIConstant (Name_FrameBytes) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit1) (NatZero))))))))))
+          (ABICons (ABIConstant (Name_CFrameAlignment) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))))))
+          (ABICons (ABIConstant (Name_LeafStackSaveBytes) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))))))
+          (ABICons (ABIConstant (Name_DriveWords) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIConstant (Name_StepWords) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))))
+          (ABICons (ABIConstant (Name_StepBytes) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))))))))
+          (ABICons (ABIConstant (Name_DriverCodeBytes) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))))))))))
+          (ABICons (ABIConstant (Name_DriverFrameDistance) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit1) (NatZero))))))))))
+          (ABICons (ABIConstant (Name_DriverWorkBytes) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))))))))
+          (ABICons (ABIConstant (Name_CallArgumentCount) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit1) (NatZero)))))
+          (ABICons (ABIConstant (Name_CallRequestWords) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIConstant (Name_CallRequestBytes) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))))))
+          (ABICons (ABIField (Record_RuntimeFrame) (Name_s0_ptr) (NatZero))
+          (ABICons (ABIField (Record_RuntimeFrame) (Name_s0_len) (NatBit (Bit1) (NatZero)))
+          (ABICons (ABIField (Record_RuntimeFrame) (Name_s1_ptr) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))
+          (ABICons (ABIField (Record_RuntimeFrame) (Name_s1_len) (NatBit (Bit1) (NatBit (Bit1) (NatZero))))
+          (ABICons (ABIField (Record_RuntimeFrame) (Name_s2_ptr) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))
+          (ABICons (ABIField (Record_RuntimeFrame) (Name_s2_len) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))
+          (ABICons (ABIField (Record_RuntimeFrame) (Name_s3_ptr) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit1) (NatZero)))))
+          (ABICons (ABIField (Record_RuntimeFrame) (Name_s3_len) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit1) (NatZero)))))
+          (ABICons (ABIField (Record_RuntimeFrame) (Name_s4_ptr) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIField (Record_RuntimeFrame) (Name_s4_len) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIField (Record_RuntimeFrame) (Name_s5_ptr) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIField (Record_RuntimeFrame) (Name_s5_len) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIField (Record_RuntimeFrame) (Name_s6_ptr) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIField (Record_RuntimeFrame) (Name_s6_len) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIField (Record_RuntimeFrame) (Name_s7_ptr) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIField (Record_RuntimeFrame) (Name_s7_len) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIField (Record_RuntimeFrame) (Name_s8_ptr) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))))
+          (ABICons (ABIField (Record_RuntimeFrame) (Name_s8_len) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))))
+          (ABICons (ABIField (Record_RuntimeFrame) (Name_status) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))))
+          (ABICons (ABIField (Record_RuntimeFrame) (Name_ret_val) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))))
+          (ABICons (ABIField (Record_RuntimeFrame) (Name_fuel_budget) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))))
+          (ABICons (ABIField (Record_RuntimeFrame) (Name_fuel_used) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))))
+          (ABICons (ABIField (Record_RuntimeFrame) (Name_arg0) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))))
+          (ABICons (ABIField (Record_RuntimeFrame) (Name_arg1) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))))
+          (ABICons (ABIField (Record_DriveDescriptor) (Name_plan) (NatZero))
+          (ABICons (ABIField (Record_DriveDescriptor) (Name_plan_end) (NatBit (Bit1) (NatZero)))
+          (ABICons (ABIField (Record_DriveDescriptor) (Name_ctl) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))
+          (ABICons (ABIField (Record_DriveDescriptor) (Name_bind) (NatBit (Bit1) (NatBit (Bit1) (NatZero))))
+          (ABICons (ABIField (Record_DriveDescriptor) (Name_leaves) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))
+          (ABICons (ABIField (Record_DriveDescriptor) (Name_budget) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))
+          (ABICons (ABIField (Record_DriveDescriptor) (Name_used) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit1) (NatZero)))))
+          (ABICons (ABIField (Record_DriveDescriptor) (Name_at) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit1) (NatZero)))))
+          (ABICons (ABIField (Record_DriveStep) (Name_leaf) (NatZero))
+          (ABICons (ABIField (Record_DriveStep) (Name_region_0) (NatBit (Bit1) (NatZero)))
+          (ABICons (ABIField (Record_DriveStep) (Name_region_1) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))
+          (ABICons (ABIField (Record_DriveStep) (Name_region_2) (NatBit (Bit1) (NatBit (Bit1) (NatZero))))
+          (ABICons (ABIField (Record_DriveStep) (Name_region_3) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))
+          (ABICons (ABIField (Record_DriveStep) (Name_region_4) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))
+          (ABICons (ABIField (Record_DriveStep) (Name_region_5) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit1) (NatZero)))))
+          (ABICons (ABIField (Record_DriveStep) (Name_region_6) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit1) (NatZero)))))
+          (ABICons (ABIField (Record_DriveStep) (Name_region_7) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIField (Record_DriveStep) (Name_region_8) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIField (Record_DriveStep) (Name_arg0) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIField (Record_DriveStep) (Name_arg1) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIField (Record_DriveStep) (Name_hot_1) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIField (Record_DriveStep) (Name_hot_2) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIField (Record_DriveStep) (Name_hot_3) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIField (Record_DriveStep) (Name_hot_4) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIField (Record_DriveStep) (Name_hot_5) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))))
+          (ABICons (ABIField (Record_DriveStep) (Name_dst) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))))
+          (ABICons (ABIField (Record_CallRequest) (Name_arg0) (NatZero))
+          (ABICons (ABIField (Record_CallRequest) (Name_arg1) (NatBit (Bit1) (NatZero)))
+          (ABICons (ABIField (Record_CallRequest) (Name_arg2) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))
+          (ABICons (ABIField (Record_CallRequest) (Name_arg3) (NatBit (Bit1) (NatBit (Bit1) (NatZero))))
+          (ABICons (ABIField (Record_CallRequest) (Name_arg4) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))
+          (ABICons (ABIField (Record_CallRequest) (Name_arg5) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))
+          (ABICons (ABIField (Record_CallRequest) (Name_arg6) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit1) (NatZero)))))
+          (ABICons (ABIField (Record_CallRequest) (Name_target) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit1) (NatZero)))))
+          (ABICons (ABIField (Record_CoreControls) (Name_policy) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit1) (NatZero)))))
+          (ABICons (ABIField (Record_CoreControls) (Name_count) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))))
+          (ABICons (ABIField (Record_CoreControls) (Name_end) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))))
+          (ABICons (ABIField (Record_CoreControls) (Name_header) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))))
+          (ABICons (ABIField (Record_CoreControls) (Name_fnv) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit1) (NatZero)))))))
+          (ABICons (ABIField (Record_ProcedureControls) (Name_result) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit1) (NatZero)))))
+          (ABICons (ABIField (Record_ProcedureControls) (Name_arg0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIField (Record_ProcedureControls) (Name_arg1) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIField (Record_ProcedureControls) (Name_arg2) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIField (Record_ProcedureControls) (Name_arg3) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIField (Record_ProcedureControls) (Name_arg4) (NatBit (Bit0) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIField (Record_ProcedureControls) (Name_arg5) (NatBit (Bit1) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit1) (NatZero))))))
+          (ABICons (ABIField (Record_ProcedureControls) (Name_arg6) (NatBit (Bit0) (NatBit (Bit1) (NatBit (Bit1) (NatBit (Bit1) (NatZero))))))
+          (ABINil))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))));
+    }
+  }
+  theory Data(scalars.Values())
+}

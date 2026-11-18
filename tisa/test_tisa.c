@@ -1485,7 +1485,8 @@ static void render_p1_manifest(FILE *fp, const TcIsaProgram *progs[15]) {
                 "\"arg0_word\": 22, \"arg1_word\": 23},\n"
                 "  \"outcome_codes\": {\"REFUSED\": 0, \"FIRED\": 1, \"UNSUPPORTED\": 2, \"INVALID_INPUT\": 3, \"EXHAUSTED\": 4},\n"
                 "  \"x86_64\": {\"vregs\": [\"rdi\", \"rsi\", \"rdx\", \"rcx\", \"r8\", \"r9\", \"r10\", \"r11\", \"rax\", \"rbx\", \"r12\", \"r13\"], "
-                "\"scratch\": [\"r14\", \"r15\"], \"frame_register\": \"rdi\", \"saved_by_prologue\": [\"rbx\", \"r12\", \"r13\", \"r14\", \"r15\"], "
+                "\"scratch\": [\"r14\", \"r15\"], \"frame_register\": \"rdi\", \"saved_by_prologue\": [\"rbx\", \"r12\", \"r13\", \"r14\", \"r15\", \"rbp\"], "
+                "\"allowance_register\": \"rbp\", "
                 "\"ret_val_register\": \"rax\", \"entry_offset\": 0},\n"
                 "  \"path_encoding\": \"child indices from the root joined by '.': SEQ first 0, second 1; IF then 1, else 2; loop body 0\",\n"
                 "  \"program_count\": 15,\n"
@@ -1497,8 +1498,7 @@ static void render_p1_manifest(FILE *fp, const TcIsaProgram *progs[15]) {
         TcIsaX86 code;
         CHECK(tisa_x86_emit(p, &code, err, sizeof err));
         static char paths[4096][256];
-        size_t npaths = tisa_span_paths(p->root, paths, 4096);
-        CHECK(npaths + 3 == code.nspans);
+        CHECK(code.nspans <= 4096 && tisa_span_paths(p, &code, paths) == code.nspans);
         TcSha256Ctx h; char hex[65];
         tc_sha256_init(&h); tc_sha256_update(&h, code.bytes, code.len); tc_sha256_final_hex(&h, hex);
         fprintf(fp, "%s    {\n      \"program_name\": \"%s\",\n      \"program_id\": %d,\n", i ? ",\n" : "",
@@ -1529,7 +1529,7 @@ static void render_p1_manifest(FILE *fp, const TcIsaProgram *progs[15]) {
         for (size_t k = 0; k < code.nspans; k++) {
             fprintf(fp, "          {\"offset\": %u, \"length\": %u, \"template\": \"%s\"", code.spans[k].offset,
                     code.spans[k].length, code.spans[k].template_name);
-            if (k > 0 && k + 2 < code.nspans) fprintf(fp, ", \"path\": \"%s\"", paths[k - 1]);
+            if (code.spans[k].stmt) fprintf(fp, ", \"path\": \"%s\"", paths[k]);
             fprintf(fp, "}%s\n", k + 1 < code.nspans ? "," : "");
         }
         fputs("        ]\n      }\n    }", fp);

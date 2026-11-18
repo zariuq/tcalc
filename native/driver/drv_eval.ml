@@ -7,7 +7,10 @@
 (*   |- drv_sem progs bw ctl budget cfr steps i m used res0                 *)
 (* with res0 explicit; DRV_SEM_FUN (driver_det.ml) then gives every run's   *)
 (* outcome. The caller adds the leaf programs and the memory's definitions  *)
-(* to the evaluator (drv_eval_compset).                                      *)
+(* to the evaluator (drv_eval_compset). drv_run_eval needs every step to    *)
+(* FIRE; drv_run_eval_stop also ends at a step that does not, and is meant  *)
+(* to be given a named memory's reads (drv_mem_read_rules), so the memory   *)
+(* stays named in every state.                                               *)
 (*                                                                           *)
 (* Loaded after driver.ml.                                                   *)
 (* ========================================================================= *)
@@ -127,6 +130,78 @@ let drv_run_eval conv progs bw ctl budget cfr steps m0 used0 =
           failwith (Printf.sprintf "drv_run_eval: step %d ended %s" i (string_of_term(rhs(concl s18)))) else
         let s21 = conv (list_mk_icomb "tisa_fword" [u; `21`]) in
         let after = conv (list_mk_icomb "drv_after" [ctl; st; u]) in
+        let ij = NUM_ADD_CONV (mk_binop `(+):num->num->num` (mk_small_numeral i) `1`) in
+        Printf.printf "DRV_EVAL step %d FIRED (leaf %s)\n%!" i (string_of_term (hd(dest_list st)));
+        let rest_th = go (i + 1) rest (rhs(concl after)) (rhs(concl s21)) in
+        let res = rand(concl rest_th) in
+        let lem = ISPECL [progs; bw; ctl; budget; cfr; st; mk_list(rest, type_of st); mk_small_numeral i;
+                          mk_small_numeral (i + 1); m; used; t; k; u; rhs(concl after); rhs(concl s21); res]
+                         DRV_SEM_FIRED_STEP in
+        MP lem (end_itlist CONJ [budget_ok; child; entry; run; s18; s21; after; ij; rest_th]) in
+  go 0 steps m0 used0;;
+
+(* ------------------------------------------------------------------------- *)
+(* Runs that may stop: a step that does not FIRE ends the run with its      *)
+(* outcome (DRV_SEM_STOP_STEP). And a memory named by a definition stays    *)
+(* named in every state the run threads: the evaluator gets the memory's    *)
+(* reads by the definition (drv_mem_read_rules), never the definition       *)
+(* itself, which would unfold it into each state (a byte-write chain tens  *)
+(* of thousands of levels deep after one plan, which no rewrite can walk).  *)
+(* ------------------------------------------------------------------------- *)
+
+let DRV_SEM_STOP_STEP = prove
+ (`!progs bw ctl budget cfr st sts i m used t k u.
+     ~(val budget < val used) /\ drv_child bw ctl budget cfr st m used t /\
+     tisa_entry_ok (progs (val(EL 0 st))) t /\
+     tisa_run (progs (val(EL 0 st))) t = TStop k u /\ ~(tisa_fword u 18 = word 1)
+     ==> drv_sem progs bw ctl budget cfr (CONS st sts) i m used
+                 (tisa_fword u 18, i, drv_after ctl st u, tisa_fword u 21)`,
+  REPEAT STRIP_TAC THEN REWRITE_TAC[drv_sem] THEN ASM_REWRITE_TAC[] THEN
+  MAP_EVERY EXISTS_TAC [`t:tisa_state`; `k:num`; `u:tisa_state`] THEN ASM_REWRITE_TAC[]);;
+
+(* Reads of a memory constant, and of its bytes, by its definition. *)
+let drv_mem_read_rules mdef =
+  let d = SPEC_ALL mdef in
+  let m = lhs(concl d) in
+  let rd = rator(subst [m, `M:int64->byte`] `read (bytes(a:int64,n)) (M:int64->byte)`) in
+  [GENL [`a:int64`; `n:num`] (AP_TERM rd d); GEN `x:int64` (AP_THM d `x:int64`)];;
+
+(* A stopped step's result (status, i, memory, receipt), rebuilt in place   *)
+(* from the evaluated status, memory and receipt.                            *)
+let drv_tuple_eq s18 after s21 tup =
+  let l1, r1 = dest_comb tup in
+  let l2, r2 = dest_comb r1 in
+  let l3, _ = dest_comb r2 in
+  let e3 = MK_COMB(AP_TERM (rator l3) after, s21) in
+  MK_COMB(AP_TERM (rator l1) s18, AP_TERM l2 e3);;
+
+(* One run of the steps from memory m0 and receipt used0, to the plan's end *)
+(* or to its first step that does not FIRE.                                 *)
+let drv_run_eval_stop conv progs bw ctl budget cfr steps m0 used0 =
+  let rec go i sts m used =
+    match sts with
+      [] -> ISPECL [progs; bw; ctl; budget; cfr; mk_small_numeral i; m; used] DRV_SEM_NIL
+    | st :: rest ->
+        let t, child = drv_canon_child conv bw ctl budget cfr st m used in
+        let prog = mk_comb(progs, mk_icomb(`val:int64->num`, list_mk_icomb "EL" [`0`; st])) in
+        let budget_ok = drv_eval_true conv (mk_neg(mk_binop `(<):num->num->bool`
+                          (mk_icomb(`val:int64->num`, budget)) (mk_icomb(`val:int64->num`, used)))) in
+        let entry = drv_eval_true conv (list_mk_icomb "tisa_entry_ok" [prog; t]) in
+        let run = conv (list_mk_icomb "tisa_run" [prog; t]) in
+        let k, u = dest_comb(rhs(concl run)) in
+        let k = rand k in
+        let s18 = conv (list_mk_icomb "tisa_fword" [u; `18`]) in
+        let s21 = conv (list_mk_icomb "tisa_fword" [u; `21`]) in
+        let after = conv (list_mk_icomb "drv_after" [ctl; st; u]) in
+        if rhs(concl s18) <> `word 1:int64` then
+          let ne = drv_eval_true conv (mk_neg(mk_eq(list_mk_icomb "tisa_fword" [u; `18`], `word 1:int64`))) in
+          Printf.printf "DRV_EVAL step %d STOPPED with %s (leaf %s)\n%!" i
+            (string_of_term(rhs(concl s18))) (string_of_term (hd(dest_list st)));
+          let lem = ISPECL [progs; bw; ctl; budget; cfr; st; mk_list(rest, type_of st); mk_small_numeral i;
+                            m; used; t; k; u] DRV_SEM_STOP_STEP in
+          let th = MP lem (end_itlist CONJ [budget_ok; child; entry; run; ne]) in
+          EQ_MP (AP_TERM (rator(concl th)) (drv_tuple_eq s18 after s21 (rand(concl th)))) th
+        else
         let ij = NUM_ADD_CONV (mk_binop `(+):num->num->num` (mk_small_numeral i) `1`) in
         Printf.printf "DRV_EVAL step %d FIRED (leaf %s)\n%!" i (string_of_term (hd(dest_list st)));
         let rest_th = go (i + 1) rest (rhs(concl after)) (rhs(concl s21)) in

@@ -1,0 +1,89 @@
+Compiler references for native procedures
+=======================================
+
+These references inform proof structure. Their compiler theorems do not
+instantiate the HOL/Lean contracts of this library.
+
+1. Jasmin: High-Assurance and High-Speed Cryptography (CCS 2017), and the
+   current memory-layout documentation.
+   https://acmccs.github.io/papers/p1807-almeidaA.pdf
+   https://jasmin-lang.readthedocs.io/en/latest/compiler/advanced/memory_layout.html
+   Use: distinguish external regions, local data, saved registers, return
+   addresses and alignment padding. Check stack allocation independently.
+   Local obligation: derive the driver's physical stack window from the
+   callee's reserve, prove actual-byte execution, and recover the existing
+   40-byte callee profile without changing the driver image.
+   Limit: the paper's compilation theorem requires sufficient stack space;
+   our bounded procedure outcomes and receipts remain explicit obligations.
+
+2. Verifying Device Drivers with Pancake (2025).
+   https://arxiv.org/abs/2501.08249
+   https://cakeml.org/pancake
+   Use: a small imperative language with explicit memory, functional
+   big-step semantics and a verified lowering chain through CakeML.
+   Local obligation: connect the procedure evaluator, controller transitions,
+   work-region layout and native execution while retaining resource exits.
+   Limit: Pancake source programs cannot inspect or take pointers into their
+   local stack. The corresponding opacity property must be proved for our
+   primitive operations; it does not follow from their write footprints.
+
+3. CompCertO: Compiling Certified Open C Components (PLDI 2021), and
+   CompCertOC: Verified Compositional Compilation of Multi-threaded Programs
+   with Shared Stacks (PLDI 2025).
+   https://flint.cs.yale.edu/certikos/publications/compcerto.pdf
+   https://github.com/SJTU-PLV/compcertoc-pldi25-artifact
+   Use: relate call/return conventions, memory protection and sharing across
+   component boundaries; compose both compiler passes and separately proved
+   components. CompCertOC's concurrency theorem concerns cooperative threads.
+   Local obligation: prove argument/result/receipt transport, suspended caller
+   frames and the concrete entry/return ABI for every outcome.
+   Qualification: CompCertOC section 5 reports an incorrect global-symbol
+   axiom in an earlier CompCertO Unusedglob proof and excludes that pass.
+   Audit the exact theorem, pass set and assumptions of any borrowed result.
+
+4. A Verified Foreign Function Interface between Coq and C (POPL 2025).
+   https://www.cs.princeton.edu/~appel/papers/VeriFFI.pdf
+   https://github.com/CertiRocq/VeriFFI
+   Use: translate high-level types and functional models into low-level
+   function specifications and representation predicates. Foreign code must
+   then be proved to implement those specifications.
+   Local obligation: connect protected value facts to physical buffers,
+   ownership, GC custody and cursor lifetimes across the CeTTa/native seam.
+   Limit: VeriFFI supplies partial correctness; our termination, exhaustion
+   and exact fuel accounting require their own proofs.
+
+5. Relational Compilation for Performance-Critical Applications (PLDI 2022).
+   https://adam.chlipala.net/papers/RupicolaPLDI22/
+   https://github.com/mit-plv/rupicola
+   Use: extensible proof-producing compilation rules for functional program
+   patterns, low-level implementations and their connecting relations.
+   Local obligation: derive reusable lowering lemmas for calls, loops,
+   hypothesis operations and shared traversals. MeTTa can propose a program;
+   the proof kernels must check the resulting compilation theorem.
+
+6. Memory Simulations, Security and Optimization in a Verified Compiler
+   (CPP 2024).
+   https://arxiv.org/abs/2312.08117
+   Use: memory extensions and injections for changed stack layouts, including
+   tail recursion elimination, stack canaries and pointer authentication.
+   Local obligation: state precisely which addresses and values may change
+   under frame relocation, and prove preservation for the actual primitives.
+
+7. Interaction Trees: Representing Recursive and Impure Programs in Coq
+   (POPL 2020), and Choice Trees: Representing Nondeterministic, Recursive,
+   and Impure Programs in Coq (POPL 2023).
+   https://arxiv.org/abs/1906.00046
+   https://arxiv.org/abs/2211.06863
+   Use: compositional interpreters, internal steps and explicit branching,
+   with equational reasoning and bisimulation. Both papers are collected.
+   Local obligation: distinguish administrative implementation steps from
+   observable rule choices in the two-sided refinement and matching engine.
+   Limit: fuel charges, allocation, capacity and termination observations
+   must remain in the declared relation; they cannot be discarded merely
+   by calling an implementation transition silent.
+
+Related references already collected include Bedrock2, Cogent, CakeML,
+Vale, Vellvm, Alive2 and Islaris. Bedrock2's current documented language
+excludes general recursion and function pointers; its compiler and frame
+proofs remain useful examples rather than an implementation of the bounded
+recursive procedure mechanism.

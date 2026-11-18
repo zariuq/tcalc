@@ -21,6 +21,9 @@
 (*                   (HANDLER_REFL_REL), composed by DRV_SEM_APPEND, with   *)
 (*                   REFL's plan renumbered to step 0 (DRV_SEM_AT0) for     *)
 (*                   PL_REFL_REL.                                            *)
+(* A dd plan that the input's end refuses keeps both relations, the cursor  *)
+(* kept (DD_REL_REFUSED). Agreement on a set of addresses that covers what  *)
+(* the relations read carries both of them (rel_reads).                      *)
 (*                                                                           *)
 (* Loaded after plans_rel.ml, in the audits' order (records.ml before it).  *)
 (* ========================================================================= *)
@@ -1097,6 +1100,226 @@ let HANDLER_REFL_REL = prove
     REWRITE_TAC[ASSUME `~(FST(r1:int64#num#(int64->byte)#int64) = word 1)`] THEN DISCH_THEN SUBST1_TAC THEN
     ASM_REWRITE_TAC[] THEN ASM_MESON_TAC[]]);;
 
+(* ------------------------------------------------------------------------- *)
+(* A REFUSED leb_next, and so a REFUSED dd plan. leb_next refuses without a *)
+(* store, so the memory after the step is the entry memory with the payload *)
+(* word written; both relations hold of it, the cursor kept. This is the    *)
+(* record loop's final memory when the input's end refuses a decode.        *)
+(* ------------------------------------------------------------------------- *)
+
+let RD_STEP_LEB_REFUSED = prove
+ (`!bw ctl nctl budget cfr st m used t k u cw ctx nms tys ntms dbs ths nmap ymap drops pol stk inp c.
+     plan_rel bw ctl nctl cfr m (cw,(ctx,nms,tys,ntms,dbs,ths,nmap,ymap,drops,pol),stk) /\
+     rd_rel bw ctl nctl cfr m inp c /\
+     drv_child bw ctl budget cfr st m used t /\ tisa_entry_ok leb_next t /\ tisa_run leb_next t = TStop k u /\
+     val(EL 1 st) = 54 /\ val(EL 2 st) = 58 /\ val(EL 17 st) < nctl /\ 6 < val(EL 17 st) /\
+     ~(tisa_fword u 18 = word 1)
+     ==> plan_rel bw ctl nctl cfr (drv_after ctl st u)
+           (pl_set cw (val(EL 17 st)) (val(tisa_fword u 19)),(ctx,nms,tys,ntms,dbs,ths,nmap,ymap,drops,pol),stk) /\
+         rd_rel bw ctl nctl cfr (drv_after ctl st u) inp c`,
+  REPEAT GEN_TAC THEN STRIP_TAC THEN
+  FIRST_ASSUM(ASSUME_TAC o CONJUNCT1 o GEN_REWRITE_RULE I [plan_rel] o
+    check (fun th -> is_const_app "plan_rel" (concl th))) THEN
+  FIRST_ASSUM(STRIP_ASSUME_TAC o GEN_REWRITE_RULE I [pl_layout] o
+    check (fun th -> is_const_app "pl_layout" (concl th))) THEN
+  MP_TAC(SPECL [`bw:num->int64`; `ctl:int64`; `nctl:num`; `budget:int64`; `cfr:int64`; `st:int64 list`;
+                `m:int64->byte`; `used:int64`; `t:tisa_state`; `inp:num list`; `c:num`] RD_CHILD) THEN
+  ASM_REWRITE_TAC[] THEN STRIP_TAC THEN
+  MP_TAC PL_LEB_NEXT_SPEC THEN REWRITE_TAC[pl_leb_next_spec; pl_leaf_ok] THEN
+  DISCH_THEN(CONJUNCTS_THEN2
+    (CONJUNCTS_THEN2 ASSUME_TAC (CONJUNCTS_THEN2 ASSUME_TAC
+       (MP_TAC o SPECL [`t:tisa_state`; `k:num`; `u:tisa_state`])))
+    (MP_TAC o SPECL [`t:tisa_state`; `k:num`; `u:tisa_state`])) THEN
+  ASM_REWRITE_TAC[] THEN DISCH_TAC THEN STRIP_TAC THEN
+  (* FIRED would leave status 1 *)
+  FIRST_X_ASSUM(DISJ_CASES_THEN2 (X_CHOOSE_THEN `v:num` STRIP_ASSUME_TAC) STRIP_ASSUME_TAC o
+    check (fun th -> is_disj(concl th))) THENL
+   [UNDISCH_TAC `~(tisa_fword u 18 = word 1)` THEN ASM_REWRITE_TAC[]; ALL_TAC] THEN
+  FIRST_ASSUM(fun th -> if is_const_app "rd_rel" (concl th) then
+     STRIP_ASSUME_TAC(GEN_REWRITE_RULE I [rd_rel] th) else failwith "") THEN
+  FIRST_ASSUM(STRIP_ASSUME_TAC o GEN_REWRITE_RULE I [rd_layout]) THEN
+  (* What leb_next keeps: everything outside the state and the payload word. *)
+  SUBGOAL_THEN `!a. ~drv_stack cfr a /\ ~drv_in a (bw 58) (val(bw 59)) /\
+                    ~drv_in a (word_add ctl (word(8 * val(EL 17 (st:int64 list))))) 8
+                    ==> drv_after ctl st u a = (m:int64->byte) a` ASSUME_TAC THENL
+   [REPEAT STRIP_TAC THEN MATCH_MP_TAC RD_LEB_KEEPS THEN
+    MAP_EVERY EXISTS_TAC [`bw:num->int64`; `nctl:num`; `budget:int64`; `cfr:int64`; `used:int64`;
+                          `t:tisa_state`; `k:num`] THEN
+    ASM_REWRITE_TAC[];
+    ALL_TAC] THEN
+  CONJ_TAC THENL
+   [(* plan_rel: only the state (apart from every slot) and the payload changed. *)
+    MATCH_MP_TAC PL_REL_AGREE THEN EXISTS_TAC `m:int64->byte` THEN ASM_REWRITE_TAC[] THEN
+    REPEAT CONJ_TAC THENL
+     [REPEAT STRIP_TAC THEN FIRST_X_ASSUM MATCH_MP_TAC THEN
+      MP_TAC(SPECL [`bw:num->int64`; `ctl:int64`; `nctl:num`; `cfr:int64`; `j:num`;
+                    `val(EL 17 (st:int64 list))`; `a:int64`] PL_SLOT_ADDR) THEN
+      MP_TAC(SPECL [`bw:num->int64`; `ctl:int64`; `nctl:num`; `cfr:int64`; `j:num`; `a:int64`] RD_SLOT_NOT_RD) THEN
+      ASM_SIMP_TAC[];
+      REPEAT STRIP_TAC THEN FIRST_X_ASSUM MATCH_MP_TAC THEN ASM_REWRITE_TAC[] THEN
+      MP_TAC(SPECL [`bw:num->int64`; `ctl:int64`; `nctl:num`; `cfr:int64`; `a:int64`] PL_CTL_ADDR) THEN
+      MP_TAC(SPECL [`bw:num->int64`; `ctl:int64`; `nctl:num`; `cfr:int64`; `a:int64`] RD_CTL_NOT_RD) THEN
+      ASM_SIMP_TAC[];
+      REWRITE_TAC[drv_after; DRV_WORD_WRITE_SAME]];
+    (* rd_rel: the input and the cursor kept. *)
+    REWRITE_TAC[rd_rel] THEN ASM_REWRITE_TAC[] THEN CONJ_TAC THENL
+     [X_GEN_TAC `i:num` THEN DISCH_TAC THEN
+      SUBGOAL_THEN `drv_in (word_add (bw 54) (word i)) (bw 54) (val(bw 55:int64))` ASSUME_TAC THENL
+       [REWRITE_TAC[drv_in] THEN MP_TAC(SPECL [`bw 54:int64`; `i:num`] TISA_VAL_OFFSET) THEN
+        ANTS_TAC THENL [ASM_ARITH_TAC; DISCH_THEN SUBST1_TAC THEN ASM_ARITH_TAC];
+        ALL_TAC] THEN
+      MP_TAC(SPECL [`bw:num->int64`; `ctl:int64`; `nctl:num`; `cfr:int64`; `word_add (bw 54) (word i):int64`]
+                   RD_INP_ADDR) THEN
+      ASM_REWRITE_TAC[] THEN STRIP_TAC THEN
+      SUBGOAL_THEN `drv_after ctl st u (word_add (bw 54) (word i)) = (m:int64->byte) (word_add (bw 54) (word i))`
+        SUBST1_TAC THENL
+       [FIRST_X_ASSUM MATCH_MP_TAC THEN ASM_REWRITE_TAC[] THEN DISCH_TAC THEN
+        UNDISCH_TAC `~drv_in (word_add (bw 54) (word i):int64) ctl (8 * nctl)` THEN REWRITE_TAC[] THEN
+        MATCH_MP_TAC DRV_CTL_WORD_IN THEN EXISTS_TAC `val(EL 17 (st:int64 list))` THEN ASM_REWRITE_TAC[];
+        ASM_SIMP_TAC[]];
+      (* the cursor: the state's word 0 after the run is the one before *)
+      SUBGOAL_THEN `tisa_base u 1 = tisa_base t 1` ASSUME_TAC THENL
+       [MP_TAC(SPECL [`leb_next`; `t:tisa_state`; `k:num`; `u:tisa_state`; `1`] TISA_RUN_REGIONS) THEN
+        ASM_REWRITE_TAC[LEB_NEXT_LEAF_WF; LEB_NEXT_READABLE] THEN SIMP_TAC[];
+        ALL_TAC] THEN
+      SUBGOAL_THEN `drv_word (drv_after ctl st u) (word_add (bw 58) (word 0)) =
+                    drv_word (tmem u) (word_add (bw 58) (word 0))` ASSUME_TAC THENL
+       [MATCH_MP_TAC DRV_WORD_AREA THEN EXISTS_TAC `val(bw 59:int64)` THEN
+        REPEAT CONJ_TAC THENL [ASM_ARITH_TAC; ASM_ARITH_TAC; ALL_TAC] THEN
+        X_GEN_TAC `a:int64` THEN DISCH_TAC THEN REWRITE_TAC[drv_after] THEN
+        MATCH_MP_TAC DRV_WRITE64_OUTSIDE THEN
+        MP_TAC(SPECL [`ctl:int64`; `8 * val(EL 17 (st:int64 list))`] TISA_VAL_OFFSET) THEN
+        ANTS_TAC THENL [ASM_ARITH_TAC; DISCH_THEN SUBST1_TAC] THEN
+        MP_TAC(SPECL [`bw:num->int64`; `ctl:int64`; `nctl:num`; `cfr:int64`; `a:int64`] RD_ST_ADDR) THEN
+        ASM_REWRITE_TAC[drv_in] THEN STRIP_TAC THEN ASM_ARITH_TAC;
+        ALL_TAC] THEN
+      REWRITE_TAC[pl_mw; MULT_CLAUSES] THEN ASM_REWRITE_TAC[] THEN
+      SUBGOAL_THEN `drv_word (tmem u) (word_add (bw 58) (word 0)) = pl_w u 1 0` SUBST1_TAC THENL
+       [REWRITE_TAC[pl_w; tisa_read; drv_word; MULT_CLAUSES] THEN ASM_REWRITE_TAC[]; ALL_TAC] THEN
+      ASM_REWRITE_TAC[] THEN
+      FIRST_X_ASSUM(fun th -> if is_eq(concl th) && lhs(concl th) = `pl_cursor t` then
+        MP_TAC th else failwith "") THEN
+      REWRITE_TAC[pl_cursor]]]);;
+
+let DD_REL_REFUSED = prove
+ (`!progs bw ctl nctl budget cfr i m used r cw ctx nms tys ntms dbs ths nmap ymap drops pol stk inp c.
+     rd_progs_ok progs /\ 21 < nctl /\
+     drv_sem progs bw ctl budget cfr pl_plan_dd i m used r /\
+     plan_rel bw ctl nctl cfr m (cw,(ctx,nms,tys,ntms,dbs,ths,nmap,ymap,drops,pol),stk) /\
+     rd_rel bw ctl nctl cfr m inp c /\ ~(val budget < val used) /\ ~(FST r = word 1)
+     ==> ?v. plan_rel bw ctl nctl cfr (FST(SND(SND r)))
+               (pl_set (pl_set cw 21 c) 18 v,(ctx,nms,tys,ntms,dbs,ths,nmap,ymap,drops,pol),stk) /\
+             rd_rel bw ctl nctl cfr (FST(SND(SND r))) inp c`,
+  REPEAT GEN_TAC THEN REWRITE_TAC[rd_progs_ok] THEN STRIP_TAC THEN
+  FIRST_X_ASSUM(MP_TAC o check (fun th -> is_const_app "drv_sem" (concl th))) THEN
+  REWRITE_TAC[pl_plan_dd; drv_sem] THEN ASM_REWRITE_TAC[] THEN CONV_TAC STEP_EL_CONV THEN ASM_REWRITE_TAC[] THEN
+  DISCH_THEN(X_CHOOSE_THEN `t1:tisa_state` (X_CHOOSE_THEN `k1:num` (X_CHOOSE_THEN `u1:tisa_state`
+    STRIP_ASSUME_TAC))) THEN
+  MP_TAC(SPECL ([`bw:num->int64`; `ctl:int64`; `nctl:num`; `budget:int64`; `cfr:int64`; pl_plan_dd_st1;
+                 `m:int64->byte`; `used:int64`; `t1:tisa_state`; `k1:num`; `u1:tisa_state`; `cw:num->num`] @
+                RD_NS_VARS @ [`inp:num list`; `c:num`]) RD_STEP_CUR) THEN
+  CONV_TAC STEP_EL_CONV THEN ASM_REWRITE_TAC[] THEN STRIP_TAC THEN
+  FIRST_X_ASSUM(MP_TAC o check (is_cond o concl)) THEN ASM_REWRITE_TAC[] THEN
+  CONV_TAC STEP_EL_CONV THEN ASM_REWRITE_TAC[] THEN
+  DISCH_THEN(X_CHOOSE_THEN `t2:tisa_state` (X_CHOOSE_THEN `k2:num` (X_CHOOSE_THEN `u2:tisa_state`
+    STRIP_ASSUME_TAC))) THEN
+  FIRST_X_ASSUM(MP_TAC o check (is_cond o concl)) THEN
+  ASM_CASES_TAC `tisa_fword u2 18 = word 1` THEN ASM_REWRITE_TAC[] THENL
+   [(* FIRED: the plan would end with outcome 1 *)
+    DISCH_THEN SUBST_ALL_TAC THEN RULE_ASSUM_TAC(REWRITE_RULE[FST]) THEN
+    FIRST_ASSUM(CONTR_TAC o check (fun th -> concl th = `F`));
+    (* REFUSED at leb_next: the step's memory *)
+    DISCH_THEN SUBST1_TAC THEN REWRITE_TAC[FST; SND] THEN
+    EXISTS_TAC `val(tisa_fword u2 19)` THEN
+    MP_TAC(SPECL ([`bw:num->int64`; `ctl:int64`; `nctl:num`; `budget:int64`; `cfr:int64`; pl_plan_dd_st2;
+                   list_mk_comb(`drv_after`, [`ctl:int64`; pl_plan_dd_st1; `u1:tisa_state`]);
+                   `used:int64`; `t2:tisa_state`; `k2:num`; `u2:tisa_state`; `pl_set cw 21 c`] @
+                  RD_NS_VARS @ [`inp:num list`; `c:num`]) RD_STEP_LEB_REFUSED) THEN
+    CONV_TAC STEP_EL_CONV THEN ASM_REWRITE_TAC[] THEN
+    ANTS_TAC THENL [ASM_ARITH_TAC; SIMP_TAC[]]]);;
+
+(* ------------------------------------------------------------------------- *)
+(* The relations under agreement. plan_rel reads only its slots and the     *)
+(* control words (PL_REL_SAME: PL_REL_AGREE with control word 7 written     *)
+(* with its own value); rd_rel reads only the input and the state           *)
+(* (RD_REL_AGREE). A set of addresses R covering what both read is a frame  *)
+(* for both: rel_reads.                                                      *)
+(* ------------------------------------------------------------------------- *)
+
+let PL_SET_SAME = prove
+ (`!(f:num->num) p. pl_set f p (f p) = f`,
+  REWRITE_TAC[pl_set; FUN_EQ_THM] THEN REPEAT GEN_TAC THEN COND_CASES_TAC THEN ASM_REWRITE_TAC[]);;
+
+let PL_REL_SAME = prove
+ (`!bw ctl nctl cfr m m' cw ctx nms tys ntms dbs ths nmap ymap drops pol stk.
+     plan_rel bw ctl nctl cfr m (cw,(ctx,nms,tys,ntms,dbs,ths,nmap,ymap,drops,pol),stk) /\ 7 < nctl /\
+     (!j a. MEM j pl_slots /\ drv_in a (bw j) (val(bw(j + 1))) ==> m' a = m a) /\
+     (!a. drv_in a ctl (8 * nctl) ==> m' a = m a)
+     ==> plan_rel bw ctl nctl cfr m' (cw,(ctx,nms,tys,ntms,dbs,ths,nmap,ymap,drops,pol),stk)`,
+  REPEAT STRIP_TAC THEN
+  FIRST_ASSUM(STRIP_ASSUME_TAC o GEN_REWRITE_RULE I [plan_rel] o
+    check (fun th -> is_const_app "plan_rel" (concl th))) THEN
+  FIRST_ASSUM(STRIP_ASSUME_TAC o GEN_REWRITE_RULE I [pl_layout] o
+    check (fun th -> is_const_app "pl_layout" (concl th))) THEN
+  (* control word 7 reads the same from both memories, and is cw 7 *)
+  SUBGOAL_THEN `val(drv_word (m':int64->byte) (word_add ctl (word(8 * 7)))) = (cw:num->num) 7` ASSUME_TAC THENL
+   [SUBGOAL_THEN `drv_word (m':int64->byte) (word_add ctl (word(8 * 7))) = drv_word m (word_add ctl (word(8 * 7)))`
+      SUBST1_TAC THENL
+     [MATCH_MP_TAC DRV_WORD_AGREE THEN X_GEN_TAC `i:num` THEN DISCH_TAC THEN
+      FIRST_X_ASSUM MATCH_MP_TAC THEN MATCH_MP_TAC DRV_IN_OFFSET THEN
+      ASM_REWRITE_TAC[] THEN ASM_ARITH_TAC;
+      ALL_TAC] THEN
+    REWRITE_TAC[GSYM pl_mw] THEN
+    FIRST_X_ASSUM(MATCH_MP_TAC o REWRITE_RULE[pl_cwords] o check (fun th -> is_const_app "pl_cwords" (concl th))) THEN
+    ASM_REWRITE_TAC[];
+    ALL_TAC] THEN
+  SUBGOAL_THEN `pl_set (cw:num->num) 7 (val(drv_word (m':int64->byte) (word_add ctl (word(8 * 7))))) = cw`
+    (fun th -> ONCE_REWRITE_TAC[GSYM th]) THENL
+   [ASM_REWRITE_TAC[PL_SET_SAME]; ALL_TAC] THEN
+  MATCH_MP_TAC PL_REL_AGREE THEN EXISTS_TAC `m:int64->byte` THEN
+  ASM_SIMP_TAC[ARITH_RULE `6 < 7`] THEN FIRST_ASSUM ACCEPT_TAC);;
+
+let rel_reads = new_definition
+ `rel_reads bw ctl nctl cfr (R:int64->bool) <=>
+    !M M'. (!a. R a ==> M' a = M a)
+           ==> (!s. plan_rel bw ctl nctl cfr M s ==> plan_rel bw ctl nctl cfr M' s) /\
+               (!inp c. rd_rel bw ctl nctl cfr M inp c ==> rd_rel bw ctl nctl cfr M' inp c)`;;
+
+let REL_READS_PLAN = prove
+ (`!bw ctl nctl cfr R M M' s.
+     rel_reads bw ctl nctl cfr R /\ (!a. R a ==> M' a = M a) /\ plan_rel bw ctl nctl cfr M s
+     ==> plan_rel bw ctl nctl cfr M' s`,
+  REWRITE_TAC[rel_reads] THEN MESON_TAC[]);;
+
+let REL_READS_RD = prove
+ (`!bw ctl nctl cfr R M M' inp c.
+     rel_reads bw ctl nctl cfr R /\ (!a. R a ==> M' a = M a) /\ rd_rel bw ctl nctl cfr M inp c
+     ==> rd_rel bw ctl nctl cfr M' inp c`,
+  REWRITE_TAC[rel_reads] THEN MESON_TAC[]);;
+
+(* A byte below 128 at the head of a list is the one LEB128 value there. *)
+let LEB_FIRES_BYTE = prove
+ (`!b rest v. b < 128 /\ leb_fires (CONS b rest) v ==> v = b`,
+  REPEAT STRIP_TAC THEN MATCH_MP_TAC LEB_FIRES_UNIQUE THEN
+  EXISTS_TAC `CONS (b:num) rest` THEN ASM_REWRITE_TAC[] THEN
+  REWRITE_TAC[leb_fires] THEN CONJ_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
+  EXISTS_TAC `rest:num list` THEN ONCE_REWRITE_TAC[leb_enc_def] THEN
+  ASM_REWRITE_TAC[APPEND]);;
+
+let LEB_ENC_LEN_SMALL = prove
+ (`!b. b < 128 ==> LENGTH (leb_enc b) = 1`,
+  REWRITE_TAC[LEB_ENC_LENGTH_1]);;
+
+(* The input left at a cursor, evaluated (a literal list, a numeral cursor). *)
+let RD_FROM_CONV =
+  REWRITE_CONV[rd_from; LENGTH] THENC NUM_REDUCE_CONV THENC ONCE_DEPTH_CONV LIST_OF_SEQ_CONV THENC
+  DEPTH_CONV BETA_CONV THENC NUM_REDUCE_CONV THENC DEPTH_CONV EL_CONV;;
+
+let RD_FROM_EVAL_CONV tm =
+  match tm with
+    Comb(Comb(Const("rd_from",_),_),_) -> RD_FROM_CONV tm
+  | _ -> failwith "RD_FROM_EVAL_CONV";;
+
 let reader_rel_theorems =
  ["RD_CHILD", RD_CHILD; "RD_REL_AGREE", RD_REL_AGREE; "PL_REL_AGREE", PL_REL_AGREE;
   "RD_STEP_KEEP", RD_STEP_KEEP; "RD_STEP_RO", RD_STEP_RO; "RD_PLAN_KEEPS", RD_PLAN_KEEPS;
@@ -1105,4 +1328,7 @@ let reader_rel_theorems =
   "DRV_SEM_INDEX_GE", DRV_SEM_INDEX_GE; "DRV_SEM_AT0", DRV_SEM_AT0; "RD_PLAN_OK_REFL", RD_PLAN_OK_REFL;
   "REFL_PAYLOADS", REFL_PAYLOADS; "PL_INV_SET", PL_INV_SET; "DD_REL", DD_REL;
   "PREFIX_OP0_REL", PREFIX_OP0_REL; "REFL_IN_HANDLER", REFL_IN_HANDLER;
-  "HANDLER_REFL_REL", HANDLER_REFL_REL];;
+  "HANDLER_REFL_REL", HANDLER_REFL_REL; "RD_STEP_LEB_REFUSED", RD_STEP_LEB_REFUSED;
+  "DD_REL_REFUSED", DD_REL_REFUSED; "PL_SET_SAME", PL_SET_SAME; "PL_REL_SAME", PL_REL_SAME;
+  "REL_READS_PLAN", REL_READS_PLAN; "REL_READS_RD", REL_READS_RD; "LEB_FIRES_BYTE", LEB_FIRES_BYTE;
+  "LEB_ENC_LEN_SMALL", LEB_ENC_LEN_SMALL];;

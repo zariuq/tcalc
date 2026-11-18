@@ -1,0 +1,26 @@
+Typed component inputs
+======================
+
+native_component_typed.ml removes the U64-only hot-input restriction from
+the source component laws. It retains the same component data, entry typing,
+memory/fuel laws and native image predicate. COMPONENT_U64_PROFILE states
+the precise relationship with component_ok, the existing driver's profile.
+
+native_component_typed_p1.ml proves the typed laws for p1 programs whose
+statements meet the frame/region conditions. native_component_typed_clients.ml
+instantiates this with the actual exported mm_sub1_leaf program: it has five
+pointer inputs, satisfies the typed laws and fails the U64-only profile.
+The captured term is checked against tisa_x86_p1_programs_v2.json.
+
+native_component_guard.ml defines a source adapter that checks initialization
+before invoking a typed operation. Invalid initialization returns INVALID (3)
+with the failure frame and retained receipt. Valid initialization invokes the
+original operation on the same state. The adapter satisfies the existing
+U64-compatible source contract. This formalizes where a checked guard supplies
+the entry facts needed by the operation.
+
+The checked-entry adapter has no native prefix image theorem yet. The current
+driver byte theorem remains restricted to component_ok. Executing typed
+components through that driver requires a proved guard prefix or a typed
+call-admission extension of the driver proof. No typed native registration or
+complete compiler-consumer result follows from these source laws alone.

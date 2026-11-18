@@ -309,7 +309,7 @@ the host's layout bw is fixed (drv_step_ok of each step).
 21 DROP_TYPE y        LIVE(Y,OP0); put_word YMD OP0 K1 (stride K1)
 22 DROP_TERM t        LIVE(TM,OP0); put_word TMD OP0 K1
 23 DROP_THM h         LIVE(TH,OP0); put_word THD OP0 K1
-24 POLICY p           pol_max POL OP0 -> POL [R: p > 2]
+24 POLICY p           pol_max POL OP0 -> tmp [R: p > 2]; eqw tmp tmp -> POL
 25 NEW_TYPE n a       LIVE(N,OP0); MAPGET(N)->nm; F(FLG,nm,0)->f;
      eqw f K0 [R: declared]; pack OP1 K1 -> w; put_word FLG nm w (word 0)
 26 NEW_CONSTANT n y   LIVE(N); LIVE(Y,OP1); MAPGET(N)->nm; MAPGET(Y)->ty;
@@ -475,10 +475,12 @@ Plans:
   dd (decode)  cur -> RST; leb_next -> OPC.  2 steps; REFUSED when the
                opcode is not a minimal LEB128 at the cursor (a byte below
                128 is its own value).
-  H (72, "H")  eqw HDR K0 [R: header seen]; eqw CNT K0; const_next;
+  H (72, "H")  const_next; eqw HDR K0 [R: header seen];
                leb_next eqw K1 (version 1); leb_next eqw K0; leb_next ->
-               p; pol_max K0 p -> POL [R: p > 2]; leb_next eqw K0 (flags,
-               strict); eqw K1 K1 -> HDR.
+               p; pol_max POL p -> T25 [R: p > 2]; leb_next eqw K0 (flags,
+               strict); eqw T25 T25 -> POL; eqw K1 K1 -> HDR.
+               The record-loop invariant supplies CNT = 0 before the header.
+               POL is published after all guards; refusal keeps the host floor.
   record kind K, opcode c (holr_rec_enc's)  eqw HDR K1 [R: no header];
                the operands in format order: leb_next -> OP0 .. OPn, or
                ids_next -> NL for a list (LS is K0: lists start at stack

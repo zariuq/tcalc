@@ -52,7 +52,7 @@ tail -1 "$c/run/test_tisa.out"
  "$work/bin/test_tisa_ref" --export-sexpr "$c/random.sexpr" 4000 7 > /dev/null &&
  "$work/bin/test_tisa_ref" --export-hol "$c/random_check.hol" 2000 11 > /dev/null &&
  "$work/bin/test_tisa_ref" --export-images "$c/random_images.hol" 1000 13 > /dev/null &&
- "$work/bin/test_tisa_ref" --export-images "$c/hoist_images.hol" 300 17 --hoist > /dev/null) || { echo "test_tisa_ref exports failed"; fail=1; }
+ "$work/bin/test_tisa_ref" --export-images "$c/hoist_images.hol" 300 17 --arrays > /dev/null) || { echo "test_tisa_ref exports failed"; fail=1; }
 
 step "loader: refusals and round trip"
 check "$here/build/p1_load_refusals"
@@ -64,7 +64,6 @@ gcc -O2 -Wall -Wextra -Werror "$here/tests/intern16_tests.c" -o "$work/bin/inter
   "$work/bin/intern16_tests" "$work/tests/intern16_diff.p1t" "$work/tests/intern16_intern.p1t"
 prog=$tcalc/native/intern/intern16b_prog.txt
 check "$here/build/p1run" --quiet "$prog" "$work/tests/intern16_diff.p1t"
-check "$here/build/p1run" --quiet --hoist "$prog" "$work/tests/intern16_diff.p1t"
 check "$here/build/p1run" --quiet "$prog" "$work/tests/intern16_intern.p1t"
 check "$here/build/p1run" --image "$work/tests/intern16.hol" intern16 "$prog" > /dev/null
 check cmp "$work/tests/intern16.hol" "$tcalc/native/intern/intern16b.hol"

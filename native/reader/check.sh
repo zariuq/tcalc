@@ -9,9 +9,8 @@
 #  2. the oracle: CeTTa's cur_uv (hol_stream.c) and hk_fnv1a (hol_core.c),
 #     extracted as text into cetta_oracle.h;
 #  3. the tests (leb128_tests.c, fnv_tests.c), each run with CeTTa's verdict,
-#     run by the p1 reference evaluator and the native code (p1run), with
-#     default and with hoisted emission: every run must agree between the two
-#     and meet its expectation;
+#     run by the p1 reference evaluator and the native code (p1run): every run
+#     must agree between the two and meet its expectation;
 #  4. the image records, which must equal leb128.hol and fnv.hol, the records
 #     whose x86 bytes are proved.
 # Exit status 0 iff every step passes.
@@ -63,12 +62,10 @@ for r in leb128 fnv; do
   gcc -O2 -Wall -Wextra -Werror -Wno-unused-function -I "$work" -I "$cetta/native/hol_light" "$here/${r}_tests.c" -o "$work/${r}_tests" ||
     { echo "cannot build ${r}_tests"; exit 2; }
   "$work/${r}_tests" "$work/$r.p1t" "$seed" $nrandom || { echo "${r}_tests failed"; fail=1; continue; }
-  for opt in "" --hoist; do
-    out=$("$p1/build/p1run" --quiet $opt "$here/${r}_prog.txt" "$work/$r.p1t"); st=$?
-    echo "$out" | grep -v "^p1run" | head -20
-    echo "$out" | grep "^p1run"
-    [ $st = 0 ] && echo "$out" | tail -1 | grep -q " 0 DIFF;.* 0 missed$" || { echo "FAILED: p1run $opt $r"; fail=1; }
-  done
+  out=$("$p1/build/p1run" --quiet "$here/${r}_prog.txt" "$work/$r.p1t"); st=$?
+  echo "$out" | grep -v "^p1run" | head -20
+  echo "$out" | grep "^p1run"
+  [ $st = 0 ] && echo "$out" | tail -1 | grep -q " 0 DIFF;.* 0 missed$" || { echo "FAILED: p1run $r"; fail=1; }
 done
 
 step "image records"

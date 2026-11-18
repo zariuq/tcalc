@@ -33,7 +33,7 @@ let PL_INC_SPEC = prove
 
 (* Two states with the same frame register and memory have the same frame words. *)
 let LEB_NEXT_VIEW = prove
- (`!t u s j. tregs u 0 = tregs s 0 /\ tmem u = tmem s ==> tisa_fword u j = tisa_fword s j`,
+ (`!u s j. tregs u 0 = tregs s 0 /\ tmem u = tmem s ==> tisa_fword u j = tisa_fword s j`,
   REWRITE_TAC[tisa_fword; tisa_read; tisa_frame] THEN SIMP_TAC[]);;
 
 (* The post's three outcomes, each with u's view equal to the described state's. *)

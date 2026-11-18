@@ -2,10 +2,10 @@
  * p1run.c -- a t-ISA p1 program from its text, run by the p1 reference
  * evaluator (tisa_ref.c) and as native code (tisa_x86.c), side by side.
  *
- *   p1run [--hoist] [--quiet] [--image FILE NAME] PROGRAM [TESTS]
+ *   p1run [--quiet] [--image FILE NAME] PROGRAM [TESTS]
  *
  * PROGRAM is a program text in either style (p1_load.h). It is admitted,
- * emitted (with bounds hoisting under --hoist) and mapped executable. Every
+ * emitted and mapped executable. Every
  * run of TESTS starts the reference and the native code on equal copies of
  * one state and compares what they leave: outcome, status, ret_val,
  * fuel_used, and every region byte for byte, with guard bytes around each
@@ -411,17 +411,16 @@ static void read_tests(Harness *h, FILE *in) {
 }
 
 int main(int argc, char **argv) {
-    bool hoist = false, quiet = false;
+    bool quiet = false;
     const char *image = NULL, *image_name = NULL;
     int a = 1;
     for (; a < argc && argv[a][0] == '-' && argv[a][1] == '-'; ++a) {
-        if (!strcmp(argv[a], "--hoist")) hoist = true;
-        else if (!strcmp(argv[a], "--quiet")) quiet = true;
+        if (!strcmp(argv[a], "--quiet")) quiet = true;
         else if (!strcmp(argv[a], "--image") && a + 2 < argc) { image = argv[++a]; image_name = argv[++a]; }
         else { fprintf(stderr, "p1run: unknown option %s\n", argv[a]); return 2; }
     }
     if (a >= argc || argc - a > 2) {
-        fprintf(stderr, "usage: p1run [--hoist] [--quiet] [--image FILE NAME] PROGRAM [TESTS]\n");
+        fprintf(stderr, "usage: p1run [--quiet] [--image FILE NAME] PROGRAM [TESTS]\n");
         return 2;
     }
     const char *path = argv[a], *tests = a + 1 < argc ? argv[a + 1] : NULL;
@@ -435,8 +434,7 @@ int main(int argc, char **argv) {
     TcIsaAdmission adm;
     if (!tisa_admit(prog, &adm, why, sizeof why)) { fprintf(stderr, "%s: not admitted: %s\n", path, why); return 2; }
     TcIsaX86 code;
-    TcIsaX86Options opts = {.hoist_bounds = hoist};
-    if (!tisa_x86_emit_with(prog, &opts, &code, why, sizeof why) || !tisa_x86_load(&code, why, sizeof why)) {
+    if (!tisa_x86_emit(prog, &code, why, sizeof why) || !tisa_x86_load(&code, why, sizeof why)) {
         fprintf(stderr, "%s: no native code: %s\n", path, why);
         return 2;
     }

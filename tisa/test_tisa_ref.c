@@ -302,7 +302,8 @@ typedef struct {
 } Gen;
 
 static bool extended_generation;
-static bool array_generation;   /* --hoist: count loops often index a region by the loop index */
+static bool frame_bases;        /* programs start by loading some region bases from the frame */
+static bool array_generation;   /* --arrays: count loops often index a region by the loop index */
 
 static int reg_of(Gen *g, TcIsaValType t, int region) {
     uint8_t found[TISA_NUM_VREGS]; unsigned n = 0;
@@ -414,7 +415,7 @@ static TcIsaStmt *gen_instr(Gen *g) {
 }
 
 /* An element access through the loop index x: ADDR d = p + x * 2^s + o, then a
-   LOAD or STORE through d (--hoist only). */
+   LOAD or STORE through d (--arrays only). */
 static TcIsaStmt *array_access(Gen *g, uint8_t x) {
     uint8_t r = (uint8_t)pick(g->prog->nregions);
     int ptr = reg_of(g, TISA_TYPE_PTR, r);
@@ -523,6 +524,10 @@ static void gen_program(Pool *pool, TcIsaProgram *prog, bool funds) {
     }
     g.locked = 1u;
     TcIsaStmt *body = gen_block(&g, 0);
+    for (uint8_t r = 0; frame_bases && r < prog->nregions; ++r)
+        if (pick(4)) body = seq(pool, instr(pool, (TcIsaInstr){.op = TISA_OP_LOAD, .ty = TISA_TYPE_PTR, .dst = (uint8_t)(r + 1),
+                                                              .src1 = TISA_V0, .subop = 8, .region_id = TISA_REGION_FRAME,
+                                                              .disp32 = (int32_t)(16 * r)}), body);
     if (g.extended) {
         prog->root = seq(pool, body, ret(pool, pick(5) ? TISA_OUTCOME_FIRED : TISA_OUTCOME_REFUSED, ret_reg(&g)));
         return;
@@ -812,37 +817,34 @@ static void native(unsigned programs, unsigned inputs) {
     unsigned emitted = 0, runs = 0, outcome_counts[5] = {0};
     unsigned loops = 0, hoisted_loops = 0, hoisted_checks = 0, fund_loops = 0, hoisted_programs = 0, hot_runs = 0;
     const char *reasons[8]; unsigned reason_counts[8] = {0}, nreasons = 0;
-    size_t bytes = 0, funds = 0, hoisted_bytes = 0;
+    size_t bytes = 0, funds = 0;
     for (unsigned k = 0; k < programs; ++k) {
         TcIsaProgram prog; TcIsaAdmission adm; char err[256];
         pool.len = 0;
+        /* Every other program also starts from region bases loaded from the
+           frame, which the emitter's region facts then place. */
+        frame_bases = k & 1;
         gen_program(&pool, &prog, pick(2));
+        frame_bases = false;
         if (!tisa_admit(&prog, &adm, err, sizeof err)) continue;
-        TcIsaX86 code, fast;
-        const TcIsaX86Options hoist = {.hoist_bounds = true};
+        TcIsaX86 code;
         if (!tisa_x86_emit(&prog, &code, err, sizeof err) || !tisa_x86_load(&code, err, sizeof err)) {
             ++failures; fprintf(stderr, "emission failed: %s\n", err); continue;
         }
-        if (!tisa_x86_emit_with(&prog, &hoist, &fast, err, sizeof err) || !tisa_x86_load(&fast, err, sizeof err)) {
-            ++failures; fprintf(stderr, "hoisted emission failed: %s\n", err); tisa_x86_free(&code); continue;
-        }
-        ++emitted; bytes += code.len; funds += adm.fund_points; hoisted_bytes += fast.len;
+        ++emitted; bytes += code.len; funds += adm.fund_points;
         unsigned here = 0;
-        for (size_t l = 0; l < fast.nloops; ++l) {
+        for (size_t l = 0; l < code.nloops; ++l) {
             ++loops;
-            if (!fast.loops[l].hoisted) {
+            if (!code.loops[l].hoisted) {
                 unsigned q = 0;
-                while (q < nreasons && strcmp(reasons[q], fast.loops[l].reason)) ++q;
-                if (q == nreasons && nreasons < 8) reasons[nreasons++] = fast.loops[l].reason;
+                while (q < nreasons && strcmp(reasons[q], code.loops[l].reason)) ++q;
+                if (q == nreasons && nreasons < 8) reasons[nreasons++] = code.loops[l].reason;
                 if (q < 8) ++reason_counts[q];
                 continue;
             }
-            ++here; hoisted_checks += fast.loops[l].hoisted_checks; fund_loops += fast.loops[l].fund_units > 0;
+            ++here; hoisted_checks += code.loops[l].hoisted_checks; fund_loops += code.loops[l].fund_units > 0;
         }
         hoisted_loops += here; hoisted_programs += here > 0;
-        EXPECT(code.nloops == fast.nloops, "loop records differ between the emissions");
-        if (!here) EXPECT(code.len == fast.len && !memcmp(code.bytes, fast.bytes, code.len),
-                          "an image with no hoisted loop differs from the default");
         for (unsigned j = 0; j < inputs; ++j) {
             gen_inputs(&w, &prog);
             /* Allowances below, at and above what the run needs, and a receipt
@@ -857,22 +859,7 @@ static void native(unsigned programs, unsigned inputs) {
             for (unsigned r = 0; r < REGIONS; ++r) memcpy(w.bytes[r], saved[r], SPAN);
             w.frame = frame; memcpy(w.regs, regs, sizeof regs);
             capture(&w, tisa_x86_run(&prog, &code, &w.frame, w.regs), &nat);
-            ++runs;
-            Result hot = nat;
-            if (here) {
-                for (unsigned r = 0; r < REGIONS; ++r) memcpy(w.bytes[r], saved[r], SPAN);
-                w.frame = frame; memcpy(w.regs, regs, sizeof regs);
-                capture(&w, tisa_x86_run(&prog, &fast, &w.frame, w.regs), &hot);
-                ++hot_runs;
-            }
-            if (!same_result(&ref, &hot) || ref.receipt != hot.receipt) {
-                if (failures < 10)
-                    fprintf(stderr, "hoisted differs: program %u input %u: reference %d ret %" PRIx64 " receipt %" PRIu64
-                            ", hoisted %d ret %" PRIx64 " receipt %" PRIu64 "\n", k, j, (int)ref.outcome, ref.ret_val,
-                            ref.receipt, (int)hot.outcome, hot.ret_val, hot.receipt);
-                if (failures < 2) dump(prog.root, 2);
-                ++failures;
-            }
+            ++runs; hot_runs += here > 0;
             if (same_result(&ref, &nat) && ref.receipt == nat.receipt) { ++outcome_counts[ref.outcome]; continue; }
             if (failures < 10) {
                 fprintf(stderr, "native differs: program %u input %u: reference %d ret %" PRIx64 " receipt %" PRIu64
@@ -882,15 +869,15 @@ static void native(unsigned programs, unsigned inputs) {
             }
             ++failures;
         }
-        tisa_x86_free(&code); tisa_x86_free(&fast);
+        tisa_x86_free(&code);
     }
     printf("native: %u programs emitted (%zu bytes, %zu FUND points in all); %u runs equal to the reference on outcome, "
            "status, ret_val, receipt and every region byte (fired %u, refused %u, unsupported %u, invalid %u, exhausted %u)\n",
            emitted, bytes, funds, runs, outcome_counts[1], outcome_counts[0], outcome_counts[2], outcome_counts[3],
            outcome_counts[4]);
-    printf("hoisted: %u of %u loops in %u programs (%u checks moved to loop entry, %u loops with FUND tested at entry; "
-           "%zu bytes against %zu); %u runs of images with a hoisted loop, each equal to the reference\n", hoisted_loops,
-           loops, hoisted_programs, hoisted_checks, fund_loops, hoisted_bytes, bytes, hot_runs);
+    printf("hoisted: %u of %u loops in %u programs (%u checks moved to loop entry, %u loops with FUND tested at entry); "
+           "%u of the runs were of images with a hoisted loop\n", hoisted_loops, loops, hoisted_programs, hoisted_checks,
+           fund_loops, hot_runs);
     printf("  not hoisted:");
     for (unsigned q = 0; q < nreasons; ++q) printf("%s %s %u", q ? "," : "", reasons[q], reason_counts[q]);
     putchar('\n');
@@ -901,7 +888,7 @@ static void native(unsigned programs, unsigned inputs) {
  * x from 0 to 16 stores x at word x of region 0, optionally paying 3 per
  * element. With the region and the allowance exactly enough, the entry test
  * passes and the copy without checks runs. One byte or one unit short, the
- * test fails and the template loop runs, failing at the last element after
+ * test fails and the checked loop runs, failing at the last element after
  * the earlier stores (and payments). Native and reference must agree, and on
  * the values written out here. */
 static void hoist_cases(void) {
@@ -915,8 +902,8 @@ static void hoist_cases(void) {
         if (paying) body = seq(&p, body, fund(&p, 3));
         program_init(&prog, seq(&p, count_loop(&p, 4, 3, 64, body), ret(&p, TISA_OUTCOME_FIRED, 3)));
         EXPECT(tisa_admit(&prog, NULL, err, sizeof err), "hoisting case refused: %s", err);
-        TcIsaX86 x; const TcIsaX86Options hoist = {.hoist_bounds = true};
-        if (!tisa_x86_emit_with(&prog, &hoist, &x, err, sizeof err) || !tisa_x86_load(&x, err, sizeof err)) {
+        TcIsaX86 x;
+        if (!tisa_x86_emit(&prog, &x, err, sizeof err) || !tisa_x86_load(&x, err, sizeof err)) {
             EXPECT(false, "hoisting case not emitted: %s", err); continue;
         }
         EXPECT(x.nloops == 1 && x.loops[0].hoisted && x.loops[0].hoisted_checks == 2 &&
@@ -946,7 +933,7 @@ static void hoist_cases(void) {
         tisa_x86_free(&x);
     }
     world_free(&w);
-    printf("hoisting cases: the copy without checks when the region and allowance suffice; the template loop, "
+    printf("hoisting cases: the copy without checks when the region and allowance suffice; the checked loop, "
            "failing at the last element after the earlier stores and payments, when one byte or unit is short\n");
 }
 
@@ -1017,17 +1004,16 @@ static bool has_bool_byte_load(const TcIsaStmt *s) {
 
 /* --export-images FILE N SEED: N admitted random programs (extended
    generation) as records for the HOL image prover, with what they cover. */
-/* With hoist, the images are emitted with bounds hoisting, from array-loop
-   programs, and only those with a hoisted loop are written. */
-static int export_images(const char *path, unsigned count, bool hoist) {
+/* With arrays, the programs are array-loop programs, and only images with a
+   hoisted loop are written. */
+static int export_images(const char *path, unsigned count, bool arrays) {
     FILE *f = fopen(path, "w");
     if (!f) { perror("export"); return 1; }
     static TcIsaStmt items[4096];
     Pool pool = {items, 0, 4096};
     Coverage c; memset(&c, 0, sizeof c);
     extended_generation = true;
-    array_generation = hoist;
-    const TcIsaX86Options options = {.hoist_bounds = hoist};
+    array_generation = arrays;
     unsigned hoisted_loops = 0;
     unsigned written = 0, funds = 0;
     size_t bytes = 0;
@@ -1037,12 +1023,12 @@ static int export_images(const char *path, unsigned count, bool hoist) {
         gen_program(&pool, &prog, pick(2));
         if (!tisa_admit(&prog, &adm, err, sizeof err)) continue;
         TcIsaX86 x;
-        if (!tisa_x86_emit_with(&prog, &options, &x, err, sizeof err)) { fprintf(stderr, "emit: %s\n", err); return 1; }
+        if (!tisa_x86_emit(&prog, &x, err, sizeof err)) { fprintf(stderr, "emit: %s\n", err); return 1; }
         unsigned here = 0;
         for (size_t l = 0; l < x.nloops; ++l) here += x.loops[l].hoisted;
-        if (hoist && !here) { tisa_x86_free(&x); continue; }
+        if (arrays && !here) { tisa_x86_free(&x); continue; }
         hoisted_loops += here;
-        snprintf(name, sizeof name, hoist ? "h%u" : "r%u", written);
+        snprintf(name, sizeof name, arrays ? "h%u" : "r%u", written);
         if (!tisa_print_image_record(f, name, &prog, &x)) { fprintf(stderr, "record %s failed\n", name); return 1; }
         bytes += x.len; funds += adm.fund_points;
         tisa_x86_free(&x);
@@ -1142,7 +1128,7 @@ static int export_corpus(bool hol, const char *path, const char *images_path, un
 int main(int argc, char **argv) {
     if (argc >= 4 && !strcmp(argv[1], "--export-images")) {
         if (argc > 4) rng = strtoull(argv[4], NULL, 10) | 1u;
-        return export_images(argv[2], (unsigned)strtoul(argv[3], NULL, 10), argc > 5 && !strcmp(argv[5], "--hoist"));
+        return export_images(argv[2], (unsigned)strtoul(argv[3], NULL, 10), argc > 5 && !strcmp(argv[5], "--arrays"));
     }
     if (argc >= 4 && (!strcmp(argv[1], "--export-hol") || !strcmp(argv[1], "--export-sexpr"))) {
         bool hol = !strcmp(argv[1], "--export-hol");
@@ -1152,7 +1138,7 @@ int main(int argc, char **argv) {
         if (!hol) snprintf(images, sizeof images, "%s.images", argv[2]);
         return export_corpus(hol, argv[2], hol ? NULL : images, count);
     }
-    if (argc >= 3 && !strcmp(argv[1], "--hoist")) {
+    if (argc >= 3 && !strcmp(argv[1], "--arrays")) {
         array_generation = true;
         if (argc > 3) rng = strtoull(argv[3], NULL, 10) | 1u;
         hoist_cases();

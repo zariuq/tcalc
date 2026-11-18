@@ -1,0 +1,158 @@
+Native procedure components
+===========================
+
+Native components
+-----------------
+
+native/driver/native_component.ml defines component entry, execution, outcome,
+payload, receipt, writable footprint and native image contracts. A component
+has declared regions, initialized hot registers and an operation on t-ISA
+states. component_ok requires a terminating operation, a valid outcome word,
+bounded fuel and the declared memory frame. component_image additionally
+requires actual x86 execution, return transport and preservation of the ABI's
+saved registers. The component run returns an outcome through frame word 18;
+RAX carries the payload from word 19.
+
+component_stack_driver.ml proves the unchanged driver with an explicit
+private callee CPU-stack bound. It covers the entry, call loop, return,
+payload and receipt transport, saved registers and physical memory frame.
+component_driver.ml specializes that proof to the original 40-byte profile;
+component_driver_p1.ml recovers the original p1 driver theorem exactly.
+native_component_stack.ml states the corresponding component image contract.
+The record loop and the procedure controller still need their own matching
+stack-bound instantiations.
+
+Bounded calls
+-------------
+
+procedure_sem.ml defines execution of guarded clauses and bounded calls over
+the existing 18-word steps. Each activation charges one unit in addition to
+the primitive's charges. A full activation stack returns UNSUPPORTED (2);
+insufficient fuel returns EXHAUSTED (4). Guard refusal is 0. A function with
+no applicable clause returns INVALID_INPUT (3), rather than refusing a rule.
+
+A clause begins with constants in control words 0..6, result zero in word 7,
+and its seven arguments in words 8..14. Retrying a clause resets those private
+control words. It preserves the preceding clause's world and fuel receipt.
+procedure_controls.ml contains a failing clause that allocates and spends
+fuel, followed by a successful clause that retains both effects.
+
+procedure_stack.ml proves work-frame bounds, separation of activations and
+preservation of a parent's policy word by a child's result write. Child result
+7 and parent policy 7 belong to different physical control arrays.
+
+Call capture
+------------
+
+The procedure_call marker is a p1 component. Its region 0 is a writable,
+8-byte-aligned request buffer of at least 64 bytes. It captures:
+
+  request words 0,1   frame arguments 22,23
+  request words 2..6  hot registers v1..v5
+  request word 7      frame word 17: the procedure target
+
+The marker declares only region 0. Word 17 is an unused descriptor word in
+this component's frame; reading it grants no region 8 capability. The caller
+must bind it to the intended target. All seven arguments are captured before
+the marker returns UNSUPPORTED with payload zero. It does not charge fuel.
+
+The controller recognizes this internal yield by the selected operation,
+not merely by outcome 2. An ordinary component's resource failure is also 2.
+The driver writes payloads on every outcome, so reading call arguments after
+that write would lose an argument when its slot is the result destination.
+procedure_call_transport.ml relates the snapshot to the driver's inputs and
+proves that result publication preserves a disjoint request buffer.
+
+Operation tables
+----------------
+
+procedure_operation_names.ml distinguishes KernelOperation, ReaderOperation and
+ProcedureCallMarker. Their numeric labels are not runtime table positions.
+The logical call tag is the primitive catalog's length. It is independent of
+the marker's runtime table index. Checked opcode lowering finds the declared
+operation and replaces only step word 0.
+It rejects missing operations, duplicate declarations, malformed step lengths
+and an oversized table. Bindings, argument indices and the result destination
+are preserved. The table order is data; no fixed offset is imposed on readers.
+
+procedure_bindings.ml constructs a static extension of the original binding
+words: a request pair, an empty pair, and one metadata pair per procedure
+target. Every original binding word is preserved. Each target's metadata is
+the pair (zero, target), for the marker's unused region-8 descriptor words.
+Index bounds, pair separation and target distinction are proved.
+procedure_bindings_driver.ml connects this extension to the actual child
+frame: original primitive region bases and lengths are preserved, and a
+call's target and arguments arrive before result publication.
+
+procedure_step_compile.ml combines operation lowering with these bindings.
+Primitive steps may use only pairs in the original binding prefix. Call
+steps receive the request, empty and target-metadata bindings; their target
+must exist and the extended word count must fit. Both branches preserve
+the seven argument indices and result destination. Runtime call detection
+compares the selected table index with the marker index; table ordering
+does not classify operations as calls or primitives.
+
+procedure_step_compile_driver.ml relates compiled calls to the physical
+driver frame and source argument values. The exact-value bridge requires
+the arguments to fit in unsigned 64-bit words. These results do not execute
+a recursive procedure; that remains the bounded controller's obligation.
+
+The relw component compares two unsigned arguments under a mask in hot v1.
+Mask bits 1,2,4 enable less, equal and greater respectively. FIRED returns
+arg0; REFUSED returns zero. Higher mask bits have no effect. Fuel is unchanged.
+
+MeTTa authoring and control sizes
+--------------------------------
+
+procedure_compile.metta provides pc:compile-step and pc:hol-result in CeTTa's
+PeTTa lane. It emits either a compiled 18-word step or None, and serializes
+the result as a HOL term. The author is untrusted: the HOL equations check
+the emitted values against procedure_compile_step.
+
+procedure_control_count.ml computes the least common control-array size
+for a whole procedure program. It includes the initial words 0..14 and
+every argument and result index of every step. The result is a natural
+number, so an oversized count is preserved rather than wrapped. A physical
+controller still has to check that its work-region layout can hold it.
+
+procedure_compile_math_load.ml loads the source compilation contracts and
+controls. procedure_compile_load.ml additionally loads the stack-bounded
+driver, marker image and physical argument bridge. Control-size analysis
+is available independently through procedure_control_count.ml.
+
+Generated layouts
+-----------------
+
+native/abi/NativeInterface.module declares the shared runtime frame, driver
+descriptor, step, request and control coordinates. native_abi.metta generates
+C assertions, assembly equates, HOL definitions and Lean layout data. Their
+consumer checks are in native_abi_contract.ml, native_abi_driver.ml and
+native_abi_core.ml. Generation is not a proof premise.
+
+Start a combined HOLR/native session with native_abi_load.ml or an existing
+kernel entrypoint. It installs the Model parser setup before ISA definitions;
+the loader rejects the opposite order.
+
+Native image checks
+-------------------
+
+The component images retain the driver's restricted x86 profile, which
+requires user-mode shadow stacks to be disabled. They do not use indirect
+CALL/JMP instruction support.
+
+procedure_call.test.py compares authored text and image records, tests native
+execution against the reference evaluator, checks linked byte slices, and
+executes the real driver with each argument slot as the result destination.
+relw.test.py checks all three comparisons, high mask bits and executed source
+mutations. The *_join.ml files connect functional results to the exact bytes.
+
+procedure_compile.test.py checks MeTTa output under table permutations,
+emits HOL fixture equalities, and executes admitted test steps through the
+real driver and marker/comparison images. It verifies all three linked byte
+slices and catches planted table-index, target-binding and boundary faults.
+check.sh includes this compiler test alongside activation, capture,
+comparison and generated-layout checks. HOL qualification remains separate.
+
+The bounded native controller, its work-region representation and recursive
+hypothesis union are separate obligations. The contracts and marker components
+do not constitute that controller.

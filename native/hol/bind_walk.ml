@@ -684,6 +684,7 @@ let bw_after_intern = new_definition
     (!i. i < 24 ==> tisa_fword u i = tisa_fword s i) /\
     intern_count u = intern_count s /\
     (val(bw_w u 0) = val(bw_w s 0) \/ val(bw_w u 0) = val(bw_w s 0) + 1) /\
+    (val(bw_w u 0) = val(bw_w s 0) \/ val(tregs u 5) = val(bw_w s 0)) /\
     val(bw_w u 0) <= val(tisa_len s 0) DIV 16 /\
     (!k. 0 < k /\ 8 * k + 8 <= val(tisa_len s 3) ==> bw_w u k = bw_w s k) /\
     (!i. i < 2 * val(bw_w s 0) ==> intern_word u i = intern_word s i) /\

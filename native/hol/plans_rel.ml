@@ -1,3 +1,7 @@
+needs "native/hol/memory_words.ml";;
+needs "native/driver/driver_memory.ml";;
+needs "native/driver/driver_fuel.ml";;
+
 (* ========================================================================= *)
 (* plan_rel: the memory of a plan's run represents the abstract state of the *)
 (* record plans (plans_abs.ml), and each built leaf implements its abstract  *)
@@ -33,8 +37,6 @@
 (* ------------------------------------------------------------------------- *)
 
 (* Word i of the area at b, as a number. *)
-let pl_mw = new_definition
- `pl_mw (m:int64->byte) (b:int64) i = val(drv_word m (word_add b (word(8 * i))))`;;
 
 (* The binding slots the relation reads (PLANS.txt, section 2): the type and *)
 (* de Bruijn interners, the term and theorem rows with counts and marks, the *)

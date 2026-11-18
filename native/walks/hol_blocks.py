@@ -35,13 +35,21 @@ def children(path):
     return out
 
 
-def folded(btext, path):
+def folded(btext, subblocks):
+    occurrences = {}
+    for _, name, body in subblocks:
+        named = occurrences.setdefault(body, [])
+        named.append(name)
     out = btext
-    for (q, n, t) in sorted(children(path), key=lambda b: -len(b[2])):
-        k = out.count(t)
-        if k != 1:
-            sys.exit("hol_blocks: block %s occurs %d times in its parent" % (n, k))
-        out = out.replace(t, n)
+    for body, names in sorted(occurrences.items(), key=lambda item: -len(item[0])):
+        name = names[0]
+        if any(other != name for other in names):
+            sys.exit("hol_blocks: one body has different names in its parent")
+        count = out.count(body)
+        if count != len(names):
+            sys.exit("hol_blocks: block %s occurs %d times in its parent, expected %d"
+                     % (name, count, len(names)))
+        out = out.replace(body, name)
     return out
 
 
@@ -51,15 +59,17 @@ if not m:
 decls, inits, root = m.group(1), m.group(2), m.group(3)
 
 order = sorted(blocks, key=lambda b: -len(b[0].split(".")) if b[0] else 0)
+definitions = {}
 for (p, n, t) in order:
-    print("let %s = new_definition\n `%s = %s`;;\n" % (n, n, folded(t, p)))
+    body = folded(t, children(p))
+    if n in definitions:
+        if definitions[n] != body:
+            sys.exit("hol_blocks: block %s has inconsistent definitions" % n)
+    else:
+        definitions[n] = body
+        print("let %s = new_definition\n `%s = %s`;;\n" % (n, n, body))
 top = [(p, n, t) for (p, n, t) in blocks if not any(r != p and is_prefix(r, p) for (r, _, _) in blocks)]
-rootf = root
-for (p, n, t) in sorted(top, key=lambda b: -len(b[2])):
-    k = rootf.count(t)
-    if k != 1:
-        sys.exit("hol_blocks: top block %s occurs %d times in the root" % (n, k))
-    rootf = rootf.replace(t, n)
+rootf = folded(root, top)
 print("let %s = new_definition\n `%s = TProg %s %s %s`;;\n" % (name, name, decls, inits, rootf))
 print("let %s_TERM = prove\n (`%s = %s`,\n  REWRITE_TAC[%s]);;" %
-      (name.upper(), name, text, "; ".join([name] + [n for (_, n, _) in blocks])))
+      (name.upper(), name, text, "; ".join([name] + list(dict.fromkeys(n for _, n, _ in blocks)))))

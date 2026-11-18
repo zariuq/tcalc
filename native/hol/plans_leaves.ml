@@ -368,14 +368,18 @@ let pl_at_end_spec = new_definition
       ==> if pl_cursor t = val(tisa_len t 0) then k = 1 else k = 0`;;
 
 (* const_next: region 2 a constant (read-only); FIRED exactly when the input *)
-(* at the cursor holds its bytes, the cursor advanced past them.            *)
+(* at the cursor holds its bytes, the cursor advanced past them; UNSUPPORTED *)
+(* when the constant is longer than the comparison loop's cap, 2^32 - 1.    *)
 let pl_const_next_spec = new_definition
  `pl_const_next_spec prog <=>
     pl_leaf_ok prog [(1,0,1); (2,16,8); (1,0,1)] /\
     !t k u. tisa_entry_ok prog t /\ tisa_run prog t = TStop k u
-      ==> if pl_cursor t + val(tisa_len t 2) <= val(tisa_len t 0) /\
-             region_range t 0 (pl_cursor t) (val(tisa_len t 2)) = region_range t 2 0 (val(tisa_len t 2))
-          then k = 1 /\ pl_w u 1 0 = word(pl_cursor t + val(tisa_len t 2))
+      ==> if pl_cursor t + val(tisa_len t 2) <= val(tisa_len t 0)
+          then (if 4294967295 < val(tisa_len t 2) then k = 2
+                else if region_range t 0 (pl_cursor t) (val(tisa_len t 2)) =
+                        region_range t 2 0 (val(tisa_len t 2))
+                then k = 1 /\ pl_w u 1 0 = word(pl_cursor t + val(tisa_len t 2))
+                else k = 0)
           else k = 0`;;
 
 (* inc: arg0 a; FIRED with a + 1 below 2^62, else UNSUPPORTED. *)

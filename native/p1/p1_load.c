@@ -448,7 +448,7 @@ bool p1_load_file(const char *path, P1Program *out, TcIsaTextStyle *style, P1Err
         for (;;) {
             if (cap - len < 65536) {
                 char *t = realloc(text, cap ? 2 * cap : 65536);
-                if (!t) { free(text); fclose(f); text = NULL; break; }
+                if (!t) { free(text); fclose(f); f = NULL; text = NULL; break; }
                 text = t; cap = cap ? 2 * cap : 65536;
             }
             size_t got = fread(text + len, 1, cap - len, f);

@@ -11,6 +11,9 @@
 (* not fall and stays within it.                                             *)
 (* ========================================================================= *)
 
+needs "native/driver/driver_leaf.ml";;
+needs "native/hol/tisa_symex.ml";;
+
 let tisa_fuel_ok = new_definition
  `tisa_fuel_ok t <=> val(tisa_fword t 21) <= val(tisa_fword t 20)`;;
 
